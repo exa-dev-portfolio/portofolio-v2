@@ -18,6 +18,36 @@ export const previewItemMetadataSchema = z.object({
 
 export type PreviewItemMetadata = z.infer<typeof previewItemMetadataSchema>;
 
+export const subAppSchema = z.object({
+    id: z.string().optional(),
+    name: z.string().min(1).max(255),
+    app_type: z.enum(["mobile", "web", "backend", "pos", "other"]).default("web"),
+    description: z.string().max(2000).optional().default(""),
+    repo_url: z.string().optional().default(""),
+    live_url: z.string().optional().default(""),
+    technologies: z.array(z.string()).optional().default([]),
+});
+
+export type SubApp = z.infer<typeof subAppSchema>;
+
+export const subAppsFieldSchema = z.preprocess((val) => {
+    if (typeof val === "string") {
+        try {
+            return JSON.parse(val);
+        } catch {
+            return [];
+        }
+    }
+    return val;
+}, z.array(subAppSchema).optional().default([]));
+
+export const isOrganizationFieldSchema = z.preprocess((val) => {
+    if (typeof val === "string") {
+        return val.toLowerCase() === "true";
+    }
+    return Boolean(val);
+}, z.boolean().default(false));
+
 export const projectModel = z.object({
     id: z.number(),
     name: z.string().min(1).max(255),
@@ -32,6 +62,9 @@ export const projectModel = z.object({
     features: z.array(z.string()),
     live_url: z.url().optional(),
     repo_url: z.url().optional(),
+    is_organization: z.boolean().optional().default(false),
+    github_org: z.string().nullable().optional(),
+    sub_apps: z.array(subAppSchema).optional().default([]),
     skills: z.array(z.string()),
     id_skills: z.array(z.number()).optional(),
     created_at: z.string(),
@@ -52,8 +85,11 @@ export const createProjectSchema = z.object({
     status: z.boolean(),
     features: z.array(z.string()),
     id_skills: z.array(z.number()),
-    live_url: z.url().optional(),
-    repo_url: z.url().optional(),
+    live_url: z.string().nullable().optional(),
+    repo_url: z.string().nullable().optional(),
+    is_organization: isOrganizationFieldSchema,
+    github_org: z.string().nullable().optional(),
+    sub_apps: subAppsFieldSchema,
     preview_metadata: z.array(previewItemMetadataSchema).optional().default([]),
     preview_files: z.union([fileSchema, z.array(fileSchema)]).optional(),
     preview_images: z.array(projectPreviewImageSchema).optional().default([]),
@@ -73,9 +109,12 @@ export const updateProjectSchema = z.object({
     status: z.boolean(),
     features: z.array(z.string()),
     url: z.string().nullable().optional(),
-    live_url: z.url().optional(),
+    live_url: z.string().nullable().optional(),
     id_skills: z.array(z.number()),
-    repo_url: z.url().optional(),
+    repo_url: z.string().nullable().optional(),
+    is_organization: isOrganizationFieldSchema,
+    github_org: z.string().nullable().optional(),
+    sub_apps: subAppsFieldSchema,
     preview_metadata: z.array(previewItemMetadataSchema).optional().default([]),
     preview_files: z.union([fileSchema, z.array(fileSchema)]).optional(),
     preview_images: z.array(projectPreviewImageSchema).optional().default([]),

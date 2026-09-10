@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import type { SubApp } from '~/types/project'
 
 interface PreviewImage {
   url: string;
@@ -19,6 +20,24 @@ interface Project {
   liveUrl?: string;
   details: string;
   features: string[];
+  is_organization?: boolean;
+  github_org?: string | null;
+  sub_apps?: SubApp[];
+}
+
+const getAppTypeBadge = (type?: string) => {
+  switch (type) {
+    case 'mobile':
+      return { label: 'Mobile App', icon: 'carbon:mobile', bgClass: 'bg-emerald-500/15 border border-emerald-500/30', textClass: 'text-emerald-400' }
+    case 'web':
+      return { label: 'Web App', icon: 'carbon:application-web', bgClass: 'bg-blue-500/15 border border-blue-500/30', textClass: 'text-blue-400' }
+    case 'backend':
+      return { label: 'Backend / API', icon: 'carbon:server-proxy', bgClass: 'bg-indigo-500/15 border border-indigo-500/30', textClass: 'text-indigo-400' }
+    case 'pos':
+      return { label: 'POS / Kiosk', icon: 'carbon:store', bgClass: 'bg-amber-500/15 border border-amber-500/30', textClass: 'text-amber-400' }
+    default:
+      return { label: 'Service / Tool', icon: 'carbon:cube', bgClass: 'bg-purple-500/15 border border-purple-500/30', textClass: 'text-purple-400' }
+  }
 }
 
 const props = defineProps<{
@@ -92,6 +111,12 @@ const copyToClipboard = (text?: string) => {
 
 // Project category inference
 const getProjectCategory = (p: Project): string => {
+  if (p.is_organization && p.sub_apps?.length) {
+    const appTypes = p.sub_apps.map(a => a.app_type || a.type)
+    if (appTypes.includes('mobile') && !appTypes.includes('web') && !appTypes.includes('backend')) return 'Mobile Apps'
+    if (appTypes.includes('backend') && !appTypes.includes('mobile') && !appTypes.includes('web')) return 'Backend & Cloud'
+    return 'Full-Stack'
+  }
   const t = (p.technologies || []).map(x => x.toLowerCase()).join(' ')
   const desc = (p.description || '').toLowerCase()
   if (t.includes('flutter') || t.includes('dart') || desc.includes('mobile')) return 'Mobile Apps'
@@ -187,11 +212,18 @@ const filteredProjects = computed(() => {
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span>LIVE</span>
               </span>
+              <span
+                v-else-if="project.is_organization"
+                class="inline-flex items-center gap-1 text-[10px] font-mono text-purple-400"
+              >
+                <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+                <span>ECOSYSTEM</span>
+              </span>
               <span v-else class="text-[10px] font-mono text-slate-500">CASE</span>
             </div>
 
             <!-- Project Banner Image -->
-            <div class="relative h-48 sm:h-52 w-full overflow-hidden bg-slate-900">
+            <div class="relative w-full aspect-[16/9] overflow-hidden bg-slate-950 flex items-center justify-center">
               <NuxtImg
                 :src="project.image || '/images/project-preview.webp'"
                 :alt="project.title"
@@ -200,7 +232,16 @@ const filteredProjects = computed(() => {
                 width="600"
                 height="340"
               />
-              <div class="absolute inset-0 bg-gradient-to-t from-[#0d1424] via-[#0d1424]/20 to-transparent"></div>
+              <div class="absolute inset-0 bg-gradient-to-t from-[#0d1424] via-[#0d1424]/10 to-transparent pointer-events-none"></div>
+
+              <!-- Org / Multi-App Badge overlay -->
+              <div
+                v-if="project.is_organization"
+                class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#090e1a]/90 backdrop-blur-md border border-purple-500/40 text-[11px] font-mono font-medium text-purple-300 shadow-lg flex items-center gap-1.5"
+              >
+                <Icon name="carbon:enterprise" size="13" class="text-purple-400" />
+                <span>Suite &middot; {{ project.sub_apps?.length || 0 }} Apps</span>
+              </div>
 
               <!-- Hover explore icon -->
               <div class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-200">
@@ -213,8 +254,15 @@ const filteredProjects = computed(() => {
           <div class="p-5 sm:p-6 flex-1 flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between gap-2 mb-1.5">
-                <h3 class="text-xl font-heading font-bold text-white group-hover:text-blue-400 transition-colors truncate">
-                  {{ project.title }}
+                <h3 class="text-xl font-heading font-bold text-white group-hover:text-blue-400 transition-colors truncate flex items-center gap-2">
+                  <span>{{ project.title }}</span>
+                  <span
+                    v-if="project.is_organization"
+                    class="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-purple-500/20 text-purple-300 border border-purple-500/30 shrink-0"
+                    title="GitHub Organization Suite"
+                  >
+                    ORG
+                  </span>
                 </h3>
               </div>
 
@@ -338,7 +386,7 @@ const filteredProjects = computed(() => {
                 v-for="(slide, sIdx) in modalSlides"
                 :key="sIdx"
                 @click="setSlide(sIdx)"
-                class="relative w-20 sm:w-24 h-14 rounded-xl overflow-hidden border transition-all duration-200 shrink-0 cursor-pointer focus:outline-none"
+                class="relative w-20 sm:w-24 aspect-[16/9] rounded-xl overflow-hidden bg-slate-950 border transition-all duration-200 shrink-0 cursor-pointer focus:outline-none flex items-center justify-center"
                 :class="activeSlideIndex === sIdx
                   ? 'border-blue-500 ring-2 ring-blue-500/40 opacity-100 scale-102 shadow-md shadow-blue-500/20'
                   : 'border-white/10 opacity-50 hover:opacity-100 hover:border-white/30'"
@@ -347,7 +395,7 @@ const filteredProjects = computed(() => {
                 <img
                   :src="slide.url"
                   :alt="slide.title || `Thumbnail ${sIdx + 1}`"
-                  class="w-full h-full object-cover"
+                  class="w-full h-full object-contain"
                 />
                 <span
                   v-if="sIdx === 0"
@@ -391,6 +439,121 @@ const filteredProjects = computed(() => {
               <div>
                 <p class="text-[10px] font-mono uppercase text-slate-400">Status</p>
                 <p class="text-xs sm:text-sm font-semibold text-white">{{ selectedProject?.liveUrl ? 'Live Production' : 'Completed Project' }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Organization Suite Header (if is_organization) -->
+          <div
+            v-if="selectedProject?.is_organization"
+            class="p-5 rounded-2xl bg-gradient-to-r from-purple-950/40 via-[#0d1424] to-blue-950/30 border border-purple-500/30 shadow-xl"
+          >
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="flex items-center gap-3.5">
+                <div class="w-12 h-12 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300 shrink-0 shadow-inner">
+                  <Icon name="carbon:enterprise" size="24" />
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-purple-400 font-semibold">GitHub Organization Ecosystem</span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      {{ selectedProject?.sub_apps?.length || 0 }} Applications
+                    </span>
+                  </div>
+                  <h4 class="text-base sm:text-lg font-bold text-white mt-0.5">
+                    {{ selectedProject.github_org ? selectedProject.github_org.replace(/^https?:\/\/github\.com\//, '') : selectedProject.title }}
+                  </h4>
+                </div>
+              </div>
+
+              <a
+                v-if="selectedProject?.github_org"
+                :href="selectedProject.github_org"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-xs font-mono font-medium text-white transition-all duration-200 self-start sm:self-auto cursor-pointer"
+              >
+                <Icon name="line-md:github" size="16" />
+                <span>Visit Org GitHub</span>
+                <Icon name="carbon:arrow-up-right" size="14" />
+              </a>
+            </div>
+          </div>
+
+          <!-- Connected Applications Suite Grid (if sub_apps exists) -->
+          <div v-if="selectedProject?.sub_apps?.length" class="space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-mono uppercase text-slate-400 tracking-wider flex items-center gap-2">
+                <Icon name="carbon:apps" size="16" class="text-purple-400" />
+                <span>Ecosystem Applications ({{ selectedProject.sub_apps.length }})</span>
+              </h3>
+              <span class="text-xs text-slate-400 font-mono">Multi-App Architecture</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              <div
+                v-for="(app, aIdx) in selectedProject.sub_apps"
+                :key="aIdx"
+                class="p-4 rounded-2xl bg-white/[0.025] hover:bg-white/[0.045] border border-white/10 hover:border-purple-500/40 transition-all duration-200 flex flex-col justify-between group/app"
+              >
+                <div>
+                  <div class="flex items-start justify-between gap-3 mb-2">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" :class="getAppTypeBadge(app.app_type || app.type).bgClass">
+                        <Icon :name="getAppTypeBadge(app.app_type || app.type).icon" size="18" :class="getAppTypeBadge(app.app_type || app.type).textClass" />
+                      </div>
+                      <div>
+                        <h4 class="text-sm font-bold text-white group-hover/app:text-purple-300 transition-colors">
+                          {{ app.name }}
+                        </h4>
+                        <span class="text-[10px] font-mono text-slate-400 uppercase">
+                          {{ getAppTypeBadge(app.app_type || app.type).label }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p v-if="app.description" class="text-xs text-slate-300 leading-relaxed line-clamp-2 mb-3">
+                    {{ app.description }}
+                  </p>
+
+                  <div v-if="app.technologies?.length" class="flex flex-wrap gap-1.5 mb-3">
+                    <span
+                      v-for="t in app.technologies"
+                      :key="t"
+                      class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/[0.04] text-slate-300 border border-white/10"
+                    >
+                      {{ t }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Action Buttons: Demo & Repo -->
+                <div class="pt-3 border-t border-white/[0.06] flex items-center justify-end gap-2">
+                  <a
+                    v-if="app.repo_url"
+                    :href="app.repo_url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono text-slate-300 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
+                    title="View Source Repository"
+                  >
+                    <Icon name="line-md:github" size="14" />
+                    <span>Repo</span>
+                  </a>
+
+                  <a
+                    v-if="app.live_url || app.demo_url"
+                    :href="app.live_url || app.demo_url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="px-3 py-1.5 rounded-lg bg-blue-600/30 hover:bg-blue-600/50 border border-blue-500/40 text-xs font-mono text-blue-300 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
+                    title="Launch Live Demo"
+                  >
+                    <Icon name="carbon:launch" size="14" />
+                    <span>Live Demo</span>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -481,17 +644,29 @@ const filteredProjects = computed(() => {
 
       <template #footer>
         <div class="flex items-center justify-between w-full">
-          <a
-            v-if="selectedProject?.link"
-            :href="selectedProject.link"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn-secondary-subtle px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-white flex items-center gap-2"
-          >
-            <Icon name="line-md:github" size="18" />
-            <span>View Source Code</span>
-          </a>
-          <span v-else></span>
+          <div class="flex items-center gap-2">
+            <a
+              v-if="selectedProject?.is_organization && selectedProject?.github_org"
+              :href="selectedProject.github_org"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn-secondary-subtle px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-white flex items-center gap-2"
+            >
+              <Icon name="carbon:enterprise" size="18" class="text-purple-400" />
+              <span>GitHub Organization</span>
+              <Icon name="carbon:arrow-up-right" size="14" />
+            </a>
+            <a
+              v-else-if="selectedProject?.link"
+              :href="selectedProject.link"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn-secondary-subtle px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-white flex items-center gap-2"
+            >
+              <Icon name="line-md:github" size="18" />
+              <span>View Source Code</span>
+            </a>
+          </div>
 
           <UButton
             color="neutral"

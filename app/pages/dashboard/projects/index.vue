@@ -227,20 +227,27 @@ const deleteProjectHandler = async (id: number) => {
           v-else
           class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 cursor-pointer"
       >
-        <!-- Image -->
-        <div class="relative h-48 bg-white/5 overflow-hidden">
-          <NuxtImg
-              :src="project.preview_image"
-              :alt="project.name"
-              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-          />
-          <!-- Status Badge -->
-          <div class="absolute top-4 right-4">
-            <span :class="['px-3 py-1 rounded-full text-xs font-semibold border', getStatusColor(project.status)]">
-              {{ getStatusText(project.status) }}
-            </span>
+          <!-- Image -->
+          <div class="relative w-full aspect-[16/9] bg-slate-950 overflow-hidden flex items-center justify-center">
+            <NuxtImg
+                :src="project.preview_image"
+                :alt="project.name"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+            <!-- Org Badge -->
+            <div v-if="project.is_organization" class="absolute top-4 left-4">
+              <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-950/80 text-purple-300 border border-purple-500/40 backdrop-blur-md flex items-center gap-1.5 shadow-md">
+                <Icon name="carbon:enterprise" size="13" class="text-purple-400" />
+                <span>Org · {{ project.sub_apps?.length || 0 }} Apps</span>
+              </span>
+            </div>
+            <!-- Status Badge -->
+            <div class="absolute top-4 right-4">
+              <span :class="['px-3 py-1 rounded-full text-xs font-semibold border', getStatusColor(project.status)]">
+                {{ getStatusText(project.status) }}
+              </span>
+            </div>
           </div>
-        </div>
 
         <!-- Content -->
         <div class="p-6">
@@ -317,11 +324,11 @@ const deleteProjectHandler = async (id: number) => {
           class="group flex items-center gap-4 p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg hover:border-primary/50 hover:bg-white/10 transition-all duration-300 cursor-pointer"
       >
         <!-- Image Thumbnail -->
-        <div class="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-white/5">
+        <div class="relative w-28 sm:w-32 aspect-[16/9] shrink-0 rounded-lg overflow-hidden bg-slate-950 flex items-center justify-center">
           <NuxtImg
-              :src="project.image"
+              :src="project.preview_image || (typeof project.image === 'string' ? project.image : undefined)"
               :alt="project.name"
-              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         </div>
 
@@ -331,6 +338,13 @@ const deleteProjectHandler = async (id: number) => {
             <h3 class="text-base font-bold text-white group-hover:text-primary transition-colors">
               {{ project.name }}
             </h3>
+            <span
+              v-if="project.is_organization"
+              class="px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/40 inline-flex items-center gap-1 shrink-0"
+            >
+              <Icon name="carbon:enterprise" size="12" />
+              <span>Org ({{ project.sub_apps?.length || 0 }} Apps)</span>
+            </span>
             <span
                 :class="['px-3 py-1 rounded-full text-xs font-semibold border shrink-0', getStatusColor(project.status)]">
               {{ getStatusText(project.status) }}

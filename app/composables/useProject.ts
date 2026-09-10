@@ -1,5 +1,6 @@
 import { useToastCustom } from "~/composables/useToastCustom";
 import type {
+  GitHubOrgData,
   Project,
   ProjectPreviewInput,
   ProjectsResponse,
@@ -141,6 +142,13 @@ export const useProject = () => {
       if (projectData.live_url?.trim()) {
         formData.append("live_url", projectData.live_url);
       }
+      formData.append("is_organization", String(Boolean(projectData.is_organization)));
+      if (projectData.github_org?.trim()) {
+        formData.append("github_org", projectData.github_org.trim());
+      }
+      if (projectData.sub_apps) {
+        formData.append("sub_apps", JSON.stringify(projectData.sub_apps));
+      }
 
       // Append preview files & metadata
       const metadata: any[] = [];
@@ -236,6 +244,13 @@ export const useProject = () => {
       if (projectData.live_url?.trim()) {
         formData.append("live_url", projectData.live_url);
       }
+      formData.append("is_organization", String(Boolean(projectData.is_organization)));
+      if (projectData.github_org?.trim()) {
+        formData.append("github_org", projectData.github_org.trim());
+      }
+      if (projectData.sub_apps) {
+        formData.append("sub_apps", JSON.stringify(projectData.sub_apps));
+      }
 
       // Append preview files & metadata
       const metadata: any[] = [];
@@ -322,6 +337,28 @@ export const useProject = () => {
     }
   };
 
+  const fetchOrgRepos = async (
+    org: string,
+  ): Promise<GitHubOrgData | null> => {
+    try {
+      const response = await $axios.get<BaseResponse<GitHubOrgData>>(
+        "/api/github/org-repos",
+        {
+          params: { org },
+        },
+      );
+      return response.data?.data || null;
+    } catch (error) {
+      console.error("Failed to fetch GitHub org repos:", error);
+      const errorMessage = getErrorMessageAxios(error);
+      toast.showErrorToast(
+        "GitHub Error",
+        errorMessage || "Failed to fetch organization repositories",
+      );
+      return null;
+    }
+  };
+
   return {
     projects,
     isLoading,
@@ -333,5 +370,6 @@ export const useProject = () => {
     fetchProjectById,
     updateProject,
     deleteProject,
+    fetchOrgRepos,
   };
 };

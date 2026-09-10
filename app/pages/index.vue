@@ -79,6 +79,9 @@ const projects = computed(() => {
       liveUrl: p.live_url,
       details: p.description,
       features: p.features || [],
+      is_organization: Boolean(p.is_organization),
+      github_org: p.github_org || null,
+      sub_apps: p.sub_apps || [],
     }));
 });
 

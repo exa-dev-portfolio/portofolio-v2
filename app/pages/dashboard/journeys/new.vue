@@ -93,13 +93,24 @@ const clearError = (field: string) => {
   delete errors.value[field]
 }
 
-const addSkill = (skillId: number | null) => {
-  if (skillId && !formData.value.id_skills?.includes(skillId)) {
+const selectKey = ref(0)
+const selectedSkill = ref<any>(null)
+
+const addSkill = (val: any) => {
+  if (!val) return
+  const skillId = typeof val === 'object' && val !== null ? Number(val.id) : Number(val)
+  if (skillId && !formData.value?.id_skills?.includes(skillId)) {
+    if (!formData.value) return
     if (!formData.value.id_skills) {
       formData.value.id_skills = []
     }
     formData.value.id_skills.push(skillId)
+    clearError('skills')
   }
+  selectedSkill.value = null
+  nextTick(() => {
+    selectKey.value++
+  })
 }
 
 const removeSkill = (skillId: number) => {
@@ -374,13 +385,17 @@ const goBack = () => {
           <label class="block text-sm font-medium text-white mb-2">Add Skills</label>
           <div class="relative">
             <USelectMenu
-                :model-value="null"
+                :key="selectKey"
+                v-model="selectedSkill"
                 :items="allSkills"
-                value-key="id"
                 label-key="name"
+                value-key="id"
                 :searchable="true"
                 placeholder="Search and select skills..."
                 @update:model-value="addSkill">
+              <template #default>
+                <span class="text-white/50 text-sm">Search and select skills...</span>
+              </template>
             </USelectMenu>
           </div>
         </div>

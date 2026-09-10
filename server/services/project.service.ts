@@ -10,6 +10,7 @@ import { HttpError } from "~~/server/errors/HttpError";
 import { get, set, del } from "~~/server/db/redis";
 import { getMinioClient } from "~~/server/lib/minio";
 import type { ParsedFile } from "~~/server/utils/common";
+import { processImageToWebP, type ProcessedImageResult } from "~~/server/utils/image";
 
 export async function invalidateProjectsCache() {
   try {
@@ -27,7 +28,14 @@ export const createProject = async (
 ) => {
   return withTransaction(async (client) => {
     const minioClient = getMinioClient();
-    const namaFile = `portofolio/${Date.now()}-${crypto.randomUUID()}`;
+
+    // Process & compress cover image to WebP (guarantees security & compression from Postman or UI)
+    const processedCover = await processImageToWebP(body.image.data, {
+      maxWidth: 1600,
+      maxHeight: 1200,
+      quality: 85,
+    });
+    const namaFile = `portofolio/${Date.now()}-${crypto.randomUUID()}.${processedCover.extension}`;
     body.url = minioClient.getPublicUrl("project", namaFile);
 
     // Process preview images
@@ -49,13 +57,18 @@ export const createProject = async (
       const file = previewFiles[fileIdx];
 
       if (file) {
-        const previewFileName = `portofolio/${Date.now()}-${crypto.randomUUID()}`;
+        const processedPreview = await processImageToWebP(file.data, {
+          maxWidth: 1920,
+          maxHeight: 1080,
+          quality: 85,
+        });
+        const previewFileName = `portofolio/${Date.now()}-${crypto.randomUUID()}.${processedPreview.extension}`;
         const previewUrl = minioClient.getPublicUrl("project", previewFileName);
         await minioClient.uploadFile(
           "project",
           previewFileName,
-          file.data,
-          file.contentType || "application/octet-stream",
+          processedPreview.data,
+          processedPreview.contentType,
         );
         previewImages.push({
           url: previewUrl,
@@ -99,8 +112,8 @@ export const createProject = async (
     await minioClient.uploadFile(
       "project",
       namaFile,
-      body.image.data,
-      body.image.contentType || "application/octet-stream",
+      processedCover.data,
+      processedCover.contentType,
     );
 
     return sendSuccess(
@@ -178,8 +191,15 @@ export const updateProject = async (
       throw new HttpError(404, "PROJECT_NOT_FOUND", "Project not found");
     }
 
-    const namaFile = `portofolio/${Date.now()}-${crypto.randomUUID()}`;
+    let processedCover: ProcessedImageResult | null = null;
+    let namaFile = "";
     if (data.image) {
+      processedCover = await processImageToWebP(data.image.data, {
+        maxWidth: 1600,
+        maxHeight: 1200,
+        quality: 85,
+      });
+      namaFile = `portofolio/${Date.now()}-${crypto.randomUUID()}.${processedCover.extension}`;
       data.url = minioClient.getPublicUrl("project", namaFile);
     } else {
       data.url = project.preview_image;
@@ -210,13 +230,18 @@ export const updateProject = async (
         const fileIdx = meta.file_index !== undefined ? meta.file_index : i;
         const file = previewFiles[fileIdx];
         if (file) {
-          const previewFileName = `portofolio/${Date.now()}-${crypto.randomUUID()}`;
+          const processedPreview = await processImageToWebP(file.data, {
+            maxWidth: 1920,
+            maxHeight: 1080,
+            quality: 85,
+          });
+          const previewFileName = `portofolio/${Date.now()}-${crypto.randomUUID()}.${processedPreview.extension}`;
           const previewUrl = minioClient.getPublicUrl("project", previewFileName);
           await minioClient.uploadFile(
             "project",
             previewFileName,
-            file.data,
-            file.contentType || "application/octet-stream",
+            processedPreview.data,
+            processedPreview.contentType,
           );
           updatedPreviewImages.push({
             url: previewUrl,
@@ -271,12 +296,12 @@ export const updateProject = async (
 
     await invalidateProjectsCache();
 
-    if (data.image) {
+    if (data.image && processedCover) {
       await minioClient.uploadFile(
         "project",
         namaFile,
-        data.image.data,
-        data.image.contentType || "application/octet-stream",
+        processedCover.data,
+        processedCover.contentType,
       );
       if (project.preview_image) {
         const oldCoverObj = extractObjectName(project.preview_image);

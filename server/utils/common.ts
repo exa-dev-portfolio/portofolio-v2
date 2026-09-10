@@ -42,10 +42,10 @@ export const fileSchema = z.object({
     contentType: z.string().optional(),
     data: z.instanceof(Buffer),
 }).refine(
-    (file) => file.data.length <= 5 * 1024 * 1024,
-    {message: 'Max file size is 5MB'}
+    (file) => file.data.length <= 15 * 1024 * 1024,
+    {message: 'Max file size is 15MB'}
 ).refine(
-    (file) => file.contentType?.startsWith('image/'),
+    (file) => !file.contentType || file.contentType.startsWith('image/') || file.contentType === 'application/octet-stream',
     {message: 'File must be an image'}
 )
 

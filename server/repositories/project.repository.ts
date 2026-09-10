@@ -1,5 +1,5 @@
-import {PoolClient} from "pg";
-import {CreateProjectInput, ProjectModel, UpdateProjectInput} from "~~/server/model/project.model";
+import type {PoolClient} from "pg";
+import type {CreateProjectInput, ProjectModel, UpdateProjectInput} from "~~/server/model/project.model";
 
 export const createProject = async (
     client: PoolClient,
@@ -7,8 +7,8 @@ export const createProject = async (
 ): Promise<number | undefined> => {
     const sql = `
         INSERT INTO projects ( name, image, description, start_date, end_date, status, features, live_url
-                             , repo_url, preview_images)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id
+                             , repo_url, preview_images, is_organization, github_org, sub_apps)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id
     `
     const values = [
         data.name,
@@ -21,6 +21,9 @@ export const createProject = async (
         data.live_url,
         data.repo_url,
         JSON.stringify(data.preview_images || []),
+        Boolean(data.is_organization),
+        data.github_org || null,
+        JSON.stringify(data.sub_apps || []),
     ]
 
     const result = await client.query<Partial<ProjectModel>>(sql, values)
@@ -33,17 +36,20 @@ export const updateProject = async (
 ): Promise<boolean> => {
     const sql = `
         UPDATE projects
-        SET name           = $1,
-            image          = $2,
-            description    = $3,
-            start_date     = $4,
-            end_date       = $5,
-            status         = $6,
-            features       = $7,
-            live_url       = $8,
-            repo_url       = $9,
-            preview_images = $10
-        WHERE id = $11
+        SET name            = $1,
+            image           = $2,
+            description     = $3,
+            start_date      = $4,
+            end_date        = $5,
+            status          = $6,
+            features        = $7,
+            live_url        = $8,
+            repo_url        = $9,
+            preview_images  = $10,
+            is_organization = $11,
+            github_org      = $12,
+            sub_apps        = $13
+        WHERE id = $14
     `
     const values = [
         data.name,
@@ -56,6 +62,9 @@ export const updateProject = async (
         data.live_url,
         data.repo_url,
         JSON.stringify(data.preview_images || []),
+        Boolean(data.is_organization),
+        data.github_org || null,
+        JSON.stringify(data.sub_apps || []),
         data.id,
     ]
     const result = await client.query(sql, values)
@@ -93,6 +102,9 @@ export const getProjectById = async (
                p.features,
                p.live_url,
                p.repo_url,
+               p.is_organization,
+               p.github_org,
+               p.sub_apps,
                p.created_at,
                ARRAY_AGG(s.name) AS technologies,
                ARRAY_AGG(s.id)   AS id_skills
@@ -127,6 +139,9 @@ export const getProjectCursorPagination = async (
                p.features,
                p.live_url,
                p.repo_url,
+               p.is_organization,
+               p.github_org,
+               p.sub_apps,
                p.created_at,
                p.updated_at,
                ARRAY_AGG(s.name) AS technologies
@@ -180,6 +195,9 @@ export const getAllProjects = async (
                p.features,
                p.live_url,
                p.repo_url,
+               p.is_organization,
+               p.github_org,
+               p.sub_apps,
                p.created_at,
                p.updated_at,
                ARRAY_AGG(s.name) AS technologies
