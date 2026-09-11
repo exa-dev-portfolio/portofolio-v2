@@ -1,10 +1,10 @@
 import { logger } from '../utils/logger'
 import { Pool, type PoolClient, type QueryResult, type QueryResultRow } from 'pg';
-import { useAppConfig } from '~~/server/utils/config';
+import { useServerConfig } from '~~/server/utils/config';
 import { formatPgError } from "~~/server/utils/pgError";
 import { HttpError } from "~~/server/errors/HttpError";
 
-const Config = useAppConfig();
+const Config = useServerConfig();
 
 export type PostgresConfig = {
     host?: string;

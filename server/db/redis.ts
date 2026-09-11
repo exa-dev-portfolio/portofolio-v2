@@ -1,8 +1,8 @@
 import { logger } from "../utils/logger";
 import { createClient, type RedisClientType } from "redis";
-import { useAppConfig } from "~~/server/utils/config";
+import { useServerConfig } from "~~/server/utils/config";
 
-const Config = useAppConfig();
+const Config = useServerConfig();
 
 export type RedisConfig = {
   url?: string;
@@ -18,22 +18,30 @@ let redisClient: RedisClientType | null = null;
 function buildRedisConfig(cfg?: Partial<RedisConfig>) {
   const url = cfg?.url ?? Config.redisUrl;
 
+  const defaultReconnectStrategy = (retries: number) => {
+    if (retries > 3) {
+      return new Error("[redis] max reconnection attempts reached");
+    }
+    return Math.min(retries * 50, 300);
+  };
+
+  const reconnectStrategy =
+    cfg?.socket?.reconnectStrategy ?? defaultReconnectStrategy;
+
   if (url) {
-    return { url };
+    return {
+      url,
+      socket: {
+        reconnectStrategy,
+      },
+    };
   }
 
   return {
     socket: {
       host: cfg?.socket?.host ?? "localhost",
       port: cfg?.socket?.port ?? 6379,
-      reconnectStrategy:
-        cfg?.socket?.reconnectStrategy ??
-        ((retries: number) => {
-          if (retries > 10) {
-            return new Error("[redis] max reconnection attempts reached");
-          }
-          return Math.min(retries * 50, 500);
-        }),
+      reconnectStrategy,
     },
   };
 }
@@ -55,38 +63,39 @@ export async function initRedis(
   }
 
   const redisConfig = buildRedisConfig(cfg);
-  redisClient = createClient(redisConfig as any);
+  const client = createClient(redisConfig as any);
 
-  redisClient.on("error", (err: Error) => {
-    logger.error("[redis] error:", err.message);
+  client.on("error", (err: Error) => {
+    logger.warn("[redis] error: " + err.message);
   });
 
-  redisClient.on("connect", () => {
+  client.on("connect", () => {
     logger.info("[redis] connecting...");
   });
 
-  redisClient.on("ready", () => {
+  client.on("ready", () => {
     logger.info("[redis] ready");
   });
 
-  redisClient.on("reconnecting", () => {
+  client.on("reconnecting", () => {
     logger.warn("[redis] reconnecting...");
   });
 
-  redisClient.on("end", () => {
+  client.on("end", () => {
     logger.info("[redis] connection closed");
   });
 
-  const retries = options?.retries ?? 5;
-  const initialDelayMs = options?.initialDelayMs ?? 200;
-  const factor = options?.factor ?? 2;
+  const retries = options?.retries ?? 3;
+  const initialDelayMs = options?.initialDelayMs ?? 150;
+  const factor = options?.factor ?? 1.5;
 
   let attempt = 0;
   let lastErr: Error | null = null;
 
   while (attempt < retries) {
     try {
-      await redisClient.connect();
+      await client.connect();
+      redisClient = client;
       const configInfo =
         redisConfig.url ??
         `${(redisConfig as any).socket?.host}:${(redisConfig as any).socket?.port}`;
@@ -103,24 +112,21 @@ export async function initRedis(
     }
   }
 
-  // If we are here, all attempts failed
+  // If we are here, all attempts failed. Disconnect to prevent indefinite background retries.
   try {
-    await redisClient.quit();
+    await client.disconnect();
   } catch (_) {
     // ignore
   }
   redisClient = null;
-  throw new Error(
-    `[redis] could not establish a connection after ${retries} attempts. last error: ${lastErr?.message}`,
+  logger.warn(
+    `[redis] could not establish connection after ${retries} attempts: ${lastErr?.message}. Proceeding without Redis cache.`,
   );
 }
 
-export function getRedisClient(): RedisClientType {
-  if (!redisClient) {
-    throw new Error("Redis client not initialized. Call initRedis() first.");
-  }
-  if (!redisClient.isOpen) {
-    throw new Error("Redis client is not connected.");
+export function getRedisClient(): RedisClientType | null {
+  if (!redisClient || !redisClient.isOpen) {
+    return null;
   }
   return redisClient;
 }
@@ -131,37 +137,72 @@ export async function set(
   expiryInSeconds?: number,
 ): Promise<void> {
   const client = getRedisClient();
-  if (expiryInSeconds) {
-    await client.setEx(key, expiryInSeconds, value);
-  } else {
-    await client.set(key, value);
+  if (!client) return;
+  try {
+    if (expiryInSeconds) {
+      await client.setEx(key, expiryInSeconds, value);
+    } else {
+      await client.set(key, value);
+    }
+  } catch (err: any) {
+    logger.warn(`[redis] set failed for key ${key}: ${err?.message}`);
   }
 }
 
 export async function get(key: string): Promise<string | null> {
   const client = getRedisClient();
-  return client.get(key);
+  if (!client) return null;
+  try {
+    return await client.get(key);
+  } catch (err: any) {
+    logger.warn(`[redis] get failed for key ${key}: ${err?.message}`);
+    return null;
+  }
 }
 
 export async function del(key: string): Promise<number> {
   const client = getRedisClient();
-  return client.del(key);
+  if (!client) return 0;
+  try {
+    return await client.del(key);
+  } catch (err: any) {
+    logger.warn(`[redis] del failed for key ${key}: ${err?.message}`);
+    return 0;
+  }
 }
 
 export async function exists(key: string): Promise<number> {
   const client = getRedisClient();
-  return client.exists(key);
+  if (!client) return 0;
+  try {
+    return await client.exists(key);
+  } catch (err: any) {
+    logger.warn(`[redis] exists failed for key ${key}: ${err?.message}`);
+    return 0;
+  }
 }
 
 export async function expire(key: string, seconds: number): Promise<boolean> {
   const client = getRedisClient();
-  const result = await client.expire(key, seconds);
-  return result === 1;
+  if (!client) return false;
+  try {
+    const result = await client.expire(key, seconds);
+    return result === 1;
+  } catch (err: any) {
+    logger.warn(`[redis] expire failed for key ${key}: ${err?.message}`);
+    return false;
+  }
 }
 
 export async function ttl(key: string): Promise<number> {
   const client = getRedisClient();
-  return client.ttl(key);
+  if (!client) return -2;
+  try {
+    return await client.ttl(key);
+  } catch (err: any) {
+    logger.warn(`[redis] ttl failed for key ${key}: ${err?.message}`);
+    return -2;
+  }
 }
 
 export async function setJson<T = any>(
@@ -170,42 +211,54 @@ export async function setJson<T = any>(
   expiryInSeconds?: number,
 ): Promise<void> {
   const client = getRedisClient();
-  const jsonString = JSON.stringify(value);
-  if (expiryInSeconds) {
-    await client.setEx(key, expiryInSeconds, jsonString);
-  } else {
-    await client.set(key, jsonString);
+  if (!client) return;
+  try {
+    const jsonString = JSON.stringify(value);
+    if (expiryInSeconds) {
+      await client.setEx(key, expiryInSeconds, jsonString);
+    } else {
+      await client.set(key, jsonString);
+    }
+  } catch (err: any) {
+    logger.warn(`[redis] setJson failed for key ${key}: ${err?.message}`);
   }
 }
 
 export async function getJson<T = any>(key: string): Promise<T | null> {
   const client = getRedisClient();
-  const value = await client.get(key);
-  if (!value) return null;
+  if (!client) return null;
   try {
+    const value = await client.get(key);
+    if (!value) return null;
     return JSON.parse(value) as T;
   } catch (err) {
-    logger.error({ err: err }, "[redis] failed to parse JSON:");
+    logger.warn({ err: err }, "[redis] failed to parse JSON:");
     return null;
   }
 }
 
-export async function shutdownRedis(timeoutMs = 5000): Promise<void> {
+export async function shutdownRedis(timeoutMs = 3000): Promise<void> {
   if (!redisClient) return;
   const current = redisClient;
   redisClient = null;
   try {
-    const p = current.quit();
-    if (timeoutMs > 0) {
-      await Promise.race([
-        p,
-        delay(timeoutMs).then(() => {
-          throw new Error("[redis] shutdown timed out");
-        }),
-      ]);
+    if (current.isOpen) {
+      const p = current.quit();
+      if (timeoutMs > 0) {
+        await Promise.race([
+          p,
+          delay(timeoutMs).then(() => {
+            throw new Error("[redis] shutdown timed out");
+          }),
+        ]);
+      } else {
+        await p;
+      }
     } else {
-      await p;
+      await current.disconnect();
     }
+  } catch (_) {
+    // ignore
   } finally {
     logger.info("[redis] client shut down");
   }

@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import {useAppConfig} from '~~/server/utils/config';
+import {useServerConfig} from '~~/server/utils/config';
 import type {TokenPayload} from "~~/server/model/token.model";
 import {HttpError} from "~~/server/errors/HttpError";
 
-const Config = useAppConfig();
+const Config = useServerConfig();
 const ACCESS_TOKEN_EXPIRES_IN = '15m';
 const REFRESH_TOKEN_EXPIRES_DAYS = Number(process.env.REFRESH_TOKEN_EXPIRES_DAYS ?? 30);
 const REFRESH_ROTATE_THRESHOLD_DAYS = Number(process.env.REFRESH_ROTATE_THRESHOLD_DAYS ?? 7);

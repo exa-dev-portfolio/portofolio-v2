@@ -1,8 +1,9 @@
 import {HttpError} from "~~/server/errors/HttpError";
 import {loginByEmail} from "~~/server/services/user.service";
 import {handleError} from "~~/server/utils/handleError";
+import {useServerConfig} from "~~/server/utils/config";
 
-const Config = useAppConfig();
+const Config = useServerConfig();
 
 export default handleError(async (event) => {
     if (Config.mode !== 'development') {

@@ -1,6 +1,6 @@
 import { logger } from '../utils/logger'
 import {OAuth2Client} from "google-auth-library";
-import {useAppConfig} from '~~/server/utils/config';
+import {useServerConfig} from '~~/server/utils/config';
 import {withTransaction} from "~~/server/db/postgres";
 import {getUserByEmail} from "~~/server/repositories/user.repository";
 import {HttpError} from "~~/server/errors/HttpError";
@@ -11,7 +11,7 @@ import {del, set} from "~~/server/db/redis";
 import type {H3Event} from "h3";
 import {sendSuccess} from "~~/server/utils/response";
 
-const Config = useAppConfig();
+const Config = useServerConfig();
 
 // Helper function to create OAuth2Client with dynamic redirectUri
 const createGoogleClient = (redirectUri: string) => {

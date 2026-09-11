@@ -1,4 +1,4 @@
-export function useAppConfig() {
+export function useServerConfig() {
   const config = useRuntimeConfig();
 
   return {

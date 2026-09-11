@@ -1,7 +1,7 @@
 import {verifyAccessToken} from '~~/server/utils/jwt'
 import {HttpError} from '~~/server/errors/HttpError'
 import type {EventHandler, EventHandlerRequest, H3Event} from 'h3'
-import {sendError} from "~~/server/utils/response";
+import {sendAppError} from "~~/server/utils/response";
 
 export const withAuth = <T extends EventHandlerRequest, D>(
     handler?: EventHandler<T, D>
@@ -27,7 +27,7 @@ export const withAuth = <T extends EventHandlerRequest, D>(
             }
 
             if (!token) {
-                return sendError(event, 401, 'missing_token', 'Access token is missing')
+                return sendAppError(event, 401, 'missing_token', 'Access token is missing')
             }
 
             // 3️⃣ Verify JWT
@@ -35,7 +35,7 @@ export const withAuth = <T extends EventHandlerRequest, D>(
             try {
                 payload = verifyAccessToken(token)
             } catch {
-                return sendError(event, 401, 'invalid_token', 'Access token is invalid')
+                return sendAppError(event, 401, 'invalid_token', 'Access token is invalid')
             }
 
             // 4️⃣ Attach ke context (SOURCE OF TRUTH)
@@ -49,7 +49,7 @@ export const withAuth = <T extends EventHandlerRequest, D>(
             if (handler) {
                 return await handler(event)
             } else {
-                return sendError(
+                return sendAppError(
                     event,
                     500, 'no_handler',
                     'No handler provided for authenticated route'
@@ -58,9 +58,9 @@ export const withAuth = <T extends EventHandlerRequest, D>(
         } catch (err: any) {
             logger.error({ err: err }, "[error]:")
             if (err instanceof HttpError) {
-                return sendError(event, err.status, err.code, err.message, err.data)
+                return sendAppError(event, err.status, err.code, err.message, err.data)
             }
-            return sendError(
+            return sendAppError(
                 event,
                 500, 'internal_error',
                 'An internal server error occurred',

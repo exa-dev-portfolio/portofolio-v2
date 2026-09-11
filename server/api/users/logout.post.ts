@@ -1,5 +1,5 @@
 import {del} from "~~/server/db/redis"
-import {sendError, sendSuccess} from "~~/server/utils/response"
+import {sendAppError, sendSuccess} from "~~/server/utils/response"
 import {withTransaction} from "~~/server/db/postgres";
 import {deleteToken} from "~~/server/repositories/token.repository";
 import {handleError} from "~~/server/utils/handleError";
@@ -58,7 +58,7 @@ export default handleError(async (event) => {
             throw error
         }
         logger.error({ err: error }, 'Logout error:')
-        return sendError(event, 500, 'LOGOUT_ERROR', 'An error occurred during logout')
+        return sendAppError(event, 500, 'LOGOUT_ERROR', 'An error occurred during logout')
     }
 })
 
