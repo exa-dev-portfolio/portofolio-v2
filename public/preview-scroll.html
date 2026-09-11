@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="id" class="dark scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scroll-Driven 3D Experience • Portofolio Eka</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        background-color: #06080f;
+        color: #e2e8f0;
+        overflow-x: hidden;
+      }
+      .font-mono {
+        font-family: "JetBrains Mono", monospace;
+      }
+      /* Fixed 3D Canvas Background */
+      #canvas-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 1;
+      }
+      .content-layer {
+        position: relative;
+        z-index: 10;
+      }
+      .glass-card {
+        background: rgba(10, 15, 30, 0.7);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .text-glow {
+        text-shadow: 0 0 30px rgba(0, 240, 255, 0.35);
+      }
+    </style>
+  </head>
+  <body class="selection:bg-cyan-500 selection:text-white">
+    <!-- ================= FIXED 3D CANVAS LAYER ================= -->
+    <div id="canvas-container">
+      <canvas id="webgl-canvas" class="w-full h-full"></canvas>
+    </div>
+
+    <!-- HUD Scroll Indicator (Top Right) -->
+    <div
+      class="fixed top-6 right-6 z-50 flex items-center gap-3 glass-card px-4 py-2 rounded-2xl"
+    >
+      <div class="flex flex-col text-right">
+        <span
+          class="text-[10px] font-mono text-slate-400 uppercase tracking-wider"
+          >Scroll Phase</span
+        >
+        <span
+          id="hud-phase-name"
+          class="text-xs font-mono font-bold text-cyan-400"
+          >01 / HERO</span
+        >
+      </div>
+      <div
+        class="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center font-mono text-xs font-bold text-cyan-300"
+        id="hud-percentage"
+      >
+        0%
+      </div>
+    </div>
+
+    <!-- Floating Scroll Helper (Bottom Center) -->
+    <div
+      id="scroll-hint"
+      class="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 transition-opacity duration-500 flex flex-col items-center gap-2 pointer-events-none"
+    >
+      <span class="text-xs font-mono text-slate-400 tracking-wider uppercase"
+        >Scroll Down to Experience 3D Transform</span
+      >
+      <div
+        class="w-5 h-9 rounded-full border-2 border-white/20 flex items-start justify-center p-1"
+      >
+        <div class="w-1.5 h-2.5 rounded-full bg-cyan-400 animate-bounce"></div>
+      </div>
+    </div>
+
+    <!-- ================= CONTENT SECTIONS (DRIVES THE 3D ANIMATION) ================= -->
+    <div class="content-layer">
+      <!-- Back link to catalog -->
+      <header class="max-w-7xl mx-auto px-6 pt-6">
+        <a
+          href="/preview-3d.html"
+          class="inline-flex items-center gap-2 text-xs font-mono text-slate-400 hover:text-cyan-400 transition"
+        >
+          <span>&larr; Kembali ke Galeri Ide</span>
+        </a>
+      </header>
+
+      <!-- ================= SECTION 1: HERO ================= -->
+      <section
+        class="min-h-screen flex items-center max-w-7xl mx-auto px-6 py-20"
+        id="sec-hero"
+      >
+        <div class="w-full lg:w-7/12">
+          <div
+            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono mb-6"
+          >
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+            <span>Scroll-Driven WebGL Experience</span>
+          </div>
+
+          <h1
+            class="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-white tracking-tight leading-[1.1] mb-6"
+          >
+            Hi, I'm
+            <span
+              class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500"
+              >Eka</span
+            >.<br />
+            Architecting
+            <span
+              class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400"
+              >Scalable</span
+            ><br />
+            Systems & Apps.
+          </h1>
+
+          <p
+            class="text-slate-300 text-base sm:text-lg leading-relaxed max-w-xl mb-8"
+          >
+            Full-Stack & Cloud Engineer. Di sebelah kananmu melayang objek 3D
+            <strong>Minimalist Geodesic Core</strong>. Cobalah men-scroll
+            halaman ini ke bawah untuk melihat bagaimana objek 3D
+            bertransformasi secara mulus mengikuti setiap section!
+          </p>
+
+          <div class="flex items-center gap-4">
+            <div
+              class="px-5 py-2.5 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs font-mono flex items-center gap-2 shadow-lg shadow-cyan-500/25"
+            >
+              <span>Scroll kebawah &darr;</span>
+            </div>
+            <span class="text-xs font-mono text-slate-400"
+              >Phase 1: Ambient Orbit Right</span
+            >
+          </div>
+        </div>
+        <!-- Right column is intentionally empty space for 3D Mesh in Phase 1 -->
+      </section>
+
+      <!-- ================= SECTION 2: ARCHITECTURE & SYSTEMS ================= -->
+      <section
+        class="min-h-screen flex items-center max-w-7xl mx-auto px-6 py-20"
+        id="sec-arch"
+      >
+        <!-- Left side empty: 3D mesh shifts to the LEFT in Phase 2 -->
+        <div class="w-full lg:w-5/12 hidden lg:block"></div>
+
+        <div class="w-full lg:w-7/12">
+          <div
+            class="glass-card p-8 sm:p-10 rounded-3xl space-y-6 border-l-4 border-l-cyan-500 shadow-2xl"
+          >
+            <div class="flex items-center gap-2">
+              <span
+                class="px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-400 text-xs font-mono font-bold"
+              >
+                PHASE 2 &bull; DEEP ZOOM & DUAL RING
+              </span>
+              <span class="text-xs text-slate-400 font-mono"
+                >Camera: Inset Close-Up</span
+              >
+            </div>
+
+            <h2
+              class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight"
+            >
+              Resilient Architecture & Microservices
+            </h2>
+
+            <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+              Perhatikan bagaimana saat kamu scroll ke sini, objek 3D
+              <strong>berpindah posisi ke sisi kiri</strong>, kamera melakukan
+              <em>smooth dolly zoom in</em>, dan kisi-kisi wireframe luar
+              membuka cincin ganda (*dual concentric halo*) untuk memperlihatkan
+              struktur dalamnya.
+            </p>
+
+            <div
+              class="grid grid-cols-2 gap-4 pt-4 border-t border-white/10 font-mono text-xs"
+            >
+              <div class="p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                <div class="text-slate-400">Cluster Latency</div>
+                <div class="text-lg font-bold text-emerald-400 mt-1">
+                  &lt; 3.8ms (p99)
+                </div>
+              </div>
+              <div class="p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                <div class="text-slate-400">Zero-Downtime</div>
+                <div class="text-lg font-bold text-cyan-400 mt-1">
+                  99.98% Uptime
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= SECTION 3: TECH STACK CONSTELLATION ================= -->
+      <section
+        class="min-h-screen flex items-center justify-center max-w-5xl mx-auto px-6 py-20 text-center"
+        id="sec-stack"
+      >
+        <div
+          class="glass-card p-8 sm:p-12 rounded-3xl max-w-3xl w-full border border-white/10 shadow-2xl space-y-6"
+        >
+          <div
+            class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono"
+          >
+            PHASE 3 &bull; EXPANDED CONSTELLATION
+          </div>
+
+          <h2 class="text-3xl sm:text-4xl font-extrabold text-white">
+            Cloud Native & Full-Stack Arsenal
+          </h2>
+
+          <p class="text-slate-300 text-sm leading-relaxed max-w-xl mx-auto">
+            Pada fase scroll ini, 3D Mesh berpindah ke
+            <strong>tengah presisi</strong>, dan melepaskan partikel konstelasi
+            yang mengembang melingkari kartu konten.
+          </p>
+
+          <!-- Stack Badges -->
+          <div class="flex flex-wrap items-center justify-center gap-3 pt-4">
+            <span
+              class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-cyan-300 font-semibold"
+            >
+              Go 1.23 • High Concurrency
+            </span>
+            <span
+              class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-emerald-300 font-semibold"
+            >
+              Vue 3 / Nuxt • Ultra Fluid UI
+            </span>
+            <span
+              class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-blue-300 font-semibold"
+            >
+              Kubernetes & KEDA Scaling
+            </span>
+            <span
+              class="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-indigo-300 font-semibold"
+            >
+              PostgreSQL & Redis Cache
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= SECTION 4: HORIZON & CONTACT ================= -->
+      <section
+        class="min-h-screen flex items-center max-w-7xl mx-auto px-6 py-20"
+        id="sec-contact"
+      >
+        <div class="w-full lg:w-7/12">
+          <div
+            class="glass-card p-8 sm:p-12 rounded-3xl space-y-6 border border-white/10 shadow-2xl"
+          >
+            <div
+              class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/30 text-violet-400 text-xs font-mono"
+            >
+              PHASE 4 &bull; AMBIENT HORIZON DEPTH
+            </div>
+
+            <h2
+              class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight"
+            >
+              Ready to Build Next-Level Software?
+            </h2>
+
+            <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+              Di akhir halaman, objek 3D mundur jauh ke latar belakang
+              (*background depth*), memancarkan aura pendaran gelap (*ambient
+              horizon light*), sehingga konten kontak tetap fokus dan nyaman
+              dibaca.
+            </p>
+
+            <div class="flex flex-wrap gap-4 pt-2">
+              <a
+                href="mailto:contact@eka-dev.cloud"
+                class="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-xs font-mono shadow-lg shadow-cyan-500/20"
+              >
+                Start a Project &rarr;
+              </a>
+              <button
+                onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
+                class="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-xs font-mono transition"
+              >
+                &uarr; Scroll ke Paling Atas
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ================= THREE.JS SCROLL ENGINE ================= -->
+    <script>
+      const canvas = document.getElementById("webgl-canvas");
+      const scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x06080f, 0.04);
+
+      const camera = new THREE.PerspectiveCamera(
+        45,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        100,
+      );
+      camera.position.set(0, 0, 8);
+
+      const renderer = new THREE.WebGLRenderer({
+        canvas: canvas,
+        antialias: true,
+        alpha: true,
+      });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      // Lights
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+      scene.add(ambientLight);
+
+      const pointLightCyan = new THREE.PointLight(0x00f0ff, 3, 30);
+      pointLightCyan.position.set(5, 5, 5);
+      scene.add(pointLightCyan);
+
+      const pointLightBlue = new THREE.PointLight(0x3b82f6, 2, 30);
+      pointLightBlue.position.set(-5, -4, 3);
+      scene.add(pointLightBlue);
+
+      // Main 3D Mesh Group (We manipulate position, rotation, and scale of this group with scroll!)
+      const meshGroup = new THREE.Group();
+      scene.add(meshGroup);
+
+      // 1. Core Faceted Crystal (Icosahedron)
+      const coreGeom = new THREE.IcosahedronGeometry(1.5, 1);
+      const coreMat = new THREE.MeshStandardMaterial({
+        color: 0x07111e,
+        roughness: 0.15,
+        metalness: 0.9,
+        flatShading: true,
+        emissive: 0x00203f,
+        emissiveIntensity: 0.25,
+      });
+      const coreMesh = new THREE.Mesh(coreGeom, coreMat);
+      meshGroup.add(coreMesh);
+
+      // 2. Wireframe Lattice (Guillaume Gouessan Style)
+      const wireGeom = new THREE.IcosahedronGeometry(1.8, 1);
+      const wireMat = new THREE.MeshBasicMaterial({
+        color: 0x00f0ff,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.4,
+      });
+      const wireMesh = new THREE.Mesh(wireGeom, wireMat);
+      meshGroup.add(wireMesh);
+
+      // 3. Glowing Vertex Points
+      const pointsMat = new THREE.PointsMaterial({
+        color: 0x00f0ff,
+        size: 0.08,
+        transparent: true,
+        opacity: 0.9,
+      });
+      const pointsMesh = new THREE.Points(wireGeom, pointsMat);
+      meshGroup.add(pointsMesh);
+
+      // 4. Outer Ring (Toroidal Halo)
+      const haloGeom = new THREE.TorusGeometry(2.3, 0.02, 16, 100);
+      const haloMat = new THREE.MeshBasicMaterial({
+        color: 0x38bdf8,
+        transparent: true,
+        opacity: 0.3,
+      });
+      const haloMesh = new THREE.Mesh(haloGeom, haloMat);
+      haloMesh.rotation.x = Math.PI / 2.5;
+      meshGroup.add(haloMesh);
+
+      // 5. Space Dust / Constellation Particles
+      const particleCount = 250;
+      const particleGeom = new THREE.BufferGeometry();
+      const positions = new Float32Array(particleCount * 3);
+      for (let i = 0; i < particleCount * 3; i += 3) {
+        positions[i] = (Math.random() - 0.5) * 18;
+        positions[i + 1] = (Math.random() - 0.5) * 14;
+        positions[i + 2] = (Math.random() - 0.5) * 12;
+      }
+      particleGeom.setAttribute(
+        "position",
+        new THREE.BufferAttribute(positions, 3),
+      );
+      const dustMat = new THREE.PointsMaterial({
+        color: 0x64748b,
+        size: 0.035,
+        transparent: true,
+        opacity: 0.55,
+      });
+      const dustParticles = new THREE.Points(particleGeom, dustMat);
+      scene.add(dustParticles);
+
+      // Initial positioning in Section 1 (Right column of Hero)
+      meshGroup.position.set(2.4, 0, 0);
+
+      // ================= SCROLL KINEMATICS ENGINE =================
+      let scrollProgress = 0;
+      let targetScrollProgress = 0;
+
+      function onScroll() {
+        const maxScroll =
+          document.documentElement.scrollHeight - window.innerHeight;
+        targetScrollProgress = Math.max(
+          0,
+          Math.min(1, window.scrollY / (maxScroll || 1)),
+        );
+
+        // Hide scroll hint after starting scroll
+        const hint = document.getElementById("scroll-hint");
+        if (window.scrollY > 100 && hint) {
+          hint.style.opacity = "0";
+        } else if (hint) {
+          hint.style.opacity = "1";
+        }
+      }
+      window.addEventListener("scroll", onScroll, { passive: true });
+
+      // HUD Elements
+      const hudPhase = document.getElementById("hud-phase-name");
+      const hudPct = document.getElementById("hud-percentage");
+
+      // Section 3D Trajectory Waypoints:
+      // Phase 1 (0.0): Hero -> x: 2.4, y: 0, z: 0, scale: 1.0
+      // Phase 2 (0.33): Arch -> x: -2.3, y: 0.2, z: 1.2, scale: 1.25 (zoom close-up)
+      // Phase 3 (0.66): Stack -> x: 0, y: -0.2, z: -0.5, scale: 0.9 (centered)
+      // Phase 4 (1.0): Contact -> x: 2.0, y: -0.5, z: -3.5, scale: 1.6 (recedes into deep background)
+
+      function interpolateScroll(p) {
+        let targetX, targetY, targetZ, targetScale, targetRotZ;
+
+        if (p < 0.33) {
+          // Between Hero & Arch
+          const t = p / 0.33;
+          targetX = 2.4 + (-2.3 - 2.4) * easeInOutCubic(t);
+          targetY = 0 + (0.2 - 0) * t;
+          targetZ = 0 + (1.2 - 0) * easeInOutCubic(t);
+          targetScale = 1.0 + (1.25 - 1.0) * t;
+          targetRotZ = t * 0.4;
+          if (hudPhase) hudPhase.textContent = "01 / HERO";
+        } else if (p < 0.66) {
+          // Between Arch & Stack
+          const t = (p - 0.33) / 0.33;
+          targetX = -2.3 + (0 - -2.3) * easeInOutCubic(t);
+          targetY = 0.2 + (-0.2 - 0.2) * t;
+          targetZ = 1.2 + (-0.5 - 1.2) * easeInOutCubic(t);
+          targetScale = 1.25 + (0.9 - 1.25) * t;
+          targetRotZ = 0.4 + (0 - 0.4) * t;
+          if (hudPhase) hudPhase.textContent = "02 / ARCH";
+        } else {
+          // Between Stack & Contact
+          const t = (p - 0.66) / 0.34;
+          targetX = 0 + (2.0 - 0) * easeInOutCubic(t);
+          targetY = -0.2 + (-0.5 - -0.2) * t;
+          targetZ = -0.5 + (-3.5 - -0.5) * easeInOutCubic(t);
+          targetScale = 0.9 + (1.6 - 0.9) * t;
+          targetRotZ = t * -0.3;
+          if (hudPhase)
+            hudPhase.textContent = p > 0.85 ? "04 / CONTACT" : "03 / STACK";
+        }
+
+        if (hudPct) hudPct.textContent = `${Math.round(p * 100)}%`;
+
+        return {
+          x: targetX,
+          y: targetY,
+          z: targetZ,
+          scale: targetScale,
+          rotZ: targetRotZ,
+        };
+      }
+
+      function easeInOutCubic(x) {
+        return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+      }
+
+      // Interactive mouse parallax offset
+      let mouseX = 0,
+        mouseY = 0;
+      window.addEventListener("mousemove", (e) => {
+        mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+        mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+      });
+
+      // Render loop
+      const clock = new THREE.Clock();
+
+      function animate() {
+        requestAnimationFrame(animate);
+        const elapsedTime = clock.getElapsedTime();
+
+        // Smooth scroll interpolation (damping)
+        scrollProgress += (targetScrollProgress - scrollProgress) * 0.06;
+
+        const wp = interpolateScroll(scrollProgress);
+
+        // Apply target positions with mouse parallax
+        meshGroup.position.x +=
+          (wp.x + mouseX * 0.3 - meshGroup.position.x) * 0.08;
+        meshGroup.position.y +=
+          (wp.y + mouseY * 0.2 - meshGroup.position.y) * 0.08;
+        meshGroup.position.z += (wp.z - meshGroup.position.z) * 0.08;
+
+        const currentScale = meshGroup.scale.x;
+        const nextScale = currentScale + (wp.scale - currentScale) * 0.08;
+        meshGroup.scale.set(nextScale, nextScale, nextScale);
+
+        // Continuous subtle rotation + scroll speed burst
+        const scrollSpeed =
+          Math.abs(targetScrollProgress - scrollProgress) * 15;
+        meshGroup.rotation.y =
+          elapsedTime * 0.18 + scrollProgress * Math.PI * 2;
+        meshGroup.rotation.x =
+          elapsedTime * 0.12 + mouseX * 0.2 + scrollSpeed * 0.5;
+        meshGroup.rotation.z = wp.rotZ;
+
+        // Halo independent spin
+        haloMesh.rotation.z = elapsedTime * 0.3;
+
+        // Dust drift
+        dustParticles.rotation.y = elapsedTime * 0.02 + scrollProgress;
+
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      // Window resize
+      window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    </script>
+  </body>
+</html>

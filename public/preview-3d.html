@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Katalog Inspirasi Animasi 3D Portofolio Eka</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #07090e;
+      color: #e2e8f0;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .mesh-glow {
+      background: radial-gradient(circle at 50% 20%, rgba(30, 127, 255, 0.15), transparent 70%);
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#07090e] text-slate-200 antialiased selection:bg-blue-500 selection:text-white pb-20">
+
+  <!-- Glow Background Effect -->
+  <div class="fixed inset-0 pointer-events-none mesh-glow z-0"></div>
+
+  <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 pt-10">
+    
+    <!-- Top Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6 mb-10">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-mono font-semibold mb-3">
+          <span class="w-2 h-2 rounded-full bg-blue-400 animate-ping"></span>
+          Visual Guide & Interactive Preview
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Inspirasi & Mockup Animasi 3D Portofolio
+        </h1>
+        <p class="text-slate-400 text-sm mt-1 max-w-2xl">
+          Visualisasi nyata bagaimana 3 konsep animasi 3D dapat diaplikasikan ke dalam hero section portofolio Eka (<span class="text-blue-400 font-mono">eka-dev.cloud</span>).
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <a href="#live-demo" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-600/20 transition flex items-center gap-2">
+          <span>⚡ Coba Live 3D Demo</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Gallery of 3 Generated Mockups -->
+    <div class="space-y-16">
+
+      <!-- ================= CONCEPT 1 ================= -->
+      <section class="rounded-3xl bg-slate-900/60 border border-white/10 p-6 sm:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden group">
+        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-6">
+          <div>
+            <div class="flex items-center gap-3">
+              <span class="px-2.5 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono font-bold">
+                OPSI 1 • REKOMENDASI UTAMA
+              </span>
+              <span class="text-xs text-slate-400 font-mono">Load: Sangat Ringan (~150KB)</span>
+            </div>
+            <h2 class="text-2xl font-bold text-white mt-2">
+              Interactive 3D Kubernetes & Cloud Mesh Topology
+            </h2>
+            <p class="text-slate-400 text-sm mt-1">
+              Paling cocok dengan persona backend & cloud architect. Node service 3D (Go, K8s Pod, Postgres, Redis) terhubung laser data interaktif.
+            </p>
+          </div>
+          <span class="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-slate-300">
+            Tech: Three.js / TresJS
+          </span>
+        </div>
+
+        <!-- Image Container -->
+        <div class="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black/60 aspect-[16/9] group-hover:border-cyan-500/40 transition-all duration-300">
+          <img src="/images/3d-concepts/k8s_mesh_hero_1789166975430.jpg" alt="Kubernetes Mesh Topology 3D Hero Mockup" class="w-full h-full object-cover">
+          <div class="absolute bottom-4 left-4 right-4 p-4 rounded-xl bg-black/70 backdrop-blur-md border border-white/10 text-xs flex flex-wrap items-center justify-between gap-2">
+            <span class="text-slate-200">
+              💡 <strong>Cara Kerja Interaksi:</strong> Kursor mouse mengontrol sudut pandang 3D (*orbit tilt*). Hover ke tiap node memunculkan status live (*latency, health check*).
+            </span>
+            <span class="text-cyan-400 font-mono font-semibold">Ready for Nuxt 3</span>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ================= CONCEPT 2 ================= -->
+      <section class="rounded-3xl bg-slate-900/60 border border-white/10 p-6 sm:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden group">
+        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-6">
+          <div>
+            <div class="flex items-center gap-3">
+              <span class="px-2.5 py-1 rounded-lg bg-fuchsia-500/10 border border-fuchsia-500/30 text-fuchsia-400 text-xs font-mono font-bold">
+                OPSI 2 • CREATIVE & RETRO-CYBER
+              </span>
+              <span class="text-xs text-slate-400 font-mono">Load: Sedang (~2 MB via Spline)</span>
+            </div>
+            <h2 class="text-2xl font-bold text-white mt-2">
+              3D Cybernetic Developer Workstation (Spline 3D)
+            </h2>
+            <p class="text-slate-400 text-sm mt-1">
+              Meja kerja developer futuristik dengan CRT monitor retro, mechanical keyboard bercahaya RGB, dan cangkir kopi panas "Eka".
+            </p>
+          </div>
+          <span class="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-slate-300">
+            Tech: Spline + @splinetool/runtime
+          </span>
+        </div>
+
+        <!-- Image Container -->
+        <div class="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black/60 aspect-[16/9] group-hover:border-fuchsia-500/40 transition-all duration-300">
+          <img src="/images/3d-concepts/desk_workstation_3d_1789166990818.jpg" alt="3D Cybernetic Workstation Hero Mockup" class="w-full h-full object-cover">
+          <div class="absolute bottom-4 left-4 right-4 p-4 rounded-xl bg-black/70 backdrop-blur-md border border-white/10 text-xs flex flex-wrap items-center justify-between gap-2">
+            <span class="text-slate-200">
+              💡 <strong>Cara Kerja Interaksi:</strong> Model 3D bisa diputar 360 derajat. Pengunjung bisa klik tombol keyboard (ada audio klik & warna RGB) atau klik monitor untuk ganti kode.
+            </span>
+            <span class="text-fuchsia-400 font-mono font-semibold">High Engagement</span>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ================= CONCEPT 3 ================= -->
+      <section class="rounded-3xl bg-slate-900/60 border border-white/10 p-6 sm:p-8 backdrop-blur-xl shadow-2xl relative overflow-hidden group">
+        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-6">
+          <div>
+            <div class="flex items-center gap-3">
+              <span class="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold">
+                OPSI 3 • SLEEK GLASS & TACTILE
+              </span>
+              <span class="text-xs text-slate-400 font-mono">Load: Ringan (~400 KB)</span>
+            </div>
+            <h2 class="text-2xl font-bold text-white mt-2">
+              3D Floating Frosted Glass Cubes (Physics Sandbox)
+            </h2>
+            <p class="text-slate-400 text-sm mt-1">
+              Balok-balok kaca transparan dengan logo Go, Vue, Kubernetes, Docker, dan Postgres yang melayang dan bereaksi terhadap gravitasi kursor.
+            </p>
+          </div>
+          <span class="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-slate-300">
+            Tech: Three.js / Rapier Physics
+          </span>
+        </div>
+
+        <!-- Image Container -->
+        <div class="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black/60 aspect-[16/9] group-hover:border-emerald-500/40 transition-all duration-300">
+          <img src="/images/3d-concepts/physics_cubes_hero_1789167009159.jpg" alt="3D Floating Frosted Glass Cubes Mockup" class="w-full h-full object-cover">
+          <div class="absolute bottom-4 left-4 right-4 p-4 rounded-xl bg-black/70 backdrop-blur-md border border-white/10 text-xs flex flex-wrap items-center justify-between gap-2">
+            <span class="text-slate-200">
+              💡 <strong>Cara Kerja Interaksi:</strong> Balok kaca memantul saat kursor digerakkan cepat (*gravity impulse*). Pengunjung bisa drag-and-throw balok kaca di layar.
+            </span>
+            <span class="text-emerald-400 font-mono font-semibold">Clean & Modern</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+
+    <!-- ================= LIVE 3D INTERACTIVE CANVAS ================= -->
+    <div id="live-demo" class="mt-20 pt-10 border-t border-white/10">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <span class="px-2.5 py-1 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-mono font-bold">
+            LIVE INTERACTIVE TEST
+          </span>
+          <h2 class="text-2xl font-bold text-white mt-2">
+            Simulasi Langsung: Interactive 3D Node Mesh (Three.js)
+          </h2>
+          <p class="text-slate-400 text-sm">
+            Gerakkan kursor mouse kamu di atas kotak hitam di bawah untuk merasakan rotasi dan interaksi 3D nyata secara langsung!
+          </p>
+        </div>
+        <div class="text-right hidden sm:block">
+          <span class="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
+            60 FPS WebGL Engine Active
+          </span>
+        </div>
+      </div>
+
+      <!-- Canvas Container -->
+      <div class="relative w-full h-[500px] rounded-3xl overflow-hidden border border-white/10 bg-[#050811] shadow-2xl">
+        <canvas id="three-canvas" class="w-full h-full cursor-grab active:cursor-grabbing"></canvas>
+
+        <!-- Floating UI Overlays simulating portfolio info -->
+        <div class="absolute top-5 left-5 pointer-events-none space-y-2">
+          <div class="px-3 py-1.5 rounded-xl bg-slate-900/80 backdrop-blur border border-white/10 text-[11px] font-mono text-slate-300 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Live Topology: 6 Microservices Active</span>
+          </div>
+          <div class="px-3 py-1.5 rounded-xl bg-slate-900/80 backdrop-blur border border-white/10 text-[11px] font-mono text-slate-400">
+            Hover & Drag: <span class="text-cyan-300">Move Camera</span>
+          </div>
+        </div>
+
+        <div class="absolute bottom-5 right-5 pointer-events-none">
+          <div class="px-3 py-2 rounded-xl bg-black/60 backdrop-blur border border-white/10 text-[11px] font-mono text-right text-slate-400">
+            <div>Pods: <span class="text-white font-bold">3 Replicas</span></div>
+            <div>P99 Latency: <span class="text-emerald-400 font-bold">&lt; 4.2ms</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ================= LIVE 3D INTERACTIVE CANVAS (GUILLAUME GOUESSAN STYLE) ================= -->
+    <div id="live-demo" class="mt-20 pt-10 border-t border-white/10">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono font-bold">
+              LIVE PROTOTYPE
+            </span>
+            <span class="text-xs text-slate-400 font-mono">Guillaume Gouessan &bull; Minimalist Tech Mesh</span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-2">
+            Simulasi Interaktif: Minimalist Tech Mesh WebGL
+          </h2>
+          <p class="text-slate-400 text-sm mt-1">
+            Gerakkan kursor atau klik canvas di bawah untuk memicu rotasi inersia, partikel konstelasi, dan efek <em>shockwave pulse</em>!
+          </p>
+        </div>
+
+        <!-- Controls Toolbar -->
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Shape Switcher -->
+          <div class="flex items-center bg-slate-900/90 p-1 rounded-xl border border-white/10 text-xs font-mono">
+            <button id="btn-geodesic" class="px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 font-semibold transition cursor-pointer">
+              Geodesic Core
+            </button>
+            <button id="btn-torus" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition cursor-pointer">
+              Torus Knot
+            </button>
+            <button id="btn-icosa" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition cursor-pointer">
+              Polyhedron
+            </button>
+          </div>
+
+          <!-- Color Accent Switcher -->
+          <div class="flex items-center gap-1.5 bg-slate-900/90 p-1.5 rounded-xl border border-white/10">
+            <button id="color-cyan" class="w-5 h-5 rounded-full bg-cyan-400 ring-2 ring-white/40 cursor-pointer" title="Cyan Accent"></button>
+            <button id="color-emerald" class="w-5 h-5 rounded-full bg-emerald-400 hover:ring-2 hover:ring-white/40 cursor-pointer" title="Emerald Accent"></button>
+            <button id="color-violet" class="w-5 h-5 rounded-full bg-violet-400 hover:ring-2 hover:ring-white/40 cursor-pointer" title="Violet Accent"></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas Container -->
+      <div class="relative w-full h-[540px] rounded-3xl overflow-hidden border border-white/10 bg-[#05070e] shadow-2xl shadow-cyan-500/5 group">
+        <canvas id="three-canvas" class="w-full h-full cursor-grab active:cursor-grabbing"></canvas>
+
+        <!-- Floating UI Overlays simulating portfolio stats -->
+        <div class="absolute top-5 left-5 pointer-events-none space-y-2">
+          <div class="px-3.5 py-1.5 rounded-xl bg-slate-950/80 backdrop-blur-md border border-white/10 text-xs font-mono text-slate-300 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+            <span>Minimalist Mesh Active &bull; 60/120 FPS</span>
+          </div>
+          <div class="px-3 py-1 rounded-lg bg-slate-950/60 backdrop-blur border border-white/5 text-[11px] font-mono text-slate-400">
+            Click Canvas: <span class="text-cyan-300">Trigger Shockwave</span>
+          </div>
+        </div>
+
+        <div class="absolute bottom-5 right-5 pointer-events-none">
+          <div class="px-4 py-2.5 rounded-xl bg-slate-950/80 backdrop-blur border border-white/10 text-xs font-mono text-right text-slate-300 space-y-0.5">
+            <div class="text-[11px] text-slate-400">Memory Footprint: <span class="text-cyan-400 font-bold">&lt; 15 MB</span></div>
+            <div class="text-[11px] text-slate-400">Render Latency: <span class="text-emerald-400 font-bold">&lt; 0.8ms</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= REAL-WORLD 3D INSPIRATION REFERENCES ================= -->
+    <div class="mt-20 pt-10 border-t border-white/10">
+      <h2 class="text-2xl font-bold text-white mb-2">
+        Referensi Nyata Portofolio 3D Dunia yang Terkenal
+      </h2>
+      <p class="text-slate-400 text-sm mb-6">
+        Portofolio-portofolio developer kelas dunia yang menggunakan animasi 3D dan memenangkan penghargaan Awwwards & FWA:
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Card 1 -->
+        <div class="p-6 rounded-2xl bg-slate-900/50 border border-white/10 hover:border-blue-500/30 transition">
+          <div class="text-xs font-mono text-blue-400 mb-2">01 • Game / Physics 3D</div>
+          <h3 class="text-lg font-bold text-white mb-1">Bruno Simon</h3>
+          <p class="text-xs text-slate-400 mb-4">
+            Portofolio paling legendaris di dunia. Menggunakan Three.js + Cannon.js physics di mana user menyetir mobil mainan mini untuk menjelajahi proyeknya.
+          </p>
+          <a href="https://bruno-simon.com" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold text-blue-400 hover:text-blue-300 flex items-center gap-1">
+            <span>Buka bruno-simon.com</span> &rarr;
+          </a>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="p-6 rounded-2xl bg-slate-900/50 border border-white/10 hover:border-blue-500/30 transition">
+          <div class="text-xs font-mono text-fuchsia-400 mb-2">02 • Isometric Room / Spline</div>
+          <h3 class="text-lg font-bold text-white mb-1">Jesse Zhou</h3>
+          <p class="text-xs text-slate-400 mb-4">
+            Model 3D ruangan kamar developer isometrik yang interaktif. User bisa klik komputer, poster, dan konsol game untuk membuka modal portofolio.
+          </p>
+          <a href="https://jesse-zhou.com" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold text-fuchsia-400 hover:text-fuchsia-300 flex items-center gap-1">
+            <span>Buka jesse-zhou.com</span> &rarr;
+          </a>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="p-6 rounded-2xl bg-slate-900/50 border border-cyan-500/40 bg-cyan-950/10 transition shadow-lg shadow-cyan-500/5">
+          <div class="text-xs font-mono text-cyan-400 mb-2 flex items-center gap-2">
+            <span>03 • Minimalist Tech Mesh</span>
+            <span class="px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 text-[10px] font-bold">PILIHAN KAMU</span>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-1">Guillaume Gouessan</h3>
+          <p class="text-xs text-slate-400 mb-4">
+            Efek visual WebGL partikel dan geometri gelap minimalis bergaya Linear & Apple yang sangat mulus tanpa mengorbankan kecepatan loading web.
+          </p>
+          <a href="https://guillaumegouessan.com" target="_blank" rel="noopener noreferrer" class="text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-1">
+            <span>Buka guillaumegouessan.com</span> &rarr;
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Three.js Minimalist Tech Mesh Script (Guillaume Gouessan Style) -->
+  <script>
+    const container = document.getElementById('three-canvas');
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x05070e, 0.035);
+
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+    camera.position.set(0, 0, 7.5);
+
+    const renderer = new THREE.WebGLRenderer({ canvas: container, antialias: true, alpha: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+    scene.add(ambientLight);
+
+    let activeColorHex = 0x00f0ff;
+    const pointLight1 = new THREE.PointLight(activeColorHex, 2.5, 30);
+    pointLight1.position.set(4, 5, 4);
+    scene.add(pointLight1);
+
+    const pointLight2 = new THREE.PointLight(0x3b82f6, 1.8, 30);
+    pointLight2.position.set(-4, -4, 2);
+    scene.add(pointLight2);
+
+    // Main 3D Container
+    const mainMeshGroup = new THREE.Group();
+    scene.add(mainMeshGroup);
+
+    // 1. Core Mesh (Inner faceted crystal)
+    let coreGeom = new THREE.IcosahedronGeometry(1.6, 1);
+    const coreMat = new THREE.MeshStandardMaterial({
+      color: 0x081326,
+      roughness: 0.15,
+      metalness: 0.9,
+      flatShading: true,
+      emissive: 0x00203f,
+      emissiveIntensity: 0.2
+    });
+    let coreMesh = new THREE.Mesh(coreGeom, coreMat);
+    mainMeshGroup.add(coreMesh);
+
+    // 2. Wireframe Lattice (Outer wireframe)
+    let wireGeom = new THREE.IcosahedronGeometry(1.85, 1);
+    const wireMat = new THREE.MeshBasicMaterial({
+      color: activeColorHex,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.35
+    });
+    let wireMesh = new THREE.Mesh(wireGeom, wireMat);
+    mainMeshGroup.add(wireMesh);
+
+    // 3. Glowing Vertex Points (Spheres at each vertex)
+    const pointsMat = new THREE.PointsMaterial({
+      color: activeColorHex,
+      size: 0.08,
+      transparent: true,
+      opacity: 0.9
+    });
+    let pointsMesh = new THREE.Points(wireGeom, pointsMat);
+    mainMeshGroup.add(pointsMesh);
+
+    // 4. Floating Particle Field (Constellation / Space Dust)
+    const particleCount = 200;
+    const particleGeom = new THREE.BufferGeometry();
+    const particlePositions = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount * 3; i += 3) {
+      particlePositions[i] = (Math.random() - 0.5) * 16;
+      particlePositions[i + 1] = (Math.random() - 0.5) * 12;
+      particlePositions[i + 2] = (Math.random() - 0.5) * 10;
+    }
+    particleGeom.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+    const dustMat = new THREE.PointsMaterial({
+      color: 0x94a3b8,
+      size: 0.035,
+      transparent: true,
+      opacity: 0.5
+    });
+    const dustField = new THREE.Points(particleGeom, dustMat);
+    scene.add(dustField);
+
+    // Mouse Tracking & Inertia Damping
+    let mouseX = 0, mouseY = 0;
+    let targetRotX = 0, targetRotY = 0;
+    let currentRotX = 0, currentRotY = 0;
+    let pulseScale = 1;
+
+    container.addEventListener('mousemove', (e) => {
+      const rect = container.getBoundingClientRect();
+      mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      mouseY = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
+      targetRotY = mouseX * 1.6;
+      targetRotX = -mouseY * 1.2;
+    });
+
+    container.addEventListener('mouseleave', () => {
+      targetRotX = 0;
+      targetRotY = 0;
+    });
+
+    // Click to shockwave pulse
+    container.addEventListener('click', () => {
+      pulseScale = 1.25;
+      wireMat.opacity = 0.9;
+    });
+
+    // Shape Switcher Logic
+    function updateShape(type) {
+      mainMeshGroup.remove(coreMesh);
+      mainMeshGroup.remove(wireMesh);
+      mainMeshGroup.remove(pointsMesh);
+
+      if (type === 'geodesic') {
+        coreGeom = new THREE.IcosahedronGeometry(1.6, 2);
+        wireGeom = new THREE.IcosahedronGeometry(1.9, 2);
+      } else if (type === 'torus') {
+        coreGeom = new THREE.TorusKnotGeometry(1.2, 0.35, 64, 8);
+        wireGeom = new THREE.TorusKnotGeometry(1.3, 0.38, 64, 8);
+      } else if (type === 'icosa') {
+        coreGeom = new THREE.OctahedronGeometry(1.7, 0);
+        wireGeom = new THREE.OctahedronGeometry(2.0, 0);
+      }
+
+      coreMesh = new THREE.Mesh(coreGeom, coreMat);
+      wireMesh = new THREE.Mesh(wireGeom, wireMat);
+      pointsMesh = new THREE.Points(wireGeom, pointsMat);
+
+      mainMeshGroup.add(coreMesh);
+      mainMeshGroup.add(wireMesh);
+      mainMeshGroup.add(pointsMesh);
+    }
+
+    document.getElementById('btn-geodesic').addEventListener('click', function() {
+      updateShape('geodesic');
+      setActiveButton(this);
+    });
+    document.getElementById('btn-torus').addEventListener('click', function() {
+      updateShape('torus');
+      setActiveButton(this);
+    });
+    document.getElementById('btn-icosa').addEventListener('click', function() {
+      updateShape('icosa');
+      setActiveButton(this);
+    });
+
+    function setActiveButton(btn) {
+      ['btn-geodesic', 'btn-torus', 'btn-icosa'].forEach(id => {
+        const b = document.getElementById(id);
+        b.className = 'px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition cursor-pointer';
+      });
+      btn.className = 'px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 font-semibold transition cursor-pointer';
+    }
+
+    // Color Switcher Logic
+    function updateColor(hex) {
+      activeColorHex = hex;
+      wireMat.color.setHex(hex);
+      pointsMat.color.setHex(hex);
+      pointLight1.color.setHex(hex);
+    }
+
+    document.getElementById('color-cyan').addEventListener('click', () => updateColor(0x00f0ff));
+    document.getElementById('color-emerald').addEventListener('click', () => updateColor(0x10b981));
+    document.getElementById('color-violet').addEventListener('click', () => updateColor(0x8b5cf6));
+
+    // Animation Render Loop
+    let clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const elapsedTime = clock.getElapsedTime();
+
+      // Smooth inertia rotation
+      currentRotX += (targetRotX - currentRotX) * 0.05;
+      currentRotY += (targetRotY - currentRotY) * 0.05;
+
+      mainMeshGroup.rotation.y = currentRotY + elapsedTime * 0.15;
+      mainMeshGroup.rotation.x = currentRotX + Math.sin(elapsedTime * 0.5) * 0.1;
+      mainMeshGroup.rotation.z = Math.cos(elapsedTime * 0.3) * 0.05;
+
+      // Pulse decay
+      if (pulseScale > 1.0) {
+        pulseScale -= 0.015;
+        wireMat.opacity = Math.max(0.35, wireMat.opacity - 0.02);
+      }
+      mainMeshGroup.scale.set(pulseScale, pulseScale, pulseScale);
+
+      // Ambient particle drift
+      dustField.rotation.y = elapsedTime * 0.02;
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Resize listener
+    window.addEventListener('resize', () => {
+      if (!container) return;
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+  </script>
+</body>
+</html>

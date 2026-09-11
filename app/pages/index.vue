@@ -3,6 +3,7 @@
 import { computed, onMounted, ref, nextTick } from "vue";
 import type { Skill, SkillsResponse } from "~/types/skill";
 import FooterSection from "~/components/FooterSection.vue";
+import ScrollTechMesh from "~/components/3d/ScrollTechMesh.client.vue";
 import type { JourneysResponse } from "~/types/journey";
 import type { ProjectsResponse } from "~/types/project";
 import type { UserSettingsModel } from "~/types/settings";
@@ -344,18 +345,23 @@ const totalExperienceYears = computed(() => {
 
 <template>
   <div class="relative">
+    <!-- 3D Scroll-Driven WebGL Minimalist Tech Mesh Background -->
+    <ClientOnly>
+      <ScrollTechMesh />
+    </ClientOnly>
+
     <!-- Hero Section -->
-    <div class="relative overflow-hidden">
+    <div class="relative overflow-hidden z-10">
       <HeroSection :user="user" />
     </div>
 
     <!-- Section Divider Line -->
-    <div class="container mx-auto px-6">
+    <div class="container mx-auto px-6 relative z-10">
       <div class="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
     </div>
 
     <!-- About Section -->
-    <div class="relative overflow-hidden">
+    <div class="relative overflow-hidden z-10">
       <AboutSection
         :user="user"
         :count_projects="projects.length"
@@ -364,47 +370,47 @@ const totalExperienceYears = computed(() => {
     </div>
 
     <!-- Section Divider Line -->
-    <div class="container mx-auto px-6">
+    <div class="container mx-auto px-6 relative z-10">
       <div class="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
     </div>
 
     <!-- Skills Section -->
-    <div class="relative overflow-hidden">
+    <div class="relative overflow-hidden z-10">
       <SkillsSection :skills="skills" />
     </div>
 
     <!-- Section Divider Line -->
-    <div class="container mx-auto px-6">
+    <div class="container mx-auto px-6 relative z-10">
       <div class="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
     </div>
 
     <!-- Journey Section -->
-    <div class="relative overflow-hidden">
+    <div class="relative overflow-hidden z-10">
       <JourneySection :experiences="experiences" />
     </div>
 
     <!-- Section Divider Line -->
-    <div class="container mx-auto px-6">
+    <div class="container mx-auto px-6 relative z-10">
       <div class="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
     </div>
 
     <!-- Projects Section -->
-    <div class="relative overflow-hidden">
+    <div class="relative overflow-hidden z-10">
       <ProjectsSection :projects="projects" />
     </div>
 
     <!-- Section Divider Line -->
-    <div class="container mx-auto px-6">
+    <div class="container mx-auto px-6 relative z-10">
       <div class="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
     </div>
 
     <!-- Contact Section -->
-    <div class="relative overflow-hidden">
+    <div class="relative overflow-hidden z-10">
       <ContactSection :user="user" />
     </div>
 
     <!-- Footer Section -->
-    <div class="relative overflow-hidden">
+    <div class="relative overflow-hidden z-10">
       <FooterSection />
     </div>
 
