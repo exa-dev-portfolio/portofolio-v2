@@ -8,8 +8,8 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "migrate:up": "dotenv -e .env npx node-pg-migrate up",
-    "migrate:down": "dotenv -e .env npx node-pg-migrate down",
+    "migrate:up": "npx dotenv-cli -e .env -- npx node-pg-migrate -d NUXT_DATABASE_URL up",
+    "migrate:down": "npx dotenv-cli -e .env -- npx node-pg-migrate -d NUXT_DATABASE_URL down",
     "migrate:create": "npx node-pg-migrate create -m migrations"
   },
   "dependencies": {
@@ -26,6 +26,7 @@
     "jwt-decode": "^4.0.0",
     "minio": "^8.0.6",
     "motion-v": "^2.2.1",
+    "node-pg-migrate": "^9.0.0",
     "nuxt": "^4.2.2",
     "nuxt-gtag": "^4.1.0",
     "pg": "^8.16.3",

@@ -2,7 +2,7 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 
 const isMobileMenuOpen = ref(false)
-const activeSection = ref('#')
+const activeSection = ref('')
 const isScrolled = ref(false)
 const commandPaletteRef = ref<any>(null)
 
@@ -14,8 +14,14 @@ const navItems = [
   { name: 'Contact', href: '#contact', icon: 'carbon:email' }
 ]
 
-const sectionIds = ['about', 'stack', 'work', 'project', 'contact']
-let observer: IntersectionObserver | null = null
+const sectionOrder = [
+  { id: 'about', href: '#about' },
+  { id: 'stack', href: '#stack' },
+  { id: 'work', href: '#work' },
+  { id: 'project', href: '#project' },
+  { id: 'contact', href: '#contact' }
+]
+
 let rafId: number | null = null
 
 const toggleMobileMenu = () => {
@@ -26,52 +32,77 @@ const closeMobileMenu = () => {
   isMobileMenuOpen.value = false
 }
 
-// Low-overhead throttled scroll listener for navbar elevation state
-const handleScroll = () => {
+const updateActiveSection = () => {
   if (rafId !== null) return
   rafId = requestAnimationFrame(() => {
     isScrolled.value = window.scrollY > 20
-    if (window.scrollY < 100) {
-      activeSection.value = '#'
+
+    // 1. Hero top section (no nav link active)
+    if (window.scrollY < 200) {
+      activeSection.value = ''
+      rafId = null
+      return
     }
+
+    // 2. Near bottom of page (activate Contact immediately)
+    const scrollBottom = window.innerHeight + window.scrollY
+    const docHeight = document.documentElement.scrollHeight
+    if (docHeight - scrollBottom < 100) {
+      activeSection.value = '#contact'
+      rafId = null
+      return
+    }
+
+    // 3. Focal line detection (at 35% viewport height from top)
+    const focalY = window.innerHeight * 0.35
+    let matched = ''
+
+    for (const section of sectionOrder) {
+      const el = document.getElementById(section.id)
+      if (!el) continue
+
+      const rect = el.getBoundingClientRect()
+      if (rect.top <= focalY && rect.bottom > focalY) {
+        matched = section.href
+        break
+      }
+    }
+
+    // 4. Secondary fallback: check whichever section has the closest top above 45% viewport height
+    if (!matched) {
+      for (const section of sectionOrder) {
+        const el = document.getElementById(section.id)
+        if (!el) continue
+        const rect = el.getBoundingClientRect()
+        if (rect.top <= window.innerHeight * 0.45 && rect.bottom > 80) {
+          matched = section.href
+        }
+      }
+    }
+
+    if (matched) {
+      activeSection.value = matched
+    }
+
     rafId = null
   })
 }
 
 onMounted(() => {
-  window.addEventListener('scroll', handleScroll, { passive: true })
-  handleScroll()
-
-  // Use IntersectionObserver for 60/120fps zero-cost section detection without layout reflows
-  if ('IntersectionObserver' in window) {
-    observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            activeSection.value = `#${entry.target.id}`
-          }
-        })
-      },
-      {
-        rootMargin: '-25% 0px -50% 0px',
-        threshold: 0
-      }
-    )
-
-    sectionIds.forEach((id) => {
-      const el = document.getElementById(id)
-      if (el) observer?.observe(el)
-    })
+  window.addEventListener('scroll', updateActiveSection, { passive: true })
+  
+  if (window.location.hash) {
+    activeSection.value = window.location.hash
   }
+  updateActiveSection()
+  
+  setTimeout(updateActiveSection, 300)
+  setTimeout(updateActiveSection, 1000)
 })
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll)
+  window.removeEventListener('scroll', updateActiveSection)
   if (rafId !== null) cancelAnimationFrame(rafId)
-  if (observer) {
-    observer.disconnect()
-    observer = null
-  }
 })
 </script>
 
@@ -112,13 +143,22 @@ onUnmounted(() => {
               v-for="item in navItems"
               :key="item.href"
               :to="item.href"
+              @click="activeSection = item.href"
               class="relative px-3.5 py-1.5 rounded-full text-xs lg:text-sm font-medium tracking-wide transition-all duration-200 flex items-center gap-1.5"
               :class="activeSection === item.href
-                ? 'text-white bg-blue-600/30 border border-blue-500/30 shadow-sm shadow-blue-500/20 font-semibold'
+                ? 'text-white bg-gradient-to-r from-blue-600 to-indigo-600 border border-blue-400/50 shadow-md shadow-blue-500/30 font-semibold'
                 : 'text-slate-300 hover:text-white hover:bg-white/[0.06] border border-transparent'"
             >
-              <Icon :name="item.icon" size="15" :class="activeSection === item.href ? 'text-blue-400' : 'text-slate-400'" />
-              {{ item.name }}
+              <Icon 
+                :name="item.icon" 
+                size="15" 
+                :class="activeSection === item.href ? 'text-cyan-200 drop-shadow-[0_0_6px_rgba(56,189,248,0.8)]' : 'text-slate-400'" 
+              />
+              <span>{{ item.name }}</span>
+              <span 
+                v-if="activeSection === item.href" 
+                class="w-1.5 h-1.5 rounded-full bg-cyan-300 shadow-[0_0_8px_#38bdf8] animate-pulse"
+              ></span>
             </NuxtLink>
           </nav>
 
@@ -214,17 +254,29 @@ onUnmounted(() => {
               v-for="item in navItems"
               :key="item.href"
               :to="item.href"
-              @click="closeMobileMenu"
-              class="px-4 py-3 rounded-xl text-sm font-medium transition-colors flex items-center justify-between"
+              @click="activeSection = item.href; closeMobileMenu()"
+              class="px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 flex items-center justify-between"
               :class="activeSection === item.href
-                ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
-                : 'text-slate-300 hover:text-white hover:bg-white/5'"
+                ? 'bg-gradient-to-r from-blue-600/30 to-indigo-600/30 text-white border border-blue-500/50 shadow-sm shadow-blue-500/20 font-semibold'
+                : 'text-slate-300 hover:text-white hover:bg-white/5 border border-transparent'"
             >
               <div class="flex items-center gap-3">
-                <Icon :name="item.icon" size="18" :class="activeSection === item.href ? 'text-blue-400' : 'text-slate-400'" />
-                <span>{{ item.name }}</span>
+                <Icon 
+                  :name="item.icon" 
+                  size="18" 
+                  :class="activeSection === item.href ? 'text-cyan-300 drop-shadow-[0_0_6px_rgba(56,189,248,0.8)]' : 'text-slate-400'" 
+                />
+                <span :class="activeSection === item.href ? 'text-white font-semibold' : ''">{{ item.name }}</span>
+                <span 
+                  v-if="activeSection === item.href" 
+                  class="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_#38bdf8] animate-pulse"
+                ></span>
               </div>
-              <Icon name="carbon:chevron-right" size="16" class="text-slate-500" />
+              <Icon 
+                name="carbon:chevron-right" 
+                size="16" 
+                :class="activeSection === item.href ? 'text-cyan-400' : 'text-slate-500'" 
+              />
             </NuxtLink>
 
             <div class="pt-3 mt-2 border-t border-white/10">

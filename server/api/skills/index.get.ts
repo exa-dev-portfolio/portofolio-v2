@@ -7,7 +7,9 @@ import {handleError} from "~~/server/utils/handleError";
 
 export default handleError(async (event) => {
     const parsed = await getValidatedQuery(event, query => paginationSchemaQuery.extend({
-        search: z.string().optional()
+        search: z.string().optional(),
+        category_id: z.coerce.number().optional(),
+        category: z.string().optional()
     }).safeParse(query));
 
     if (!parsed.success) {
@@ -16,15 +18,14 @@ export default handleError(async (event) => {
 
     const query = parsed.data
 
-
     if (!query.pagination) {
         logger.info('Fetching skills without pagination')
-        return await getSkillsNoPagination(event)
+        return await getSkillsNoPagination(event, query.category_id, query.category)
     }
 
     const limit = query.limit ? query.limit : 10
     const cursor = query.cursor ? query.cursor : undefined
     const search = query.search ? query.search : undefined
 
-    return await getSkillsByCursor(event, limit, cursor, search)
+    return await getSkillsByCursor(event, limit, cursor, search, query.category_id, query.category)
 })

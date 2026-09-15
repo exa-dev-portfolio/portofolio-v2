@@ -11,7 +11,7 @@ const { onMouseMove } = useSpotlight()
 const searchQuery = ref('')
 const selectedCategory = ref('All')
 
-// Automatic intelligent categorization based on skill name / keywords
+// Automatic intelligent categorization fallback
 const getCategoryForSkill = (name: string): string => {
   const n = name.toLowerCase()
   if (n.includes('nuxt') || n.includes('next') || n.includes('react') || n.includes('vue') || n.includes('flutter') || n.includes('dart') || n.includes('javascript') || n.includes('typescript') || n.includes('tailwind') || n.includes('html') || n.includes('css')) {
@@ -26,7 +26,22 @@ const getCategoryForSkill = (name: string): string => {
   return 'Backend & APIs'
 }
 
-const categories = ['All', 'Backend & APIs', 'Frontend & Mobile', 'Cloud & DevOps', 'Databases & Queues']
+// Prioritize official database-backed category_name, fallback to intelligent heuristics
+const resolveSkillCategory = (skill: Skill): string => {
+  if (skill.category_name && skill.category_name.trim()) {
+    return skill.category_name.trim()
+  }
+  return getCategoryForSkill(skill.name)
+}
+
+const categories = computed(() => {
+  const cats = new Set<string>()
+  props.skills.forEach(s => {
+    const cat = resolveSkillCategory(s)
+    if (cat) cats.add(cat)
+  })
+  return ['All', ...Array.from(cats).sort()]
+})
 
 const filteredSkills = computed(() => {
   return props.skills.filter(s => {
@@ -34,14 +49,14 @@ const filteredSkills = computed(() => {
     if (!matchesSearch) return false
 
     if (selectedCategory.value === 'All') return true
-    const cat = getCategoryForSkill(s.name)
+    const cat = resolveSkillCategory(s)
     return cat === selectedCategory.value
   })
 })
 
 const getCategoryCount = (cat: string) => {
   if (cat === 'All') return props.skills.length
-  return props.skills.filter(s => getCategoryForSkill(s.name) === cat).length
+  return props.skills.filter(s => resolveSkillCategory(s) === cat).length
 }
 </script>
 
@@ -156,7 +171,7 @@ const getCategoryCount = (cat: string) => {
 
           <!-- Subtle category pill badge on hover -->
           <span class="text-[9px] font-mono text-slate-500 group-hover:text-cyan-400 transition-colors">
-            {{ getCategoryForSkill(skill.name) }}
+            {{ resolveSkillCategory(skill) }}
           </span>
         </div>
       </Motion>

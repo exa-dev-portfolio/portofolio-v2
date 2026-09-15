@@ -49,7 +49,6 @@ const { onMouseMove } = useSpotlight()
 const selectedProject = ref<Project | null>(null)
 const isModalOpen = ref(false)
 const copied = ref(false)
-const activeFilter = ref('All')
 const activeSlideIndex = ref(0)
 
 const modalSlides = computed(() => {
@@ -109,27 +108,6 @@ const copyToClipboard = (text?: string) => {
   }
 }
 
-// Project category inference
-const getProjectCategory = (p: Project): string => {
-  if (p.is_organization && p.sub_apps?.length) {
-    const appTypes = p.sub_apps.map(a => a.app_type || a.type)
-    if (appTypes.includes('mobile') && !appTypes.includes('web') && !appTypes.includes('backend')) return 'Mobile Apps'
-    if (appTypes.includes('backend') && !appTypes.includes('mobile') && !appTypes.includes('web')) return 'Backend & Cloud'
-    return 'Full-Stack'
-  }
-  const t = (p.technologies || []).map(x => x.toLowerCase()).join(' ')
-  const desc = (p.description || '').toLowerCase()
-  if (t.includes('flutter') || t.includes('dart') || desc.includes('mobile')) return 'Mobile Apps'
-  if (t.includes('k8s') || t.includes('docker') || t.includes('go') || desc.includes('microservice') || desc.includes('backend')) return 'Backend & Cloud'
-  return 'Full-Stack'
-}
-
-const categories = ['All', 'Full-Stack', 'Backend & Cloud', 'Mobile Apps']
-
-const filteredProjects = computed(() => {
-  if (activeFilter.value === 'All') return props.projects
-  return props.projects.filter(p => getProjectCategory(p) === activeFilter.value)
-})
 </script>
 
 <template>
@@ -156,25 +134,10 @@ const filteredProjects = computed(() => {
         </p>
       </Motion>
 
-      <!-- Category Filter Pills Bar -->
-      <div class="flex flex-wrap items-center justify-center gap-2 mb-10 max-w-2xl mx-auto">
-        <button
-          v-for="cat in categories"
-          :key="cat"
-          @click="activeFilter = cat"
-          class="px-4 py-1.5 rounded-full text-xs font-medium tracking-wide transition-all duration-200 cursor-pointer"
-          :class="activeFilter === cat
-            ? 'bg-blue-600/30 text-blue-300 border border-blue-500/40 shadow-sm shadow-blue-500/10'
-            : 'bg-white/[0.03] text-slate-400 hover:text-white hover:bg-white/[0.06] border border-white/[0.06]'"
-        >
-          {{ cat }}
-        </button>
-      </div>
-
       <!-- Projects Grid with Linear Spotlight & Browser Mockup -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
         <Motion
-          v-for="(project, index) in filteredProjects"
+          v-for="(project, index) in projects"
           :key="project.id ?? index"
           :initial="{ opacity: 0, y: 20 }"
           :while-in-view="{ opacity: 1, y: 0 }"
