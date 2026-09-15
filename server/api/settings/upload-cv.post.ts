@@ -1,8 +1,9 @@
 import {HttpError} from "~~/server/errors/HttpError"
 import {withAuth} from "~~/server/utils/withAuth"
 import {getMinioClient} from "~~/server/lib/minio"
-import {updateUserCV} from "~~/server/repositories/settings.repository";
+import {getUserSettings, updateUserCV} from "~~/server/repositories/settings.repository";
 import {withTransaction} from "~~/server/db/postgres";
+import {del, set} from "~~/server/db/redis";
 
 export default withAuth(async (event) => {
     return await withTransaction(
@@ -39,6 +40,7 @@ export default withAuth(async (event) => {
                 const key = `portofolio/resumes/${filename}-${crypto.randomUUID()}-${Date.now()}.pdf`
 
                 try {
+                    const currentUser = await getUserSettings(client)
                     const url = minio.getPublicUrl(bucketName, key)
 
                     const ok = await updateUserCV(
@@ -56,6 +58,28 @@ export default withAuth(async (event) => {
                         fileData.data,
                         'application/pdf'
                     )
+
+                    // Update Redis cache with updated user settings
+                    const updatedSettings = await getUserSettings(client)
+                    if (updatedSettings) {
+                        await set(`user_settings`, JSON.stringify(updatedSettings))
+                    } else {
+                        await del(`user_settings`)
+                    }
+
+                    // Clean up previous CV from storage if exists
+                    if (currentUser?.cv_url && currentUser.cv_url !== url) {
+                        try {
+                            const oldUrl = new URL(currentUser.cv_url)
+                            const prefix = `/${bucketName}/`
+                            if (oldUrl.pathname.startsWith(prefix)) {
+                                const oldKey = oldUrl.pathname.substring(prefix.length)
+                                await minio.deleteFile(bucketName, oldKey)
+                            }
+                        } catch (cleanupError) {
+                            logger.warn({ err: cleanupError }, 'Failed to delete previous CV from storage:')
+                        }
+                    }
 
                     return sendSuccess(event, {url}, 'CV uploaded successfully', 'cv_uploaded')
                 } catch (minioError) {
