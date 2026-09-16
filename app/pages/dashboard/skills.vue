@@ -619,7 +619,15 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
     </div>
 
     <!-- Add/Edit Skill Modal -->
-    <UModal v-model:open="showModal">
+    <UModal
+      v-model:open="showModal"
+      :ui="{
+        content: 'w-full max-w-xl bg-[#090e1a] border border-white/15 shadow-2xl rounded-2xl sm:rounded-3xl overflow-hidden',
+        header: 'p-5 sm:p-6 bg-[#0c1424] border-b border-white/10',
+        body: 'p-5 sm:p-6 max-h-[75vh] overflow-y-auto',
+        footer: 'p-4 sm:p-5 bg-[#0c1424] border-t border-white/10'
+      }"
+    >
       <template #title>
         <h2 class="text-xl font-bold text-white">
           {{ isEditMode ? 'Edit Skill' : 'Add New Skills' }}
@@ -823,7 +831,15 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
     </UModal>
 
     <!-- Manage Categories Modal (Dedicated CRUD) -->
-    <UModal v-model:open="showCategoryModal">
+    <UModal
+      v-model:open="showCategoryModal"
+      :ui="{
+        content: 'w-full max-w-lg bg-[#090e1a] border border-white/15 shadow-2xl rounded-2xl sm:rounded-3xl overflow-hidden',
+        header: 'p-5 sm:p-6 bg-[#0c1424] border-b border-white/10',
+        body: 'p-5 sm:p-6 max-h-[75vh] overflow-y-auto',
+        footer: 'p-4 sm:p-5 bg-[#0c1424] border-t border-white/10'
+      }"
+    >
       <template #title>
         <div class="flex items-center gap-2">
           <Icon name="carbon:folders" size="22" class="text-cyan-400" />
@@ -847,8 +863,8 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
 
             <div class="space-y-3">
               <!-- Name & Color -->
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div class="sm:col-span-2">
+              <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                <div class="sm:col-span-7">
                   <label class="block text-xs text-slate-300 mb-1 font-medium">Category Name *</label>
                   <input
                     v-model="categoryForm.name"
@@ -857,18 +873,19 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
                     class="w-full px-3 py-2 rounded-lg bg-white/[0.06] border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-500/50"
                   />
                 </div>
-                <div>
+                <div class="sm:col-span-5">
                   <label class="block text-xs text-slate-300 mb-1 font-medium">Theme Color</label>
                   <div class="flex items-center gap-2">
                     <input
                       v-model="categoryForm.color"
                       type="color"
-                      class="w-8 h-8 rounded cursor-pointer bg-transparent border border-white/20"
+                      class="w-8 h-8 rounded-lg cursor-pointer bg-transparent border border-white/20 shrink-0 p-0.5"
                     />
                     <input
                       v-model="categoryForm.color"
                       type="text"
-                      class="flex-1 px-2 py-1.5 rounded-lg bg-white/[0.06] border border-white/15 text-white text-xs font-mono"
+                      placeholder="#38bdf8"
+                      class="w-full min-w-0 flex-1 px-2.5 py-1.5 rounded-lg bg-white/[0.06] border border-white/15 text-white text-xs font-mono focus:outline-none focus:border-cyan-500/50"
                     />
                   </div>
                 </div>
@@ -891,14 +908,14 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
                   v-if="isEditingCategory"
                   @click="resetCategoryForm"
                   type="button"
-                  class="px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white"
+                  class="px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white cursor-pointer"
                 >
                   Cancel Edit
                 </button>
                 <button
                   @click="saveCategoryHandler"
                   :disabled="isSavingCategory"
-                  class="px-4 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs transition-all flex items-center gap-1.5 disabled:opacity-50"
+                  class="px-4 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
                 >
                   <Icon v-if="isSavingCategory" name="carbon:circle-dash" size="14" class="animate-spin" />
                   <span>{{ isEditingCategory ? 'Update Category' : 'Add Category' }}</span>
@@ -913,36 +930,44 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
               Existing Categories ({{ categories.length }})
             </h3>
 
-            <div class="space-y-2 max-h-56 overflow-y-auto pr-1">
+            <div class="space-y-2 max-h-52 overflow-y-auto pr-1">
+              <div
+                v-if="categories.length === 0"
+                class="text-center py-6 text-xs text-slate-500 bg-white/[0.02] border border-dashed border-white/10 rounded-xl"
+              >
+                No categories created yet. Add one above!
+              </div>
               <div
                 v-for="cat in categories"
                 :key="cat.id"
-                class="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/10 hover:border-white/20 transition-all"
+                class="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/10 hover:border-white/20 transition-all gap-2"
               >
                 <!-- Left: Name & Dot -->
-                <div class="flex items-center gap-3 min-w-0">
+                <div class="flex items-center gap-2.5 min-w-0 flex-1">
                   <span class="w-3 h-3 rounded-full shrink-0" :style="{ backgroundColor: cat.color || '#38bdf8' }"></span>
-                  <div class="min-w-0">
+                  <div class="min-w-0 flex-1">
                     <p class="text-sm font-semibold text-white truncate">{{ cat.name }}</p>
                     <p class="text-[11px] text-slate-400 truncate">{{ cat.description || `${cat.skills_count || 0} skills linked` }}</p>
                   </div>
                 </div>
 
                 <!-- Right: Count & Actions -->
-                <div class="flex items-center gap-2 shrink-0">
-                  <span class="px-2 py-0.5 rounded-full text-[11px] font-mono bg-white/10 text-cyan-300">
+                <div class="flex items-center gap-1.5 shrink-0">
+                  <span class="px-2 py-0.5 rounded-full text-[11px] font-mono bg-white/10 text-cyan-300 whitespace-nowrap">
                     {{ cat.skills_count || 0 }} skills
                   </span>
                   <button
                     @click="editCategoryHandler(cat)"
-                    class="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-cyan-300 transition-colors"
+                    type="button"
+                    class="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer"
                     title="Edit category"
                   >
                     <Icon name="carbon:pen" size="15" />
                   </button>
                   <button
                     @click="deleteCategoryHandler(cat)"
-                    class="p-1.5 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-colors"
+                    type="button"
+                    class="p-1.5 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
                     title="Delete category"
                   >
                     <Icon name="carbon:trash-can" size="15" />
@@ -957,7 +982,7 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
       <template #footer>
         <button
           @click="showCategoryModal = false"
-          class="w-full py-2 rounded-xl bg-white/[0.08] hover:bg-white/15 text-white font-semibold text-xs border border-white/10 transition-all"
+          class="w-full py-2 rounded-xl bg-white/[0.08] hover:bg-white/15 text-white font-semibold text-xs border border-white/10 transition-all cursor-pointer"
         >
           Close
         </button>
