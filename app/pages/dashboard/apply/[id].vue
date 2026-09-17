@@ -94,15 +94,16 @@ const handleSend = async () => {
     "Send Application",
     `Send application to ${application.value.hr_email}?`,
     () => {
-      const tid = toast.showLoadingToast("Sending", "Preparing...");
-      doSend(tid);
+      const loadingToast = toast.showLoadingToast("Sending", "Preparing...");
+      doSend(loadingToast.id);
     },
   );
 };
 
 const doSend = async (tid: any, code?: string) => {
+  const toastId = typeof tid === "object" && tid !== null ? tid.id : tid;
   toast.updateToast(
-    tid,
+    toastId,
     "Sending",
     "Sending email...",
     "primary",
@@ -111,21 +112,21 @@ const doSend = async (tid: any, code?: string) => {
   );
   const result = await sendEmail(id, code, attachCv.value);
   if (result.success) {
-    toast.updateToast(tid, "Sent!", "Email sent successfully", "success", 2000);
+    toast.updateToast(toastId, "Sent!", "Email sent successfully", "success", 2000);
     await loadData();
   } else if (result.error?.includes("Gmail authorization required")) {
     toast.updateToast(
-      tid,
+      toastId,
       "Authorizing",
       "Please authorize Gmail in the popup...",
       "primary",
       Infinity,
       "line-md:loading-loop",
     );
-    requestGmailAuth(tid);
+    requestGmailAuth(toastId);
   } else {
     toast.updateToast(
-      tid,
+      toastId,
       "Error",
       result.error || "Failed to send email",
       "error",
@@ -152,10 +153,11 @@ const loadGsiScript = (): Promise<void> => {
 };
 
 const requestGmailAuth = async (tid: any) => {
+  const toastId = typeof tid === "object" && tid !== null ? tid.id : tid;
   const googleClientId = config.public.googleClientId as string;
   if (!googleClientId) {
     toast.updateToast(
-      tid,
+      toastId,
       "Error",
       "Google Client ID not configured",
       "error",
@@ -168,7 +170,7 @@ const requestGmailAuth = async (tid: any) => {
     await loadGsiScript();
   } catch {
     toast.updateToast(
-      tid,
+      toastId,
       "Error",
       "Failed to load Google OAuth. Check your internet connection.",
       "error",
@@ -179,7 +181,7 @@ const requestGmailAuth = async (tid: any) => {
 
   if (!(window as any).google?.accounts?.oauth2) {
     toast.updateToast(
-      tid,
+      toastId,
       "Error",
       "Google OAuth not available",
       "error",
@@ -195,17 +197,17 @@ const requestGmailAuth = async (tid: any) => {
     callback: async (response: any) => {
       if (response.code) {
         toast.updateToast(
-          tid,
+          toastId,
           "Sending",
           "Authorizing Gmail and sending email...",
           "primary",
           Infinity,
           "line-md:loading-loop",
         );
-        await doSend(tid, response.code);
+        await doSend(toastId, response.code);
       } else {
         toast.updateToast(
-          tid,
+          toastId,
           "Cancelled",
           "Gmail authorization cancelled",
           "warning",

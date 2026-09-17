@@ -62,14 +62,41 @@ export const useToastCustom = () => {
         )
     }
 
-    const updateToast = (toastId: number | string, title: string, message: string, color: "success" | "primary" | "secondary" | "info" | "warning" | "error" | "neutral" | undefined, duration: number, icon?: string) => {
-        toast.update(toastId, {
+    const updateToast = (
+        toastId: any,
+        title: string,
+        message: string,
+        color: "success" | "primary" | "secondary" | "info" | "warning" | "error" | "neutral" | undefined,
+        duration: number,
+        icon?: string
+    ) => {
+        const id = typeof toastId === 'object' && toastId !== null ? toastId.id : toastId
+        const resolvedIcon = icon ?? (
+            color === 'success' ? 'carbon:checkmark-filled' :
+            color === 'error' ? 'carbon:error-filled' :
+            color === 'warning' ? 'carbon:warning-filled' :
+            color === 'info' ? 'carbon:information-filled' :
+            undefined
+        )
+
+        toast.update(id, {
             title: title,
             description: message,
             color: color,
             duration: duration,
-            icon: icon
+            icon: resolvedIcon
         })
+
+        if (duration && isFinite(duration) && duration > 0) {
+            setTimeout(() => {
+                toast.remove(id)
+            }, duration)
+        }
+    }
+
+    const removeToast = (toastId: any) => {
+        const id = typeof toastId === 'object' && toastId !== null ? toastId.id : toastId
+        toast.remove(id)
     }
 
     const showConfirmationToast = (title: string, message: string, onConfirm: () => void, onCancel?: () => void) => {
@@ -108,6 +135,7 @@ export const useToastCustom = () => {
         showInfoToast,
         showConfirmationToast,
         showWarningToast,
-        updateToast
+        updateToast,
+        removeToast
     }
 }
