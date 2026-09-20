@@ -21,6 +21,7 @@ const {
   updateApplication,
   sendEmail,
   sendChat,
+  clearChat,
   uploadAttachment,
   deleteAttachment,
   isSending,
@@ -60,6 +61,29 @@ const loadData = async () => {
         .filter(Boolean);
     }
 
+    // Restore chat history from backend or localStorage
+    if (appData.application.chat_history) {
+      if (Array.isArray(appData.application.chat_history)) {
+        chatMessages.value = [...appData.application.chat_history];
+      } else if (typeof appData.application.chat_history === "string") {
+        try {
+          chatMessages.value = JSON.parse(appData.application.chat_history);
+        } catch {
+          chatMessages.value = [];
+        }
+      }
+    } else {
+      try {
+        const cached = localStorage.getItem(`apply_chat_${id}`);
+        if (cached) {
+          chatMessages.value = JSON.parse(cached);
+        }
+      } catch {}
+    }
+    try {
+      localStorage.setItem(`apply_chat_${id}`, JSON.stringify(chatMessages.value));
+    } catch {}
+
     const breadCrumb = useBreadCrumbStore();
     breadCrumb.setBreadCrumb([
       { title: "Apply", link: "/dashboard/apply" },
@@ -74,7 +98,16 @@ const loadData = async () => {
   }
 };
 
-onMounted(loadData);
+onMounted(() => {
+  // Pre-load from localStorage instantly to prevent layout jump on refresh
+  try {
+    const cached = localStorage.getItem(`apply_chat_${id}`);
+    if (cached) {
+      chatMessages.value = JSON.parse(cached);
+    }
+  } catch {}
+  loadData();
+});
 
 const handleSave = async () => {
   if (!application.value) return;
@@ -222,13 +255,37 @@ const requestGmailAuth = async (tid: any) => {
 
 const handleChatSend = async (message: string) => {
   chatMessages.value.push({ role: "user", content: message });
+  try {
+    localStorage.setItem(`apply_chat_${id}`, JSON.stringify(chatMessages.value));
+  } catch {}
+
   const result = await sendChat(id, message);
   if (result) {
-    chatMessages.value.push({ role: "assistant", content: result.reply });
+    if (result.chat_history && Array.isArray(result.chat_history)) {
+      chatMessages.value = [...result.chat_history];
+    } else {
+      chatMessages.value.push({ role: "assistant", content: result.reply });
+    }
+    try {
+      localStorage.setItem(`apply_chat_${id}`, JSON.stringify(chatMessages.value));
+    } catch {}
+
     if (result.revised_subject) subject.value = result.revised_subject;
     if (result.revised_body) body.value = result.revised_body;
     if (result.reasoning) reasoning.value = result.reasoning;
   }
+};
+
+const handleChatClear = async () => {
+  const confirmed = confirm("Apakah Anda yakin ingin menghapus semua riwayat chat revisi?");
+  if (!confirmed) return;
+
+  chatMessages.value = [];
+  try {
+    localStorage.removeItem(`apply_chat_${id}`);
+  } catch {}
+  await clearChat(id);
+  toast.showSuccessToast("Riwayat Dibersihkan", "Riwayat chat berhasil dihapus.");
 };
 
 const handleFileUpload = async (event: Event) => {
@@ -416,6 +473,7 @@ const handleDeleteAttachment = async (attachmentId: string) => {
           :messages="chatMessages"
           :loading="isChatLoading"
           @send="handleChatSend"
+          @clear="handleChatClear"
         />
       </div>
     </div>

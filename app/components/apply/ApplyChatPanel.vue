@@ -11,6 +11,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     send: [message: string]
+    clear: []
 }>()
 
 const userInput = ref('')
@@ -42,12 +43,23 @@ const suggestions = [
 
 <template>
     <div class="flex flex-col h-full bg-white/5 rounded-xl border border-white/10 overflow-hidden">
-        <div class="px-4 py-3 border-b border-white/10 bg-white/5">
-            <p class="text-sm font-semibold text-white flex items-center gap-2">
-                <Icon name="carbon:chat" size="16" class="text-primary"/>
-                AI Revision Chat
-            </p>
-            <p class="text-xs text-white/40">Ask AI to revise the email</p>
+        <div class="px-4 py-3 border-b border-white/10 bg-white/5 flex items-center justify-between">
+            <div>
+                <p class="text-sm font-semibold text-white flex items-center gap-2">
+                    <Icon name="carbon:chat" size="16" class="text-primary"/>
+                    AI Revision Chat
+                </p>
+                <p class="text-xs text-white/40">Ask AI to revise the email</p>
+            </div>
+            <button
+                v-if="messages.length > 0"
+                @click="emit('clear')"
+                title="Hapus riwayat chat"
+                class="px-2 py-1 rounded-md text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-all text-xs flex items-center gap-1 cursor-pointer border border-transparent hover:border-red-500/20"
+            >
+                <Icon name="carbon:trash-can" size="14"/>
+                <span class="text-[11px]">Clear</span>
+            </button>
         </div>
 
         <div ref="messagesContainer" class="flex-1 overflow-y-auto p-4 space-y-3">

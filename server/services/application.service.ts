@@ -108,7 +108,18 @@ export const chat = async (event: H3Event, applicationId: string, message: strin
             throw new HttpError(404, 'APPLICATION_NOT_FOUND', 'Application not found');
         }
 
-        const chatHistory: Array<{ role: string; content: string }> = [];
+        let chatHistory: Array<{ role: string; content: string }> = [];
+        if (application.chat_history) {
+            if (Array.isArray(application.chat_history)) {
+                chatHistory = [...application.chat_history];
+            } else if (typeof application.chat_history === 'string') {
+                try {
+                    chatHistory = JSON.parse(application.chat_history);
+                } catch {
+                    chatHistory = [];
+                }
+            }
+        }
 
         const result = await reviseEmail(
             user.id,
@@ -119,21 +130,45 @@ export const chat = async (event: H3Event, applicationId: string, message: strin
             chatHistory
         );
 
-        const updates: any = {};
+        const updatedChatHistory = [
+            ...chatHistory,
+            { role: 'user', content: message },
+            { role: 'assistant', content: result.reply },
+        ];
+
+        const updates: any = {
+            chat_history: JSON.stringify(updatedChatHistory),
+        };
         if (result.revised_subject) updates.email_subject = result.revised_subject;
         if (result.revised_body) updates.email_body = result.revised_body;
         if (result.reasoning) updates.email_reasoning = result.reasoning.join('\n');
 
-        if (Object.keys(updates).length > 0) {
-            await repository.updateApplication(client, applicationId, user.id, updates);
-        }
+        await repository.updateApplication(client, applicationId, user.id, updates);
 
         return sendSuccess(event, {
             reply: result.reply,
             revised_subject: result.revised_subject || null,
             revised_body: result.revised_body || null,
             reasoning: result.reasoning || [],
+            chat_history: updatedChatHistory,
         }, 'Chat response generated', 'chat_response');
+    });
+};
+
+export const clearApplicationChat = async (event: H3Event, applicationId: string) => {
+    const user = event.context.user;
+
+    return withTransaction(async (client) => {
+        const application = await repository.findApplicationById(client, applicationId, user.id);
+        if (!application) {
+            throw new HttpError(404, 'APPLICATION_NOT_FOUND', 'Application not found');
+        }
+
+        await repository.updateApplication(client, applicationId, user.id, {
+            chat_history: JSON.stringify([]),
+        });
+
+        return sendSuccess(event, { chat_history: [] }, 'Chat history cleared', 'chat_cleared');
     });
 };
 

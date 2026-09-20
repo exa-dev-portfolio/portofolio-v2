@@ -4,6 +4,7 @@ export function useServerConfig() {
   return {
     mode: config.mode,
     jwtSecret: config.jwtSecret,
+    appleClientId: config.appleClientId,
     googleClientId: config.googleClientId,
     googleClientSecret: config.googleClientSecret,
     redisUrl: config.redisUrl,

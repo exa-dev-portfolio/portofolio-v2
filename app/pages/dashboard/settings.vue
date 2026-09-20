@@ -12,9 +12,21 @@ const {
   updateProfileSettings,
   updateSocialLinks,
   uploadCV,
+  bindApple,
+  unbindApple,
   isLoading,
   isSaving,
 } = useSettings();
+
+const { authorizeAppleForBinding, isAppleLoading } = useAppleSignIn();
+
+const appleAccount = ref<{
+  apple_id: string | null;
+  apple_email: string | null;
+}>({
+  apple_id: null,
+  apple_email: null,
+});
 
 const toast = useToastCustom();
 
@@ -78,6 +90,11 @@ watch(
         job_notifications_enabled: newData.job_notifications_enabled ?? true,
         github_profile: newData.github_profile || "",
         linkedin_profile: newData.linkedin_profile || "",
+      };
+
+      appleAccount.value = {
+        apple_id: newData.apple_id || null,
+        apple_email: newData.apple_email || null,
       };
     }
   },
@@ -197,6 +214,40 @@ const openCVModal = () => {
 
 const closeCVModal = () => {
   showCVModal.value = false;
+};
+
+const handleBindApple = async () => {
+  const auth = await authorizeAppleForBinding();
+  if (!auth) return;
+
+  const result = await bindApple(auth.identityToken, auth.email);
+  if (result) {
+    appleAccount.value = {
+      apple_id: result.apple_id || null,
+      apple_email: result.apple_email || null,
+    };
+    if (settingsData.value) {
+      settingsData.value.apple_id = result.apple_id;
+      settingsData.value.apple_email = result.apple_email;
+    }
+  }
+};
+
+const handleUnbindApple = async () => {
+  const confirmed = confirm("Apakah Anda yakin ingin memutuskan tautan akun Apple ini?");
+  if (!confirmed) return;
+
+  const result = await unbindApple();
+  if (result) {
+    appleAccount.value = {
+      apple_id: null,
+      apple_email: null,
+    };
+    if (settingsData.value) {
+      settingsData.value.apple_id = null;
+      settingsData.value.apple_email = null;
+    }
+  }
 };
 </script>
 
@@ -350,6 +401,117 @@ const closeCVModal = () => {
             <Icon v-else name="carbon:save" size="20" />
             {{ isSaving ? "Saving..." : "Save Profile" }}
           </button>
+        </div>
+      </div>
+
+      <!-- Connected Accounts (Akun Terhubung) -->
+      <div
+        class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden"
+      >
+        <!-- Header -->
+        <div class="px-6 py-4 border-b border-white/10 bg-white/5 flex items-center justify-between">
+          <h2 class="text-2xl font-bold text-white flex items-center gap-3">
+            <Icon name="carbon:user-identification" size="24" class="text-primary" />
+            Connected Accounts
+          </h2>
+          <span class="text-xs text-white/40">OAuth & Social Login</span>
+        </div>
+
+        <!-- Content -->
+        <div class="p-6 space-y-4">
+          <!-- Google Account -->
+          <div
+            class="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl gap-4"
+          >
+            <div class="flex items-center gap-3">
+              <div
+                class="w-11 h-11 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center shrink-0"
+              >
+                <Icon name="mdi:google" size="22" class="text-white" />
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <p class="text-base font-semibold text-white">Google Account</p>
+                  <span
+                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                  >
+                    <Icon name="carbon:checkmark-filled" size="12" /> Primary
+                  </span>
+                </div>
+                <p class="text-xs text-white/50 mt-0.5">{{ profileForm.email || originalData.email }}</p>
+              </div>
+            </div>
+            <div>
+              <span
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/5 text-white/70 border border-white/10"
+              >
+                <Icon name="carbon:locked" size="14" class="text-white/40" />
+                Linked
+              </span>
+            </div>
+          </div>
+
+          <!-- Apple Account -->
+          <div
+            class="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl gap-4"
+          >
+            <div class="flex items-center gap-3">
+              <div
+                class="w-11 h-11 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center shrink-0"
+              >
+                <Icon name="mdi:apple" size="24" class="text-white" />
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <p class="text-base font-semibold text-white">Apple ID</p>
+                  <span
+                    v-if="appleAccount.apple_id"
+                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                  >
+                    <Icon name="carbon:checkmark-filled" size="12" /> Connected
+                  </span>
+                  <span
+                    v-else
+                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                  >
+                    Not connected
+                  </span>
+                </div>
+                <p v-if="appleAccount.apple_id" class="text-xs text-white/60 mt-0.5">
+                  {{ appleAccount.apple_email || 'Connected with Apple ID' }}
+                </p>
+                <p v-else class="text-xs text-white/40 mt-0.5">
+                  Link your Apple account to sign in securely with Apple ID
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                v-if="appleAccount.apple_id"
+                @click="handleUnbindApple"
+                :disabled="isSaving || isAppleLoading"
+                class="px-4 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                <Icon name="carbon:unlink" size="14" />
+                Unbind Apple
+              </button>
+              <button
+                v-else
+                @click="handleBindApple"
+                :disabled="isSaving || isAppleLoading"
+                class="px-4 py-2 rounded-lg bg-black hover:bg-black/80 text-white border border-white/20 text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer shadow-md disabled:opacity-50"
+              >
+                <Icon
+                  v-if="isAppleLoading"
+                  name="icon-park-outline:loading-four"
+                  size="14"
+                  class="animate-spin"
+                />
+                <Icon v-else name="mdi:apple" size="16" />
+                <span>{{ isAppleLoading ? 'Connecting...' : 'Bind Apple ID' }}</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

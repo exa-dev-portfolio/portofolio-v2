@@ -1,8 +1,9 @@
 import { logger } from '../utils/logger'
 import {OAuth2Client} from "google-auth-library";
+import jwt from "jsonwebtoken";
 import {useServerConfig} from '~~/server/utils/config';
 import {withTransaction} from "~~/server/db/postgres";
-import {getUserByEmail} from "~~/server/repositories/user.repository";
+import {getUserByEmail, getUserByAppleId, linkAppleId} from "~~/server/repositories/user.repository";
 import {HttpError} from "~~/server/errors/HttpError";
 import {isRefreshTokenRotatingSoon, signAccessToken, signRefreshToken, verifyRefreshToken} from "~~/server/utils/jwt";
 import * as repository from "~~/server/repositories/token.repository";
@@ -111,6 +112,105 @@ export const loginWithGoogle = async (event: H3Event, code: string) => {
             }, "Login successful", "LOGIN_SUCCESS", 200);
         }
     )
+}
+
+export const loginWithApple = async (
+    event: H3Event,
+    identityToken: string,
+    clientEmail?: string | null,
+    clientName?: any
+) => {
+    // Decode Apple ID Token
+    const decoded = jwt.decode(identityToken) as {
+        iss?: string;
+        sub?: string;
+        email?: string;
+        aud?: string;
+    } | null;
+
+    if (!decoded || !decoded.sub) {
+        throw new HttpError(400, 'INVALID_APPLE_TOKEN', 'Failed to decode Apple identity token');
+    }
+
+    const appleUserId = decoded.sub;
+    const resolvedEmail = decoded.email || clientEmail || null;
+
+    logger.info({ appleUserId, resolvedEmail }, '[Apple Auth] Attempting login with Apple:');
+
+    return withTransaction(
+        async (client) => {
+            // 1. Try finding by apple_id
+            let user = await getUserByAppleId(client, appleUserId);
+
+            // 2. If not found by apple_id, try finding by email and auto-link
+            if (!user && resolvedEmail) {
+                const userByEmail = await getUserByEmail(client, resolvedEmail);
+                if (userByEmail) {
+                    await linkAppleId(client, userByEmail.id, appleUserId, resolvedEmail);
+                    user = {
+                        ...userByEmail,
+                        apple_id: appleUserId,
+                        apple_email: resolvedEmail,
+                    };
+                    logger.info({ userId: user.id }, '[Apple Auth] Auto-linked Apple ID to existing user account');
+                }
+            }
+
+            if (!user) {
+                throw new HttpError(
+                    404,
+                    'USER_NOT_FOUND',
+                    'Akun dengan Apple ID / Email ini tidak ditemukan. Silakan hubungkan (bind) akun Apple Anda di pengaturan dashboard terlebih dahulu.'
+                );
+            }
+
+            const accessToken = signAccessToken(user.name, user.email, user.id);
+            const {
+                token: refreshToken,
+                expiresAt
+            } = signRefreshToken(user.id, user.name, user.email);
+
+            await repository.saveRefreshToken(client, {
+                userId: user.id,
+                tokenHash: hashToSha256(refreshToken),
+                expiresAt
+            });
+
+            await set(`user_refresh_token:${refreshToken}`, JSON.stringify(user));
+
+            setCookie(
+                event,
+                'refresh_token',
+                refreshToken,
+                {
+                    httpOnly: true,
+                    secure: Config.mode === 'production',
+                    sameSite: 'lax',
+                    path: '/api',
+                    expires: expiresAt,
+                }
+            );
+
+            setCookie(
+                event,
+                'access_token',
+                accessToken,
+                {
+                    httpOnly: true,
+                    secure: Config.mode === 'production',
+                    sameSite: 'lax',
+                    path: '/api',
+                    expires: expiresAt,
+                }
+            );
+
+            return sendSuccess(event, {
+                access_token: accessToken,
+                refresh_token: refreshToken,
+                refresh_expires_at: expiresAt,
+            }, "Apple login successful", "LOGIN_SUCCESS", 200);
+        }
+    );
 }
 
 export const loginByEmail = async (event: H3Event, email: string,) => {

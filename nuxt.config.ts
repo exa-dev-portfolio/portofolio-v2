@@ -155,6 +155,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     mode: process.env.NUXT_MODE || "production",
     jwtSecret: process.env.NUXT_JWT_SECRET,
+    appleClientId: process.env.NUXT_APPLE_CLIENT_ID || process.env.NUXT_PUBLIC_APPLE_CLIENT_ID || "cloud.eka-dev.portfolio",
     googleClientId: process.env.NUXT_GOOGLE_CLIENT_ID,
     googleClientSecret: process.env.NUXT_GOOGLE_CLIENT_SECRET,
     redisUrl: process.env.NUXT_REDIS_URL,
@@ -189,6 +190,10 @@ export default defineNuxtConfig({
     jobWorkerUrl: process.env.NUXT_JOB_WORKER_URL || "http://localhost:9090",
 
     public: {
+      appleClientId:
+        process.env.NUXT_PUBLIC_APPLE_CLIENT_ID ||
+        process.env.NUXT_APPLE_CLIENT_ID ||
+        "cloud.eka-dev.portfolio",
       googleClientId:
         process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID ||
         "897905079551-k2chp1f1lu4f7dagjsg0nl03em61gm8m.apps.googleusercontent.com",

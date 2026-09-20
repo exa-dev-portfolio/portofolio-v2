@@ -13,6 +13,8 @@ export const getUserSettings = async (
                job_notifications_enabled,
                github_profile,
                linkedin_profile,
+               apple_id,
+               apple_email,
                created_at,
                cv_url,
                updated_at

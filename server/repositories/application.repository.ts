@@ -74,6 +74,7 @@ export const updateApplication = async (
         email_subject: string | null;
         email_body: string | null;
         email_reasoning: string | null;
+        chat_history: any;
         status: string;
         sent_at: string;
     }>

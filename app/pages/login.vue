@@ -18,6 +18,11 @@ useHead({
       async: true,
       defer: true,
     },
+    {
+      src: 'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js',
+      async: true,
+      defer: true,
+    },
   ],
 })
 
@@ -27,9 +32,17 @@ const config = useRuntimeConfig()
 const debugInfo = ref<{ clientId?: string; clientUrl?: string }>({clientId: '', clientUrl: ''})
 
 const {initGoogleSignIn, signInError} = useGoogleSignIn()
+const {signInWithApple, isAppleLoading, appleSignInError} = useAppleSignIn()
 
-// Watch untuk reactive error dari composable
+// Watch untuk reactive error dari Google
 watch(signInError, (newError) => {
+  if (newError) {
+    localError.value = newError
+  }
+})
+
+// Watch untuk reactive error dari Apple
+watch(appleSignInError, (newError) => {
   if (newError) {
     localError.value = newError
   }
@@ -42,10 +55,7 @@ onMounted(() => {
     clientUrl: String(config.public.clientUrl || 'NOT SET'),
   }
   console.log('[Debug] Google Config:', debugInfo.value)
-  console.log('[Debug] Full config.public:', config.public)
-  console.log('[Debug] Raw googleClientId:', config.public.googleClientId)
-  console.log('[Debug] Type:', typeof config.public.googleClientId)
-  console.log('[Debug] Length:', config.public.googleClientId?.length)
+  console.log('[Debug] Apple Client ID:', config.public.appleClientId)
 })
 
 const handleGoogleLogin = async () => {
@@ -59,6 +69,11 @@ const handleGoogleLogin = async () => {
   setTimeout(() => {
     isLoading.value = false
   }, 1000)
+}
+
+const handleAppleLogin = async () => {
+  localError.value = null
+  await signInWithApple()
 }
 </script>
 
@@ -105,20 +120,34 @@ const handleGoogleLogin = async () => {
 
         <!-- Header -->
         <div class="text-center mb-8">
-          <h2 class="text-2xl font-bold text-white mb-2">Sign in with Google</h2>
+          <h2 class="text-2xl font-bold text-white mb-2">Sign in to your account</h2>
           <p class="text-white/50 text-sm">Quick and secure authentication</p>
         </div>
 
-        <!-- Google Login Button -->
-        <button
-            @click="handleGoogleLogin"
-            :disabled="isLoading"
-            class="w-full py-4 cursor-pointer px-6 rounded-xl bg-white text-[#0a0e27] font-bold text-lg hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-3 group shadow-lg hover:shadow-xl"
-        >
-          <Icon v-if="isLoading" name="icon-park-outline:loading-four" size="24" class="animate-spin text-[#0a0e27]"/>
-          <Icon v-else name="mdi:google" size="24" class="text-[#0a0e27]"/>
-          <span>{{ isLoading ? 'Signing in...' : 'Continue with Google' }}</span>
-        </button>
+        <!-- Login Buttons Container -->
+        <div class="space-y-4">
+          <!-- Google Login Button -->
+          <button
+              @click="handleGoogleLogin"
+              :disabled="isLoading || isAppleLoading"
+              class="w-full py-4 cursor-pointer px-6 rounded-xl bg-white text-[#0a0e27] font-bold text-base hover:bg-white/90 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-3 group shadow-lg hover:shadow-xl"
+          >
+            <Icon v-if="isLoading" name="icon-park-outline:loading-four" size="22" class="animate-spin text-[#0a0e27]"/>
+            <Icon v-else name="mdi:google" size="22" class="text-[#0a0e27]"/>
+            <span>{{ isLoading ? 'Signing in with Google...' : 'Continue with Google' }}</span>
+          </button>
+
+          <!-- Apple Login Button -->
+          <button
+              @click="handleAppleLogin"
+              :disabled="isLoading || isAppleLoading"
+              class="w-full py-4 cursor-pointer px-6 rounded-xl bg-[#000000] text-white border border-white/20 font-bold text-base hover:bg-[#111111] hover:border-white/40 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-3 group shadow-lg hover:shadow-xl"
+          >
+            <Icon v-if="isAppleLoading" name="icon-park-outline:loading-four" size="22" class="animate-spin text-white"/>
+            <Icon v-else name="mdi:apple" size="24" class="text-white"/>
+            <span>{{ isAppleLoading ? 'Signing in with Apple...' : 'Sign in with Apple' }}</span>
+          </button>
+        </div>
       </div>
 
       <!-- Security Info -->

@@ -170,6 +170,93 @@ export const useSettings = () => {
         }
     }
 
+    const bindApple = async (identityToken: string, email?: string | null): Promise<UserSettingsModel | null> => {
+        isSaving.value = true
+        const loadingToast = toast.showLoadingToast("Menghubungkan Apple", "Mohon tunggu, sedang memverifikasi akun Apple...")
+        try {
+            const response = await $axios.post<BaseResponse<UserSettingsModel>>('/api/settings/bind-apple', {
+                identityToken,
+                email,
+            })
+            const body = response.data
+
+            if (!body || !body.data) {
+                toast.updateToast(
+                    loadingToast.id,
+                    "Error",
+                    "Gagal menghubungkan akun Apple",
+                    "error",
+                    5000
+                )
+                return null
+            }
+
+            toast.updateToast(
+                loadingToast.id,
+                "Berhasil",
+                "Akun Apple berhasil terhubung!",
+                "success",
+                3000
+            )
+            return body.data
+        } catch (error) {
+            console.error('Failed to bind Apple:', error)
+            const message = getErrorMessageAxios(error)
+            toast.updateToast(
+                loadingToast.id,
+                "Gagal",
+                message,
+                "error",
+                5000
+            )
+            return null
+        } finally {
+            isSaving.value = false
+        }
+    }
+
+    const unbindApple = async (): Promise<UserSettingsModel | null> => {
+        isSaving.value = true
+        const loadingToast = toast.showLoadingToast("Memutuskan Apple", "Mohon tunggu, sedang memutuskan tautan akun Apple...")
+        try {
+            const response = await $axios.post<BaseResponse<UserSettingsModel>>('/api/settings/unbind-apple')
+            const body = response.data
+
+            if (!body || !body.data) {
+                toast.updateToast(
+                    loadingToast.id,
+                    "Error",
+                    "Gagal memutuskan akun Apple",
+                    "error",
+                    5000
+                )
+                return null
+            }
+
+            toast.updateToast(
+                loadingToast.id,
+                "Berhasil",
+                "Tautan akun Apple berhasil dilepas!",
+                "success",
+                3000
+            )
+            return body.data
+        } catch (error) {
+            console.error('Failed to unbind Apple:', error)
+            const message = getErrorMessageAxios(error)
+            toast.updateToast(
+                loadingToast.id,
+                "Gagal",
+                message,
+                "error",
+                5000
+            )
+            return null
+        } finally {
+            isSaving.value = false
+        }
+    }
+
     return {
         isLoading,
         isSaving,
@@ -177,6 +264,9 @@ export const useSettings = () => {
         updateProfileSettings,
         updateSocialLinks,
         uploadCV,
+        bindApple,
+        unbindApple,
     }
 }
+
 

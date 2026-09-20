@@ -58,6 +58,21 @@ export const useApply = () => {
     }
   };
 
+  const clearChat = async (applicationId: string): Promise<boolean> => {
+    try {
+      const { data } = await $axios.post<BaseResponse<{ chat_history: [] }>>(
+        "/api/applications/clear-chat",
+        {
+          application_id: applicationId,
+        },
+      );
+      return Boolean(data?.data);
+    } catch (err: any) {
+      toast.showErrorToast("Error", getErrorMessage(err));
+      return false;
+    }
+  };
+
   const fetchApplications = async (): Promise<Application[]> => {
     try {
       const { data } =
@@ -195,6 +210,7 @@ export const useApply = () => {
     isUploading,
     generateEmail,
     sendChat,
+    clearChat,
     fetchApplications,
     fetchApplication,
     updateApplication,

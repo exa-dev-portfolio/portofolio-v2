@@ -11,6 +11,7 @@ export const applicationModel = z.object({
     email_subject: z.string().nullable().optional(),
     email_body: z.string().nullable().optional(),
     email_reasoning: z.string().nullable().optional(),
+    chat_history: z.any().optional().nullable(),
     status: z.enum(['draft', 'sent']),
     sent_at: z.string().nullable().optional(),
     created_at: z.string(),
@@ -37,6 +38,7 @@ export const updateApplicationSchema = z.object({
     job_link: z.string().max(500).optional().nullable(),
     email_subject: z.string().optional().nullable(),
     email_body: z.string().optional().nullable(),
+    chat_history: z.any().optional().nullable(),
 });
 
 export type UpdateApplicationInput = z.infer<typeof updateApplicationSchema>;

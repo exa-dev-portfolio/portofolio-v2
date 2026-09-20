@@ -9,6 +9,7 @@ export interface Application {
     email_subject: string | null
     email_body: string | null
     email_reasoning: string | null
+    chat_history?: Array<{ role: 'user' | 'assistant'; content: string }> | null
     status: 'draft' | 'sent'
     sent_at: string | null
     created_at: string
@@ -51,6 +52,7 @@ export interface ChatResult {
     revised_subject: string | null
     revised_body: string | null
     reasoning: string[]
+    chat_history?: Array<{ role: 'user' | 'assistant'; content: string }>
 }
 
 export interface ApplicationStats {
