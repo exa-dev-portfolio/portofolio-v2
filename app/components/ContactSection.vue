@@ -50,7 +50,7 @@ const submitForm = async () => {
 </script>
 
 <template>
-  <section id="contact" class="py-20 sm:py-24 relative overflow-hidden" aria-labelledby="contact-heading">
+  <section id="contact" class="py-20 sm:py-24 relative overflow-visible" aria-labelledby="contact-heading">
     <div class="container mx-auto px-4 sm:px-6">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start max-w-6xl mx-auto">
         

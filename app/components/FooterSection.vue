@@ -7,11 +7,13 @@ const handleScrollToTop = () => {
 </script>
 
 <template>
-  <footer class="relative bg-[#050914] border-t border-white/[0.08] overflow-hidden">
-    <!-- Top subtle gradient highlight line -->
-    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 max-w-4xl h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"></div>
+  <footer class="relative bg-transparent overflow-visible">
+    <!-- Natural Left-to-Right Full Width Flame Wave Canvas Background -->
+    <ClientOnly>
+      <FooterFlameWave />
+    </ClientOnly>
 
-    <div class="container mx-auto px-4 sm:px-6 py-12">
+    <div class="container mx-auto px-4 sm:px-6 py-14 sm:py-16 relative z-10">
       <div class="flex flex-col md:flex-row items-center justify-between gap-8">
         
         <!-- Brand & Bio -->

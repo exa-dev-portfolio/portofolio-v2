@@ -409,6 +409,11 @@ const totalExperienceYears = computed(() => {
       <ContactSection :user="user" />
     </div>
 
+    <!-- Section Divider Line -->
+    <div class="container mx-auto px-6 relative z-10">
+      <div class="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+    </div>
+
     <!-- Footer Section -->
     <div class="relative overflow-hidden z-10">
       <FooterSection />
