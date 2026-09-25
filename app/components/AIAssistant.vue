@@ -10,7 +10,6 @@ interface Message {
 }
 
 const isOpen = ref(false)
-const isMinimized = ref(false)
 const messages = ref<Message[]>([
   {
     id: '1',
@@ -111,13 +110,6 @@ const askQuestion = (question: string) => {
 
 const toggleChat = () => {
   isOpen.value = !isOpen.value
-  if (isOpen.value) {
-    isMinimized.value = false
-  }
-}
-
-const toggleMinimize = () => {
-  isMinimized.value = !isMinimized.value
 }
 </script>
 
@@ -135,7 +127,7 @@ const toggleMinimize = () => {
       leave-to-class="opacity-0 scale-95 translate-y-3"
     >
       <div
-        v-show="isOpen && !isMinimized"
+        v-show="isOpen"
         class="w-[calc(100vw-2rem)] sm:w-[380px] bg-[#0c1222] border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
         style="max-height: calc(100vh - 7rem); height: min(560px, calc(100vh - 7rem))"
       >
@@ -157,13 +149,6 @@ const toggleMinimize = () => {
           </div>
 
           <div class="flex items-center gap-1">
-            <button
-              @click="toggleMinimize"
-              class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-              aria-label="Minimize AI Assistant"
-            >
-              <Icon name="carbon:subtract" size="16" />
-            </button>
             <button
               @click="toggleChat"
               class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
