@@ -57,7 +57,7 @@ const modalSlides = computed(() => {
     {
       url: selectedProject.value.image || '/images/project-preview.webp',
       title: 'Cover Overview',
-      caption: selectedProject.value.shortDesc || selectedProject.value.title
+      caption: ''
     }
   ]
   if (selectedProject.value.preview_images?.length) {
@@ -268,8 +268,8 @@ const copyToClipboard = (text?: string) => {
       v-model:open="isModalOpen"
       :ui="{
         content: 'w-full max-w-4xl bg-[#090e1a] border border-white/15 shadow-2xl rounded-3xl overflow-hidden',
-        header: 'p-6 sm:p-8 bg-[#0c1424] border-b border-white/10',
-        body: 'p-6 sm:p-8 max-h-[70vh] overflow-y-auto',
+        header: 'p-5 sm:p-8 bg-[#0c1424] border-b border-white/10',
+        body: 'p-4 sm:p-8 max-h-[75vh] sm:max-h-[70vh] overflow-y-auto',
         footer: 'p-4 sm:p-6 bg-[#0c1424] border-t border-white/10'
       }"
     >
@@ -283,62 +283,64 @@ const copyToClipboard = (text?: string) => {
       </template>
 
       <template #body>
-        <div class="space-y-8">
+        <div class="space-y-6 sm:space-y-8">
           <!-- Interactive Project Showcase & Gallery Carousel -->
           <div class="space-y-3">
-            <!-- Main Display Frame -->
-            <div class="relative rounded-2xl overflow-hidden border border-white/15 bg-slate-950 shadow-2xl group h-64 sm:h-84 md:h-96">
-              <!-- Active Image -->
-              <NuxtImg
-                v-if="activeSlide"
-                :key="activeSlide.url"
-                :src="activeSlide.url"
-                :alt="activeSlide.title || selectedProject?.title || 'Project Preview'"
-                class="w-full h-full object-cover transition-all duration-300"
-                width="900"
-                height="500"
-              />
+            <!-- Main Display Frame (Card with separate Image Frame and Caption) -->
+            <div class="rounded-2xl overflow-hidden border border-white/15 bg-slate-950 shadow-2xl flex flex-col group">
+              <!-- Active Image Container -->
+              <div class="relative w-full aspect-[16/10] sm:aspect-[16/9] md:h-96 bg-slate-950 flex items-center justify-center overflow-hidden">
+                <NuxtImg
+                  v-if="activeSlide"
+                  :key="activeSlide.url"
+                  :src="activeSlide.url"
+                  :alt="activeSlide.title || selectedProject?.title || 'Project Preview'"
+                  class="w-full h-full object-contain transition-all duration-300"
+                  width="900"
+                  height="500"
+                />
 
-              <!-- Top Floating Pill Badges -->
-              <div class="absolute top-4 inset-x-4 flex items-center justify-between pointer-events-none">
-                <div class="flex items-center gap-2">
-                  <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-950/80 backdrop-blur-md border border-white/20 text-xs font-mono font-medium text-blue-300 shadow-lg">
-                    <Icon name="carbon:screen" size="14" class="text-blue-400" />
-                    <span>{{ activeSlide?.title || 'Feature Preview' }}</span>
+                <!-- Top Floating Pill Badges -->
+                <div class="absolute top-3 sm:top-4 inset-x-3 sm:inset-x-4 flex items-center justify-between pointer-events-none">
+                  <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-slate-950/80 backdrop-blur-md border border-white/20 text-[11px] sm:text-xs font-mono font-medium text-blue-300 shadow-lg">
+                      <Icon name="carbon:screen" size="14" class="text-blue-400" />
+                      <span>{{ activeSlide?.title || 'Feature Preview' }}</span>
+                    </span>
+                  </div>
+
+                  <span v-if="modalSlides.length > 1" class="px-2.5 py-1 rounded-full bg-slate-950/80 backdrop-blur-md border border-white/20 text-[11px] sm:text-xs font-mono font-medium text-slate-300 shadow-lg">
+                    {{ activeSlideIndex + 1 }} / {{ modalSlides.length }}
                   </span>
                 </div>
 
-                <span v-if="modalSlides.length > 1" class="px-2.5 py-1 rounded-full bg-slate-950/80 backdrop-blur-md border border-white/20 text-xs font-mono font-medium text-slate-300 shadow-lg">
-                  {{ activeSlideIndex + 1 }} / {{ modalSlides.length }}
-                </span>
+                <!-- Prev / Next Navigation Arrows (Only if multiple slides) -->
+                <div v-if="modalSlides.length > 1" class="absolute inset-y-0 inset-x-2 sm:inset-x-3 flex items-center justify-between pointer-events-none">
+                  <button
+                    @click.stop="prevSlide"
+                    class="pointer-events-auto w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-950/80 hover:bg-blue-600/90 text-white/80 hover:text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-lg hover:scale-110 active:scale-95"
+                    title="Previous image"
+                  >
+                    <Icon name="carbon:chevron-left" size="18" />
+                  </button>
+                  <button
+                    @click.stop="nextSlide"
+                    class="pointer-events-auto w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-950/80 hover:bg-blue-600/90 text-white/80 hover:text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-lg hover:scale-110 active:scale-95"
+                    title="Next image"
+                  >
+                    <Icon name="carbon:chevron-right" size="18" />
+                  </button>
+                </div>
               </div>
 
-              <!-- Prev / Next Navigation Arrows (Only if multiple slides) -->
-              <div v-if="modalSlides.length > 1" class="absolute inset-y-0 inset-x-3 flex items-center justify-between pointer-events-none">
-                <button
-                  @click.stop="prevSlide"
-                  class="pointer-events-auto w-10 h-10 rounded-full bg-slate-950/70 hover:bg-blue-600/90 text-white/80 hover:text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-lg hover:scale-110 active:scale-95"
-                  title="Previous image"
-                >
-                  <Icon name="carbon:chevron-left" size="20" />
-                </button>
-                <button
-                  @click.stop="nextSlide"
-                  class="pointer-events-auto w-10 h-10 rounded-full bg-slate-950/70 hover:bg-blue-600/90 text-white/80 hover:text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-lg hover:scale-110 active:scale-95"
-                  title="Next image"
-                >
-                  <Icon name="carbon:chevron-right" size="20" />
-                </button>
-              </div>
-
-              <!-- Bottom Caption Bar (If caption exists) -->
+              <!-- Dedicated Bottom Caption Bar (Positioned BELOW the image, NEVER covers it) -->
               <div
                 v-if="activeSlide?.caption"
-                class="absolute bottom-0 inset-x-0 p-3.5 sm:p-4 bg-gradient-to-t from-slate-950/95 via-slate-950/75 to-transparent border-t border-white/5"
+                class="p-3.5 sm:p-4 bg-[#0a0f1d] border-t border-white/10 flex items-start gap-2.5"
               >
-                <p class="text-xs sm:text-sm text-slate-200 font-normal leading-relaxed flex items-center gap-2">
-                  <Icon name="carbon:information-filled" size="16" class="text-blue-400 shrink-0" />
-                  <span>{{ activeSlide.caption }}</span>
+                <Icon name="carbon:information-filled" size="16" class="text-blue-400 shrink-0 mt-0.5" />
+                <p class="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
+                  {{ activeSlide.caption }}
                 </p>
               </div>
             </div>
