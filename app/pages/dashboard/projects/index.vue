@@ -95,15 +95,20 @@ if (import.meta.client) {
   })
 }
 
-const getStatusColor = (status: boolean) => {
-  if (status) {
+const getStatusColor = (status: any) => {
+  if (status === 'published' || status === true) {
     return 'bg-green-500/20 text-green-400 border-green-500/40'
+  }
+  if (status === 'archived') {
+    return 'bg-amber-500/20 text-amber-400 border-amber-500/40'
   }
   return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40'
 }
 
-const getStatusText = (status: boolean) => {
-  return status ? 'Published' : 'Draft'
+const getStatusText = (status: any) => {
+  if (status === 'published' || status === true) return 'Published'
+  if (status === 'archived') return 'Archived'
+  return 'Draft'
 }
 
 const openProject = (project: Project) => {

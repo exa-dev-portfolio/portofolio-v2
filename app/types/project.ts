@@ -52,12 +52,14 @@ export interface GitHubOrgData {
     repos: GitHubRepoItem[];
 }
 
+export type ProjectStatus = "draft" | "published" | "archived";
+
 export type Project = {
     id?: number
     name: string
     description: string
     image: File | null
-    status: boolean
+    status: ProjectStatus | boolean
     features: string[]
     technologies: string[]
     repo_url?: string

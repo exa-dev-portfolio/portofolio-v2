@@ -125,7 +125,7 @@ export const getProjectCursorPagination = async (
     limit: number,
     search?: string,
     cursor?: number,
-    status?: boolean
+    status?: string
 ): Promise<ProjectModel[]> => {
     let sql = `
         SELECT p.id,
@@ -181,7 +181,7 @@ export const getProjectCursorPagination = async (
 
 export const getAllProjects = async (
     client: PoolClient,
-    status?: boolean
+    status?: string
 ): Promise<ProjectModel[]> => {
     let sql = `
         SELECT p.id,

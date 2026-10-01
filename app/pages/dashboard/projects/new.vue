@@ -39,7 +39,7 @@ const { isSaving, createProject, fetchOrgRepos } = useProject();
 const formData = ref<Project>({
   name: "",
   description: "",
-  status: true,
+  status: "draft",
   image: null,
   features: [""],
   technologies: [],
@@ -998,8 +998,9 @@ const goBack = () => {
           <USelectMenu
             v-model="formData.status"
             :items="[
-              { value: false, label: 'Draft' },
-              { value: true, label: 'Published' },
+              { value: 'draft', label: 'Draft' },
+              { value: 'published', label: 'Published' },
+              { value: 'archived', label: 'Archived' },
             ]"
             option-attribute="label"
             value-key="value"

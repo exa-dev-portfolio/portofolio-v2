@@ -3,6 +3,7 @@ export interface DashboardStats {
         total: number
         published: number
         draft: number
+        archived?: number
     }
     skills: {
         total: number

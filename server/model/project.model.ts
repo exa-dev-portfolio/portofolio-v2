@@ -48,6 +48,22 @@ export const isOrganizationFieldSchema = z.preprocess((val) => {
     return Boolean(val);
 }, z.boolean().default(false));
 
+export const projectStatusSchema = z.preprocess((val) => {
+    if (typeof val === "boolean") {
+        return val ? "published" : "draft";
+    }
+    if (typeof val === "string") {
+        const lower = val.trim().toLowerCase();
+        if (lower === "true" || lower === "published") return "published";
+        if (lower === "false" || lower === "draft") return "draft";
+        if (lower === "archived") return "archived";
+        return lower;
+    }
+    return val;
+}, z.enum(["draft", "published", "archived"]).default("draft"));
+
+export type ProjectStatus = z.infer<typeof projectStatusSchema>;
+
 export const projectModel = z.object({
     id: z.number(),
     name: z.string().min(1).max(255),
@@ -56,7 +72,7 @@ export const projectModel = z.object({
     end_date: z.string().refine((date) => !isNaN(Date.parse(date)), {
         message: "Invalid date format",
     }).optional(),
-    status: z.enum(["Draft", "Published"]),
+    status: projectStatusSchema,
     preview_image: z.string(),
     preview_images: z.array(projectPreviewImageSchema).optional().default([]),
     features: z.array(z.string()),
@@ -82,7 +98,7 @@ export const createProjectSchema = z.object({
     end_date: z.string().refine((date) => !isNaN(Date.parse(date)), {
         message: "Invalid date format",
     }).optional(),
-    status: z.boolean(),
+    status: projectStatusSchema,
     features: z.array(z.string()),
     id_skills: z.array(z.number()),
     live_url: z.string().nullable().optional(),
@@ -106,7 +122,7 @@ export const updateProjectSchema = z.object({
     end_date: z.string().refine((date) => !isNaN(Date.parse(date)), {
         message: "Invalid date format",
     }).optional(),
-    status: z.boolean(),
+    status: projectStatusSchema,
     features: z.array(z.string()),
     url: z.string().nullable().optional(),
     live_url: z.string().nullable().optional(),

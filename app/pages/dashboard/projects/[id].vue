@@ -472,22 +472,33 @@ const deleteProjectHandler = async () => {
   )
 }
 
-const getStatusColor = (status: boolean) => {
-  return status
-      ? 'bg-green-500/20 text-green-400 border-green-500/40'
-      : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40'
+const getStatusColor = (status: any) => {
+  if (status === 'published' || status === true) {
+    return 'bg-green-500/20 text-green-400 border-green-500/40'
+  }
+  if (status === 'archived') {
+    return 'bg-amber-500/20 text-amber-400 border-amber-500/40'
+  }
+  return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40'
 }
 
-const getStatusText = (status: boolean) => {
-  return status ? 'Published' : 'Draft'
+const getStatusText = (status: any) => {
+  if (status === 'published' || status === true) return 'Published'
+  if (status === 'archived') return 'Archived'
+  return 'Draft'
 }
 
 // Initialize on mount (client-side only)
 if (import.meta.client) {
   onMounted(() => {
     if (projectData.value) {
+      const normalizedStatus = typeof projectData.value.status === 'string'
+        ? projectData.value.status
+        : (projectData.value.status ? 'published' : 'draft')
+
       currentProject.value = {
         ...projectData.value,
+        status: normalizedStatus,
         is_organization: Boolean(projectData.value.is_organization),
         github_org: projectData.value.github_org || '',
         sub_apps: Array.isArray(projectData.value.sub_apps) ? projectData.value.sub_apps : [],
@@ -496,6 +507,7 @@ if (import.meta.client) {
       }
       formData.value = {
         ...currentProject.value,
+        status: normalizedStatus,
         sub_apps: JSON.parse(JSON.stringify(currentProject.value.sub_apps || []))
       }
       imagePreview.value = projectData.value.preview_image as string || ''
@@ -1117,10 +1129,11 @@ if (import.meta.client) {
               <label class="block text-sm font-semibold text-white mb-2">Status</label>
               <select
                   v-model="formData.status"
-                  class="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:border-primary/50 transition-all"
+                  class="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:border-primary/50 transition-all [&>option]:bg-slate-900 [&>option]:text-white"
               >
-                <option :value="false">Draft</option>
-                <option :value="true">Published</option>
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+                <option value="archived">Archived</option>
               </select>
             </div>
           </div>

@@ -8,7 +8,14 @@ import {handleError} from "~~/server/utils/handleError";
 export default handleError(async (event) => {
     const parsed = await getValidatedQuery(event, query => paginationSchemaQuery.extend({
         search: z.string().optional(),
-        status: z.preprocess((val) => val === 'true' || val === true ? true : val === 'false' || val === false ? false : undefined, z.boolean().optional())
+        status: z.preprocess((val) => {
+            if (val === undefined || val === null || val === '') return undefined;
+            if (val === 'true' || val === true) return 'published';
+            if (val === 'false' || val === false) return 'draft';
+            const lower = String(val).toLowerCase();
+            if (['draft', 'published', 'archived'].includes(lower)) return lower;
+            return undefined;
+        }, z.enum(['draft', 'published', 'archived']).optional())
     }).safeParse(query));
 
     if (!parsed.success) {

@@ -66,7 +66,7 @@ const projects = computed(() => {
 
   // Map API projects to expected format for components (filter only published/active projects)
   return apiProjects
-    .filter((p) => p.status === true)
+    .filter((p) => p.status === 'published' || p.status === true)
     .map((p) => ({
       ...p,
       id: p.id,

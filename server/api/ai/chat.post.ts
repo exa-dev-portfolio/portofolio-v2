@@ -97,8 +97,8 @@ function buildPortfolioContext(data: {
             if (features) context += `Features: ${features}\n`;
             if (tech) context += `Technologies: ${tech}\n`;
             if (p.live_url) context += `Live URL: ${p.live_url}\n`;
-            if (p.repo_url) context += `Repository: ${p.repo_url}\n`;
-            context += `Status: ${p.status ? 'Published' : 'Draft'}\n`;
+            const statusLabel = typeof p.status === 'string' ? p.status.charAt(0).toUpperCase() + p.status.slice(1) : (p.status ? 'Published' : 'Draft');
+            context += `Status: ${statusLabel}\n`;
         }
         context += '\n';
     }

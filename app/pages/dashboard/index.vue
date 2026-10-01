@@ -32,6 +32,12 @@ const dashboardStats = computed(() => {
   return statsData.value ?? null
 })
 
+const getStatusLabel = (status: any) => {
+  if (status === 'published' || status === true) return 'Published'
+  if (status === 'archived') return 'Archived'
+  return 'Draft'
+}
+
 const stats = computed(() => [
   {
     label: 'Total Projects',
@@ -52,6 +58,12 @@ const stats = computed(() => [
     color: 'from-yellow-500 to-yellow-600'
   },
   {
+    label: 'Archived',
+    value: (dashboardStats.value?.projects.archived ?? 0).toString(),
+    icon: 'carbon:archive',
+    color: 'from-amber-500 to-orange-600'
+  },
+  {
     label: 'Total Skills',
     value: dashboardStats.value?.skills.total.toString() ?? '0',
     icon: 'carbon:view',
@@ -65,7 +77,7 @@ const recentProjects = computed(() => {
       .map((p: any) => ({
         id: p.id,
         title: p.name,
-        status: p.status ? 'Published' : 'Draft',
+        status: getStatusLabel(p.status),
         updatedAt: formatDate(p.updated_at)
       }))
 })
@@ -80,7 +92,7 @@ const recentProjects = computed(() => {
     </div>
 
     <!-- Stats Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
       <div
           v-for="stat in stats"
           :key="stat.label"
@@ -146,7 +158,9 @@ const recentProjects = computed(() => {
                   'px-3 py-1 rounded-full text-xs font-semibold border',
                   project.status === 'Published'
                     ? 'bg-green-500/20 text-green-400 border-green-500/40'
-                    : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40'
+                    : project.status === 'Archived'
+                      ? 'bg-amber-500/20 text-amber-400 border-amber-500/40'
+                      : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40'
                 ]">
                   {{ project.status }}
                 </span>

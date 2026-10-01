@@ -13,8 +13,9 @@ export default withAuth(async (event) => {
             // Get all projects
             const projects = await projectRepository.getAllProjects(client)
             const totalProjects = projects.length
-            const publishedProjects = projects.filter((p: any) => p.status === true).length
-            const draftProjects = projects.filter((p: any) => p.status === false).length
+            const publishedProjects = projects.filter((p: any) => p.status === 'published' || p.status === true).length
+            const draftProjects = projects.filter((p: any) => p.status === 'draft' || p.status === false).length
+            const archivedProjects = projects.filter((p: any) => p.status === 'archived').length
 
             // Get all skills
             const skills = await skillRepository.getAllSkills(client)
@@ -33,7 +34,8 @@ export default withAuth(async (event) => {
                 projects: {
                     total: totalProjects,
                     published: publishedProjects,
-                    draft: draftProjects
+                    draft: draftProjects,
+                    archived: archivedProjects
                 },
                 skills: {
                     total: totalSkills

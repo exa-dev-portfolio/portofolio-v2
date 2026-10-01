@@ -15,6 +15,9 @@ import { processImageToWebP, type ProcessedImageResult } from "~~/server/utils/i
 export async function invalidateProjectsCache() {
   try {
     await del("projects:all");
+    await del("projects:status:published");
+    await del("projects:status:draft");
+    await del("projects:status:archived");
     await del("projects:status:true");
     await del("projects:status:false");
   } catch (e) {
@@ -126,7 +129,7 @@ export const createProject = async (
   });
 };
 
-export const getProjectsNoPagination = async (event: H3Event, status?: boolean) => {
+export const getProjectsNoPagination = async (event: H3Event, status?: string) => {
   return withTransaction(async (client) => {
     const cacheKey = status !== undefined ? `projects:status:${status}` : "projects:all";
     const cachedProjects = await get(cacheKey);
@@ -157,7 +160,7 @@ export const getProjectsByCursor = async (
   limit: number,
   cursor?: number,
   search?: string,
-  status?: boolean,
+  status?: string,
 ) => {
   return withTransaction(async (client) => {
     const projects = await repository.getProjectCursorPagination(
