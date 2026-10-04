@@ -227,16 +227,17 @@
       class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm"
       @click.self="selectedAppDetail = null"
     >
-      <div class="bg-slate-900 border border-white/10 rounded-2xl max-w-xl w-full p-6 shadow-2xl relative max-h-[85vh] overflow-y-auto">
+      <div class="bg-slate-900 border border-white/10 rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative max-h-[88vh] flex flex-col">
         <button
           @click="selectedAppDetail = null"
-          class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
+          class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors z-10 cursor-pointer"
         >
           <UIcon name="i-carbon-close" class="w-5 h-5" />
         </button>
 
-        <div class="flex items-center gap-4 mb-6 pb-4 border-b border-white/10">
-          <div class="w-14 h-14 rounded-2xl bg-slate-800 border border-white/10 p-1 flex items-center justify-center">
+        <!-- Header -->
+        <div class="flex items-center gap-4 pb-4 border-b border-white/10 shrink-0">
+          <div class="w-14 h-14 rounded-2xl bg-slate-800 border border-white/10 p-1 flex items-center justify-center shrink-0">
             <img
               v-if="selectedAppDetail.icon_url"
               :src="selectedAppDetail.icon_url"
@@ -244,48 +245,108 @@
             />
             <UIcon v-else name="i-carbon-application-mobile" class="w-7 h-7 text-cyan-400" />
           </div>
-          <div>
-            <h2 class="text-xl font-bold text-white">{{ selectedAppDetail.app_name }}</h2>
-            <p class="text-xs text-slate-400 font-mono">{{ selectedAppDetail.package_name }}</p>
+          <div class="min-w-0 pr-8">
+            <h2 class="text-xl font-bold text-white truncate">{{ selectedAppDetail.app_name }}</h2>
+            <p class="text-xs text-slate-400 font-mono truncate">{{ selectedAppDetail.package_name }}</p>
           </div>
         </div>
 
-        <!-- Release Information -->
-        <div class="space-y-4">
-          <div>
-            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Latest Release Information</h4>
-            <div class="grid grid-cols-2 gap-2 text-xs bg-slate-950/80 p-3 rounded-xl border border-white/5 font-mono">
-              <div>Version: <span class="text-cyan-400 font-bold">v{{ selectedAppDetail.latest_version_name }}</span> (Code: {{ selectedAppDetail.latest_version_code }})</div>
-              <div>Size: <span class="text-slate-200">{{ formatFileSize(selectedAppDetail.latest_release?.file_size_bytes) }}</span></div>
-              <div v-if="selectedAppDetail.latest_release?.min_sdk">Min Android: <span class="text-slate-200">SDK {{ selectedAppDetail.latest_release.min_sdk }}+</span></div>
-              <div>Total Downloads: <span class="text-emerald-400 font-bold">{{ selectedAppDetail.download_count }}x</span></div>
-            </div>
-          </div>
-
-          <div v-if="selectedAppDetail.latest_release?.sha256_hash">
-            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">SHA-256 Checksum</h4>
-            <div class="text-[11px] font-mono text-slate-400 bg-slate-950/80 p-2.5 rounded-xl border border-white/5 break-all flex items-center justify-between gap-2">
-              <span class="truncate">{{ selectedAppDetail.latest_release.sha256_hash }}</span>
-              <button @click="copyUrl(selectedAppDetail.latest_release.sha256_hash)" class="text-cyan-400 hover:text-cyan-300">
-                <UIcon name="i-carbon-copy" class="w-4 h-4" />
+        <!-- Scrollable Content Body -->
+        <div class="space-y-4 pt-4 overflow-y-auto pr-1">
+          <!-- Multi-version Switcher (if app has multiple releases) -->
+          <div v-if="selectedAppDetail.releases && selectedAppDetail.releases.length > 1">
+            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Available Versions</h4>
+            <div class="flex items-center gap-2 overflow-x-auto pb-1">
+              <button
+                v-for="(rel, idx) in selectedAppDetail.releases"
+                :key="rel.id || idx"
+                @click="selectedReleaseIndex = idx"
+                :class="[
+                  'px-3 py-1.5 rounded-xl text-xs font-mono font-medium transition-all shrink-0 cursor-pointer',
+                  selectedReleaseIndex === idx
+                    ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/25'
+                    : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700/80 border border-white/5'
+                ]"
+              >
+                v{{ rel.version_name || rel.tag_name }}
+                <span v-if="idx === 0" class="ml-1 text-[10px] opacity-75 font-sans">(latest)</span>
               </button>
             </div>
           </div>
 
+          <!-- Active Release Details -->
           <div>
-            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Release Notes & Changelog</h4>
-            <div class="bg-slate-950/60 p-4 rounded-xl border border-white/5 text-xs text-slate-300 whitespace-pre-wrap font-sans leading-relaxed max-h-56 overflow-y-auto">
-              {{ selectedAppDetail.latest_release?.changelog || 'No release notes provided for this version.' }}
+            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Release Information</h4>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs bg-slate-950/80 p-3 rounded-xl border border-white/5 font-mono">
+              <div>
+                <span class="text-slate-400 block text-[10px] uppercase font-sans">Version</span>
+                <span class="text-cyan-400 font-bold">v{{ currentRelease?.version_name || selectedAppDetail.latest_version_name }}</span>
+              </div>
+              <div>
+                <span class="text-slate-400 block text-[10px] uppercase font-sans">Build Code</span>
+                <span class="text-slate-200">{{ currentRelease?.version_code || selectedAppDetail.latest_version_code }}</span>
+              </div>
+              <div>
+                <span class="text-slate-400 block text-[10px] uppercase font-sans">File Size</span>
+                <span class="text-slate-200">{{ formatFileSize(currentRelease?.file_size_bytes) }}</span>
+              </div>
+              <div>
+                <span class="text-slate-400 block text-[10px] uppercase font-sans">Min / Target SDK</span>
+                <span class="text-slate-200">{{ currentRelease?.target_sdk ? `API ${currentRelease.target_sdk}` : (currentRelease?.min_sdk ? `SDK ${currentRelease.min_sdk}+` : '-') }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Checksum -->
+          <div v-if="currentRelease?.sha256_hash">
+            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">SHA-256 Checksum</h4>
+            <div class="text-[11px] font-mono text-slate-400 bg-slate-950/80 p-2.5 rounded-xl border border-white/5 break-all flex items-center justify-between gap-2">
+              <span class="truncate">{{ currentRelease.sha256_hash }}</span>
+              <button
+                @click="copyUrl(currentRelease.sha256_hash)"
+                class="text-cyan-400 hover:text-cyan-300 shrink-0 cursor-pointer"
+                title="Copy SHA-256 Hash"
+              >
+                <UIcon :name="copied ? 'i-carbon-checkmark' : 'i-carbon-copy'" class="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          <!-- Release Notes & Changelog (Rendered Markdown) -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Release Notes & Changelog</h4>
+              <span v-if="currentRelease?.published_at" class="text-[11px] text-slate-400">
+                Released on {{ formatDate(currentRelease.published_at) }}
+              </span>
+            </div>
+
+            <!-- Beautiful Markdown Output -->
+            <div
+              v-if="currentRelease?.changelog"
+              class="bg-slate-950/70 p-4 rounded-xl border border-white/10 changelog-prose max-h-72 overflow-y-auto"
+              v-html="renderMarkdown(currentRelease.changelog)"
+            />
+            <div
+              v-else
+              class="bg-slate-950/50 p-6 rounded-xl border border-white/5 text-xs text-slate-400 italic text-center"
+            >
+              No release notes provided for this version.
             </div>
           </div>
         </div>
 
-        <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-end gap-3">
+        <!-- Footer / Download Action -->
+        <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between gap-3 shrink-0">
+          <div class="text-xs text-slate-400">
+            Total app downloads: <span class="text-emerald-400 font-bold font-mono">{{ selectedAppDetail.download_count }}x</span>
+          </div>
           <a
             :href="`/api/v1/apps/${selectedAppDetail.package_name}/download`"
-            class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-semibold shadow-lg shadow-cyan-500/20 hover:scale-105 transition-all"
+            class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-semibold shadow-lg shadow-cyan-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-1.5 cursor-pointer"
           >
-            Download APK Now
+            <UIcon name="i-carbon-download" class="w-4 h-4" />
+            <span>Download APK</span>
           </a>
         </div>
       </div>
@@ -305,6 +366,8 @@ if (!isApkStoreEnabled.value) {
   });
 }
 
+const { renderMarkdown } = useMarkdown();
+
 useSeoMeta({
   title: "Android Apps & APK Releases | Eka Portfolio",
   description: "Download official Android APK release binaries directly from GitHub releases.",
@@ -318,6 +381,8 @@ const apps = computed(() => response.value?.data || []);
 const searchQuery = ref("");
 const activeQrApp = ref<any>(null);
 const selectedAppDetail = ref<any>(null);
+const selectedReleaseIndex = ref(0);
+const loadingDetail = ref(false);
 const copied = ref(false);
 
 const filteredApps = computed(() => {
@@ -329,6 +394,14 @@ const filteredApps = computed(() => {
       app.package_name?.toLowerCase().includes(q) ||
       app.repo_slug?.toLowerCase().includes(q)
   );
+});
+
+const currentRelease = computed(() => {
+  if (!selectedAppDetail.value) return null;
+  if (selectedAppDetail.value.releases && selectedAppDetail.value.releases.length > 0) {
+    return selectedAppDetail.value.releases[selectedReleaseIndex.value] || selectedAppDetail.value.releases[0];
+  }
+  return selectedAppDetail.value.latest_release;
 });
 
 const formatFileSize = (bytes?: number) => {
@@ -364,8 +437,21 @@ const openQrModal = (app: any) => {
   copied.value = false;
 };
 
-const openDetailModal = (app: any) => {
-  selectedAppDetail.value = app;
+const openDetailModal = async (app: any) => {
+  selectedAppDetail.value = { ...app };
+  selectedReleaseIndex.value = 0;
+  copied.value = false;
+  loadingDetail.value = true;
+  try {
+    const res = await $fetch<{ success: boolean; data: any }>(`/api/v1/apps/${app.package_name}`);
+    if (res?.success && res.data) {
+      selectedAppDetail.value = res.data;
+    }
+  } catch (err) {
+    console.error("Failed to load full app releases:", err);
+  } finally {
+    loadingDetail.value = false;
+  }
 };
 
 const copyUrl = (text: string) => {
