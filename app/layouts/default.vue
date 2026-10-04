@@ -5,6 +5,7 @@ const isMobileMenuOpen = ref(false)
 const activeSection = ref('')
 const isScrolled = ref(false)
 const commandPaletteRef = ref<any>(null)
+const { isApkStoreEnabled } = useFeatureFlag()
 
 const navItems = [
   { name: 'About', href: '#about', icon: 'carbon:user-avatar' },
@@ -175,6 +176,16 @@ onUnmounted(() => {
               <kbd class="text-[10px] bg-white/10 px-1.5 py-0.5 rounded border border-white/10 text-slate-300">Ctrl K</kbd>
             </button>
 
+            <NuxtLink
+              v-if="isApkStoreEnabled"
+              to="/apps"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/25 hover:border-cyan-400 hover:bg-cyan-500/20 text-xs font-mono text-cyan-300 hover:text-white transition-all cursor-pointer"
+              title="Android APK Store"
+            >
+              <Icon name="carbon:application-mobile" size="14" class="text-cyan-400" />
+              <span>Apps</span>
+            </NuxtLink>
+
             <a
               href="#contact"
               class="btn-primary-gradient px-4 py-2 rounded-full text-xs font-semibold tracking-wide text-white flex items-center gap-2 cursor-pointer"
@@ -277,6 +288,19 @@ onUnmounted(() => {
                 size="16" 
                 :class="activeSection === item.href ? 'text-cyan-400' : 'text-slate-500'" 
               />
+            </NuxtLink>
+
+            <NuxtLink
+              v-if="isApkStoreEnabled"
+              to="/apps"
+              @click="closeMobileMenu"
+              class="px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 flex items-center justify-between text-cyan-300 hover:text-white hover:bg-cyan-500/10 border border-cyan-500/20"
+            >
+              <div class="flex items-center gap-3">
+                <Icon name="carbon:application-mobile" size="18" class="text-cyan-400" />
+                <span class="font-semibold">Android Apps (APK)</span>
+              </div>
+              <Icon name="carbon:chevron-right" size="16" class="text-cyan-400" />
             </NuxtLink>
 
             <div class="pt-3 mt-2 border-t border-white/10">

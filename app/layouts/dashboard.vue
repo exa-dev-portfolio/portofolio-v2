@@ -48,6 +48,7 @@ const user = {
 const menuItems = [
   {name: 'Dashboard', icon: 'carbon:dashboard', href: '/dashboard'},
   {name: 'Projects', icon: 'carbon:folder-open', href: '/dashboard/projects'},
+  {name: 'Apps (APK)', icon: 'carbon:application-mobile', href: '/dashboard/apps'},
   {name: 'Work', icon: 'mdi:briefcase', href: '/dashboard/journeys'},
   {name: 'Skills', icon: 'carbon:skill-level', href: '/dashboard/skills'},
   {name: 'Messages', icon: 'carbon:email', href: '/dashboard/messages'},
@@ -55,6 +56,16 @@ const menuItems = [
   {name: 'Lowongan', icon: 'carbon:search', href: '/dashboard/jobs'},
   {name: 'Analytics', icon: 'carbon:chart-bar', href: '/dashboard/analytics'},
 ]
+
+const { isApkStoreEnabled } = useFeatureFlag()
+const displayMenuItems = computed(() => {
+  return menuItems.filter((item) => {
+    if (item.href === '/dashboard/apps' && !isApkStoreEnabled.value) {
+      return false
+    }
+    return true
+  })
+})
 
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value
@@ -175,7 +186,7 @@ watchEffect(
       <!-- Navigation Menu -->
       <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
         <NuxtLink
-            v-for="item in menuItems"
+            v-for="item in displayMenuItems"
             :key="item.href"
             :to="item.href"
             class="flex items-center gap-3 px-4 py-3 rounded-lg text-white/70 hover:bg-white/5 hover:text-white transition-all duration-300 group"
@@ -265,7 +276,7 @@ watchEffect(
         <!-- Navigation Menu -->
         <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
           <NuxtLink
-              v-for="item in menuItems"
+              v-for="item in displayMenuItems"
               :key="item.href"
               :to="item.href"
               @click="closeSidebar"

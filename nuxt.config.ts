@@ -201,6 +201,7 @@ export default defineNuxtConfig({
         process.env.NUXT_PUBLIC_API_BASE_URL || "https://eka-dev.cloud",
       clientUrl: process.env.NUXT_CLIENT_URL || "https://eka-dev.cloud",
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL || "https://eka-dev.cloud",
+      enableApkStore: process.env.NUXT_PUBLIC_ENABLE_APK_STORE === "true",
     },
   },
 });
