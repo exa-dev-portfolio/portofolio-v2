@@ -15,6 +15,7 @@ import {
   addTesterToGooglePlay,
   removeTesterFromGooglePlay,
 } from "./storeIntegration.service";
+import { scheduleBetaTesterExpiration } from "~~/server/lib/asynq";
 
 const getWorkerConfig = () => {
   const config = useRuntimeConfig();
@@ -588,6 +589,11 @@ export async function verifyBetaAccessOtp(
     const expiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000); // 14 days
     const activated = await apkRepo.activateBetaTester(client, tester.id, expiresAt, storeTesterId);
 
+    // Schedule automatic expiration via Asynq task queue
+    scheduleBetaTesterExpiration(tester.id, expiresAt).catch((err) => {
+      logger.error({ err, testerId: tester.id }, "[apk.service] Failed to schedule beta tester expiration in Asynq");
+    });
+
     const storeUrl = platform === "ios" ? app.testflight_url : app.play_store_url;
 
     return {
@@ -706,6 +712,11 @@ export async function adminAddBetaTester(
       expiresAt,
       storeTesterId
     );
+
+    // Schedule automatic expiration via Asynq task queue
+    scheduleBetaTesterExpiration(tester.id, expiresAt).catch((err) => {
+      logger.error({ err, testerId: tester.id }, "[apk.service] Failed to schedule beta tester expiration in Asynq");
+    });
 
     return tester;
   });
