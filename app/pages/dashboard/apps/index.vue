@@ -58,6 +58,135 @@
       </button>
     </div>
 
+    <!-- Applications & Release Status Section -->
+    <div class="bg-[#0b1222]/80 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl overflow-hidden">
+      <div class="p-6 border-b border-white/10 flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-bold text-white flex items-center gap-2.5">
+            <Icon name="carbon:application-mobile" size="20" class="text-cyan-400" />
+            <span>Ingested Applications</span>
+            <span class="text-xs font-mono text-white/50">({{ apps.length }})</span>
+          </h2>
+          <p class="text-xs text-white/50 mt-1">
+            Toggle release status between <strong>Full Release (Production)</strong> and <strong>In Development (Testing)</strong>.
+          </p>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div v-if="loading" class="p-8 text-center text-white/60 text-xs">
+        <Icon name="carbon:renew" size="20" class="animate-spin mx-auto mb-2 text-cyan-400" />
+        <span>Loading applications...</span>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else-if="apps.length === 0" class="p-10 text-center">
+        <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-3 text-white/40">
+          <Icon name="carbon:application-mobile" size="24" />
+        </div>
+        <p class="text-sm font-bold text-white">No applications ingested yet</p>
+        <p class="text-xs text-white/50 mt-1">
+          Sync one of your repositories below to automatically extract app metadata and APK binaries.
+        </p>
+      </div>
+
+      <!-- Apps List -->
+      <div v-else class="divide-y divide-white/5">
+        <div
+          v-for="app in apps"
+          :key="app.id"
+          class="p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 hover:bg-white/[0.02] transition-colors"
+        >
+          <!-- Left: App Icon & Details -->
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-slate-800 border border-white/10 p-1 flex-shrink-0 flex items-center justify-center overflow-hidden">
+              <img
+                v-if="app.icon_url"
+                :src="app.icon_url"
+                :alt="app.app_name"
+                class="w-full h-full object-cover rounded-xl"
+              />
+              <Icon v-else name="carbon:application-mobile" size="24" class="text-cyan-400" />
+            </div>
+
+            <div class="space-y-1">
+              <div class="flex items-center gap-2.5">
+                <span class="text-base font-bold text-white">{{ app.app_name }}</span>
+                <span
+                  :class="[
+                    'text-[10px] px-2.5 py-0.5 rounded-full font-mono font-bold uppercase tracking-wider border flex items-center gap-1.5',
+                    app.status === 'production'
+                      ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                      : 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+                  ]"
+                >
+                  <span
+                    :class="[
+                      'w-1.5 h-1.5 rounded-full',
+                      app.status === 'production' ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'
+                    ]"
+                  />
+                  {{ app.status === 'production' ? 'Full Release' : 'Development' }}
+                </span>
+              </div>
+
+              <p class="text-xs text-white/50 font-mono">{{ app.package_name }}</p>
+
+              <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-white/60 pt-0.5">
+                <span>Repo: <strong class="text-white font-mono">{{ app.repo_slug }}</strong></span>
+                <span>Latest: <strong class="text-cyan-300 font-mono">v{{ app.latest_version_name }}</strong> ({{ app.latest_version_code }})</span>
+                <span>Releases: <strong class="text-white">{{ app.release_count || 1 }}</strong></span>
+                <span>Downloads: <strong class="text-emerald-400">{{ app.download_count || 0 }}x</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Actions & Status Switcher -->
+          <div class="flex flex-wrap items-center gap-2.5 self-start md:self-center">
+            <!-- Toggle Status Button -->
+            <button
+              @click="toggleAppStatus(app)"
+              :disabled="updatingStatusId === app.id"
+              :class="[
+                'inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer disabled:opacity-50',
+                app.status === 'production'
+                  ? 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border-amber-500/30'
+                  : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+              ]"
+              :title="app.status === 'production' ? 'Switch to Development build' : 'Switch to Full Release'"
+            >
+              <Icon
+                :name="updatingStatusId === app.id ? 'carbon:renew' : (app.status === 'production' ? 'carbon:chemistry' : 'carbon:checkmark-filled')"
+                size="15"
+                :class="updatingStatusId === app.id ? 'animate-spin' : ''"
+              />
+              <span>{{ updatingStatusId === app.id ? 'Updating...' : (app.status === 'production' ? 'Set to Development' : 'Set to Full Release') }}</span>
+            </button>
+
+            <!-- Test Download -->
+            <a
+              :href="`/api/v1/apps/${app.package_name}/download`"
+              class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/80 hover:text-white border border-white/10 text-xs font-medium transition-colors"
+              title="Download APK binary to test"
+            >
+              <Icon name="carbon:download" size="15" class="text-cyan-400" />
+              <span>Test Download</span>
+            </a>
+
+            <!-- View in Showcase -->
+            <NuxtLink
+              to="/apps"
+              target="_blank"
+              class="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border border-white/10 text-xs transition-colors"
+              title="View on Public Showcase"
+            >
+              <Icon name="carbon:launch" size="16" />
+            </NuxtLink>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Registered Repositories Section -->
     <div class="bg-[#0b1222]/80 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl overflow-hidden">
       <div class="p-6 border-b border-white/10 flex items-center justify-between">
@@ -383,6 +512,8 @@ const toast = useToastCustom();
 const loading = ref(true);
 const repositories = ref<any[]>([]);
 const syncJobs = ref<any[]>([]);
+const apps = ref<any[]>([]);
+const updatingStatusId = ref<string | null>(null);
 const showModal = ref(false);
 const submitting = ref(false);
 const syncingId = ref<string | null>(null);
@@ -410,18 +541,39 @@ onMounted(() => {
 const fetchData = async () => {
   loading.value = true;
   try {
-    const [reposRes, jobsRes] = await Promise.all([
+    const [reposRes, jobsRes, appsRes] = await Promise.all([
       $axios.get("/api/v1/admin/apk/repositories"),
       $axios.get("/api/v1/admin/apk/jobs?limit=15"),
+      $axios.get("/api/v1/admin/apk/apps"),
     ]);
 
     repositories.value = reposRes.data?.data || [];
     syncJobs.value = jobsRes.data?.data || [];
+    apps.value = appsRes.data?.data || [];
   } catch (err: any) {
     console.error("Failed to load APK dashboard data:", err);
     toast.showErrorToast("Failed to Load Data", "An error occurred while loading repository data");
   } finally {
     loading.value = false;
+  }
+};
+
+const toggleAppStatus = async (app: any) => {
+  const newStatus = app.status === "production" ? "development" : "production";
+  updatingStatusId.value = app.id;
+  try {
+    await $axios.patch(`/api/v1/admin/apk/apps/${app.id}/status`, {
+      status: newStatus,
+    });
+    app.status = newStatus;
+    toast.showSuccessToast(
+      "Status Updated",
+      `${app.app_name} is now marked as ${newStatus === "production" ? "Full Release" : "Development"}`
+    );
+  } catch (err: any) {
+    toast.showErrorToast("Update Failed", err.response?.data?.message || "Failed to update status");
+  } finally {
+    updatingStatusId.value = null;
   }
 };
 

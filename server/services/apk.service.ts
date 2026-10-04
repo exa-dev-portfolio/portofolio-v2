@@ -124,6 +124,41 @@ export async function listPublishedApps() {
 }
 
 /**
+ * List all apps for admin dashboard
+ */
+export async function listAllApps() {
+  return withTransaction(async (client) => {
+    return await apkRepo.listAllApps(client);
+  });
+}
+
+/**
+ * Update app release status ('development' | 'production')
+ */
+export async function updateAppStatus(id: string, status: "development" | "production") {
+  return withTransaction(async (client) => {
+    const updated = await apkRepo.updateAppStatus(client, id, status);
+    if (!updated) {
+      throw new HttpError(404, "App not found");
+    }
+    return updated;
+  });
+}
+
+/**
+ * Update individual release status ('development' | 'production')
+ */
+export async function updateReleaseStatus(id: string, status: "development" | "production") {
+  return withTransaction(async (client) => {
+    const updated = await apkRepo.updateReleaseStatus(client, id, status);
+    if (!updated) {
+      throw new HttpError(404, "Release not found");
+    }
+    return updated;
+  });
+}
+
+/**
  * Get app detail with release history
  */
 export async function getAppDetail(packageName: string) {

@@ -213,6 +213,7 @@ export const listPublishedApps = async (
         'tag_name', rel.tag_name,
         'version_code', rel.version_code,
         'version_name', rel.version_name,
+        'status', rel.status,
         'min_sdk', rel.min_sdk,
         'target_sdk', rel.target_sdk,
         'changelog', rel.changelog,
@@ -233,6 +234,50 @@ export const listPublishedApps = async (
   `;
   const res = await client.query(sql);
   return res.rows;
+};
+
+export const listAllApps = async (
+  client: PoolClient
+): Promise<(ApkAppModel & { release_count: number })[]> => {
+  const sql = `
+    SELECT a.*, r.repo_slug,
+      (SELECT COUNT(*)::int FROM apk_releases WHERE app_id = a.id) AS release_count
+    FROM apk_apps a
+    JOIN apk_repositories r ON r.id = a.repo_id
+    ORDER BY a.updated_at DESC
+  `;
+  const res = await client.query(sql);
+  return res.rows;
+};
+
+export const updateAppStatus = async (
+  client: PoolClient,
+  id: string,
+  status: "development" | "production"
+): Promise<ApkAppModel | null> => {
+  const sql = `
+    UPDATE apk_apps
+    SET status = $1, updated_at = current_timestamp
+    WHERE id = $2
+    RETURNING *
+  `;
+  const res = await client.query<ApkAppModel>(sql, [status, id]);
+  return res.rows[0] || null;
+};
+
+export const updateReleaseStatus = async (
+  client: PoolClient,
+  id: string,
+  status: "development" | "production"
+): Promise<ApkReleaseModel | null> => {
+  const sql = `
+    UPDATE apk_releases
+    SET status = $1
+    WHERE id = $2
+    RETURNING *
+  `;
+  const res = await client.query<ApkReleaseModel>(sql, [status, id]);
+  return res.rows[0] || null;
 };
 
 export const incrementAppDownload = async (

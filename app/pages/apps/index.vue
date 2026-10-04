@@ -44,19 +44,62 @@
         </p>
       </div>
 
-      <!-- Search & Status Bar -->
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
-        <div class="relative w-full sm:w-80">
-          <UIcon name="i-carbon-search" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Search apps or package name..."
-            class="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-900/80 border border-white/10 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors"
-          />
+      <!-- Search & Status Filter Bar -->
+      <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 mb-8">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <!-- Search Input -->
+          <div class="relative w-full sm:w-72">
+            <UIcon name="i-carbon-search" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Search apps or package..."
+              class="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-900/80 border border-white/10 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors"
+            />
+          </div>
+
+          <!-- Status Filter Pills -->
+          <div class="flex items-center gap-1 p-1 rounded-xl bg-slate-900/80 border border-white/10 self-start sm:self-auto">
+            <button
+              @click="selectedStatusFilter = 'all'"
+              :class="[
+                'px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer',
+                selectedStatusFilter === 'all'
+                  ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/25'
+                  : 'text-slate-400 hover:text-white'
+              ]"
+            >
+              All ({{ counts.all }})
+            </button>
+            <button
+              @click="selectedStatusFilter = 'production'"
+              :class="[
+                'px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer',
+                selectedStatusFilter === 'production'
+                  ? 'bg-emerald-500 text-slate-950 font-bold shadow-md shadow-emerald-500/25'
+                  : 'text-slate-400 hover:text-emerald-400'
+              ]"
+            >
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span>Full Release ({{ counts.production }})</span>
+            </button>
+            <button
+              @click="selectedStatusFilter = 'development'"
+              :class="[
+                'px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer',
+                selectedStatusFilter === 'development'
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/25'
+                  : 'text-slate-400 hover:text-amber-400'
+              ]"
+            >
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+              <span>Development ({{ counts.development }})</span>
+            </button>
+          </div>
         </div>
+
         <div class="text-xs text-slate-400 flex items-center gap-2">
-          <span>Showing {{ filteredApps.length }} published applications</span>
+          <span>Showing {{ filteredApps.length }} of {{ apps.length }} apps</span>
         </div>
       </div>
 
@@ -114,6 +157,25 @@
                   <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 text-xs font-semibold font-mono">
                     v{{ app.latest_version_name || '1.0.0' }}
                   </span>
+
+                  <!-- Status Badge -->
+                  <span
+                    :class="[
+                      'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold font-mono border',
+                      (app.status || 'development') === 'production'
+                        ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                        : 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+                    ]"
+                  >
+                    <span
+                      :class="[
+                        'w-1.5 h-1.5 rounded-full',
+                        (app.status || 'development') === 'production' ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'
+                      ]"
+                    />
+                    {{ (app.status || 'development') === 'production' ? 'Full Release' : 'Development' }}
+                  </span>
+
                   <span v-if="app.latest_release?.file_size_bytes" class="text-[11px] text-slate-400 font-mono">
                     {{ formatFileSize(app.latest_release.file_size_bytes) }}
                   </span>
@@ -246,13 +308,39 @@
             <UIcon v-else name="i-carbon-application-mobile" class="w-7 h-7 text-cyan-400" />
           </div>
           <div class="min-w-0 pr-8">
-            <h2 class="text-xl font-bold text-white truncate">{{ selectedAppDetail.app_name }}</h2>
+            <div class="flex items-center gap-2 mb-1">
+              <h2 class="text-xl font-bold text-white truncate">{{ selectedAppDetail.app_name }}</h2>
+              <span
+                :class="[
+                  'text-[10px] px-2.5 py-0.5 rounded-full font-mono font-bold uppercase tracking-wider border flex items-center gap-1 shrink-0',
+                  (selectedAppDetail.status || 'development') === 'production'
+                    ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                    : 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+                ]"
+              >
+                <span
+                  :class="[
+                    'w-1.5 h-1.5 rounded-full',
+                    (selectedAppDetail.status || 'development') === 'production' ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'
+                  ]"
+                />
+                {{ (selectedAppDetail.status || 'development') === 'production' ? 'Full Release' : 'Development' }}
+              </span>
+            </div>
             <p class="text-xs text-slate-400 font-mono truncate">{{ selectedAppDetail.package_name }}</p>
           </div>
         </div>
 
         <!-- Scrollable Content Body -->
         <div class="space-y-4 pt-4 overflow-y-auto pr-1">
+          <!-- Development Mode Banner -->
+          <div
+            v-if="(selectedAppDetail.status || 'development') === 'development'"
+            class="flex items-center gap-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs"
+          >
+            <UIcon name="i-carbon-warning-alt" class="w-4 h-4 shrink-0 text-amber-400" />
+            <span>This build is currently in <strong>Development / Testing</strong> status. You can download and test this APK directly on your device.</span>
+          </div>
           <!-- Multi-version Switcher (if app has multiple releases) -->
           <div v-if="selectedAppDetail.releases && selectedAppDetail.releases.length > 1">
             <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Available Versions</h4>
@@ -385,10 +473,23 @@ const selectedReleaseIndex = ref(0);
 const loadingDetail = ref(false);
 const copied = ref(false);
 
+const selectedStatusFilter = ref<"all" | "production" | "development">("all");
+
+const counts = computed(() => {
+  const all = apps.value.length;
+  const production = apps.value.filter((a: any) => a.status === "production").length;
+  const development = apps.value.filter((a: any) => (a.status || "development") === "development").length;
+  return { all, production, development };
+});
+
 const filteredApps = computed(() => {
-  if (!searchQuery.value.trim()) return apps.value;
+  let list = apps.value;
+  if (selectedStatusFilter.value !== "all") {
+    list = list.filter((app: any) => (app.status || "development") === selectedStatusFilter.value);
+  }
+  if (!searchQuery.value.trim()) return list;
   const q = searchQuery.value.toLowerCase();
-  return apps.value.filter(
+  return list.filter(
     (app: any) =>
       app.app_name?.toLowerCase().includes(q) ||
       app.package_name?.toLowerCase().includes(q) ||

@@ -33,6 +33,14 @@ export interface ApkRepositoryModel {
   updated_at: string;
 }
 
+export const updateAppStatusSchema = z.object({
+  status: z.enum(["development", "production"]),
+});
+
+export const updateReleaseStatusSchema = z.object({
+  status: z.enum(["development", "production"]),
+});
+
 export interface ApkAppModel {
   id: string;
   repo_id: string;
@@ -42,11 +50,13 @@ export interface ApkAppModel {
   icon_url: string | null;
   latest_version_code: number;
   latest_version_name: string | null;
+  status: "development" | "production";
   is_published: boolean;
   download_count: number;
   created_at: string;
   updated_at: string;
   repo_slug?: string;
+  release_count?: number;
 }
 
 export interface ApkReleaseModel {
@@ -56,6 +66,7 @@ export interface ApkReleaseModel {
   tag_name: string;
   version_code: number;
   version_name: string;
+  status: "development" | "production";
   min_sdk: number | null;
   target_sdk: number | null;
   changelog: string | null;
