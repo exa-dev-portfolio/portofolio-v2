@@ -9,6 +9,73 @@ interface StoreInviteResult {
 }
 
 /**
+ * Parses Apple ASC private key supporting:
+ * 1. Base64 encoded PEM (recommended for .env)
+ * 2. Raw PEM with \n or newlines
+ */
+export function parsePrivateKey(rawKey: string): string {
+  let key = rawKey.trim();
+
+  // If wrapped in quotes, unwrap
+  if ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith("'") && key.endsWith("'"))) {
+    key = key.slice(1, -1);
+  }
+
+  // 1. Try decoding Base64 if not already standard PEM header
+  if (!key.includes("-----BEGIN PRIVATE KEY-----")) {
+    try {
+      const decoded = Buffer.from(key, "base64").toString("utf8");
+      if (decoded.includes("-----BEGIN PRIVATE KEY-----")) {
+        key = decoded;
+      }
+    } catch {}
+  }
+
+  // 2. Format escaped newlines
+  if (key.includes("\\n")) {
+    key = key.replace(/\\n/g, "\n");
+  }
+
+  return key;
+}
+
+/**
+ * Parses Google Service Account credentials supporting:
+ * 1. Base64 encoded JSON (recommended for .env)
+ * 2. Raw JSON string
+ * 3. File path to service-account.json
+ */
+export function parseServiceAccountJson(rawInput: string): any {
+  let content = rawInput.trim();
+
+  // If wrapped in quotes, unwrap
+  if ((content.startsWith('"') && content.endsWith('"')) || (content.startsWith("'") && content.endsWith("'"))) {
+    content = content.slice(1, -1);
+  }
+
+  // 1. Try decoding Base64 if not starting with '{'
+  if (!content.startsWith("{")) {
+    try {
+      const decoded = Buffer.from(content, "base64").toString("utf8");
+      if (decoded.trim().startsWith("{")) {
+        content = decoded.trim();
+      }
+    } catch {}
+  }
+
+  // 2. Parse JSON or read from file path
+  try {
+    return JSON.parse(content);
+  } catch {
+    const fs = require("node:fs");
+    if (fs.existsSync(content)) {
+      return JSON.parse(fs.readFileSync(content, "utf8"));
+    }
+    throw new Error("Invalid service account JSON or file path");
+  }
+}
+
+/**
  * Generate signed JWT for Apple App Store Connect API (ES256)
  */
 function getAppStoreConnectJwt(keyId: string, issuerId: string, privateKey: string): string {
@@ -19,11 +86,7 @@ function getAppStoreConnectJwt(keyId: string, issuerId: string, privateKey: stri
     aud: "appstoreconnect-v1",
   };
 
-  // Format private key properly if stored with escaped newlines in .env
-  let formattedKey = privateKey.trim();
-  if (formattedKey.includes("\\n")) {
-    formattedKey = formattedKey.replace(/\\n/g, "\n");
-  }
+  const formattedKey = parsePrivateKey(privateKey);
 
   return jwt.sign(payload, formattedKey, {
     algorithm: "ES256",
@@ -231,14 +294,7 @@ export async function addTesterToGooglePlay(
   try {
     // If Service Account JSON is provided, authenticate with Google Android Publisher / Groups API
     if (serviceAccountJson) {
-      let credentials: any;
-      try {
-        credentials = JSON.parse(serviceAccountJson);
-      } catch {
-        // If it's a file path
-        const fs = await import("node:fs");
-        credentials = JSON.parse(fs.readFileSync(serviceAccountJson, "utf8"));
-      }
+      const credentials = parseServiceAccountJson(serviceAccountJson);
 
       const { GoogleAuth } = await import("google-auth-library");
       const auth = new GoogleAuth({
@@ -295,13 +351,7 @@ export async function removeTesterFromGooglePlay(
   }
 
   try {
-    let credentials: any;
-    try {
-      credentials = JSON.parse(serviceAccountJson);
-    } catch {
-      const fs = await import("node:fs");
-      credentials = JSON.parse(fs.readFileSync(serviceAccountJson, "utf8"));
-    }
+    const credentials = parseServiceAccountJson(serviceAccountJson);
 
     if (!credentials.client_email || !credentials.private_key) {
       logger.warn("[StoreIntegration] Invalid Google Play service account JSON structure");
