@@ -711,4 +711,43 @@ export async function adminAddBetaTester(
   });
 }
 
+/**
+ * Automatically clean up and revoke expired beta testers (> 14 days)
+ * Called by background worker cron or on demand
+ */
+export async function cleanupExpiredBetaTesters() {
+  return withTransaction(async (client) => {
+    // 1. Find all active testers whose expiry date has passed
+    const expiredTesters = await client.query<any>(
+      `SELECT * FROM apk_beta_testers
+       WHERE status = 'active' AND expires_at <= current_timestamp`
+    );
+
+    let revokedCount = 0;
+
+    for (const tester of expiredTesters.rows) {
+      // If Apple TestFlight tester ID exists, revoke from Apple API
+      if (tester.platform === "ios" && tester.store_tester_id) {
+        removeTesterFromAppleTestFlight(tester.store_tester_id).catch((err) => {
+          logger.error({ err, testerId: tester.id }, "[Janitor] Failed to remove tester from Apple TestFlight");
+        });
+      }
+
+      await apkRepo.revokeBetaTester(
+        client,
+        tester.id,
+        "Expired: 14-day beta pass elapsed automatically"
+      );
+      revokedCount++;
+    }
+
+    logger.info({ revokedCount }, "[apk.service] Auto-revoked expired beta testers");
+    return {
+      revoked_count: revokedCount,
+      total_found: expiredTesters.rows.length,
+    };
+  });
+}
+
+
 
