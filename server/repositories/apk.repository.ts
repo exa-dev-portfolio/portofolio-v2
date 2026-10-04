@@ -626,17 +626,6 @@ export const listBetaTestersByAppId = async (
   return res.rows;
 };
 
-export const expireOldBetaTesters = async (
-  client: PoolClient
-): Promise<number> => {
-  const res = await client.query(
-    `UPDATE apk_beta_testers
-     SET status = 'expired', updated_at = current_timestamp
-     WHERE status = 'active' AND expires_at <= current_timestamp`
-  );
-  return res.rowCount || 0;
-};
-
 export const adminUpsertActiveTester = async (
   client: PoolClient,
   appId: string,
