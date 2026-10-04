@@ -189,6 +189,16 @@ export default defineNuxtConfig({
     jobWorkerSecret: process.env.NUXT_JOB_WORKER_SECRET,
     jobWorkerUrl: process.env.NUXT_JOB_WORKER_URL || "http://localhost:9090",
 
+    // Apple App Store Connect API (for official TestFlight invitation emails from Apple)
+    appleAscKeyId: process.env.NUXT_APPLE_ASC_KEY_ID || process.env.APPLE_ASC_KEY_ID,
+    appleAscIssuerId: process.env.NUXT_APPLE_ASC_ISSUER_ID || process.env.APPLE_ASC_ISSUER_ID,
+    appleAscPrivateKey: process.env.NUXT_APPLE_ASC_PRIVATE_KEY || process.env.APPLE_ASC_PRIVATE_KEY,
+    appleAscBetaGroupId: process.env.NUXT_APPLE_ASC_BETA_GROUP_ID || process.env.APPLE_ASC_BETA_GROUP_ID,
+
+    // Google Play Developer Console (for official Closed/Internal Testing track invites)
+    googlePlayServiceAccountJson: process.env.NUXT_GOOGLE_PLAY_SERVICE_ACCOUNT_JSON || process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON,
+    googlePlayTesterGroupEmail: process.env.NUXT_GOOGLE_PLAY_TESTER_GROUP_EMAIL || process.env.GOOGLE_PLAY_TESTER_GROUP_EMAIL,
+
     public: {
       appleClientId:
         process.env.NUXT_PUBLIC_APPLE_CLIENT_ID ||

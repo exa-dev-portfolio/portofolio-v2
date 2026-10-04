@@ -266,6 +266,26 @@ export const updateAppStatus = async (
   return res.rows[0] || null;
 };
 
+export const updateAppStoreLinks = async (
+  client: PoolClient,
+  id: string,
+  playStoreUrl: string | null | undefined,
+  testflightUrl: string | null | undefined
+): Promise<ApkAppModel | null> => {
+  const sql = `
+    UPDATE apk_apps
+    SET play_store_url = $1, testflight_url = $2, updated_at = current_timestamp
+    WHERE id = $3
+    RETURNING *
+  `;
+  const res = await client.query<ApkAppModel>(sql, [
+    playStoreUrl && playStoreUrl.trim() ? playStoreUrl.trim() : null,
+    testflightUrl && testflightUrl.trim() ? testflightUrl.trim() : null,
+    id,
+  ]);
+  return res.rows[0] || null;
+};
+
 export const updateReleaseStatus = async (
   client: PoolClient,
   id: string,
@@ -550,14 +570,16 @@ export const getOldestActiveTester = async (
 export const activateBetaTester = async (
   client: PoolClient,
   id: string,
-  expiresAt: Date
+  expiresAt: Date,
+  storeTesterId?: string | null
 ): Promise<ApkBetaTesterModel> => {
   const res = await client.query<ApkBetaTesterModel>(
     `UPDATE apk_beta_testers
-     SET status = 'active', otp_code = NULL, otp_expires_at = NULL, expires_at = $1, updated_at = current_timestamp
+     SET status = 'active', otp_code = NULL, otp_expires_at = NULL, expires_at = $1,
+         store_tester_id = COALESCE($3, store_tester_id), updated_at = current_timestamp
      WHERE id = $2
      RETURNING *`,
-    [expiresAt, id]
+    [expiresAt, id, storeTesterId || null]
   );
   return res.rows[0];
 };
@@ -614,3 +636,37 @@ export const expireOldBetaTesters = async (
   );
   return res.rowCount || 0;
 };
+
+export const adminUpsertActiveTester = async (
+  client: PoolClient,
+  appId: string,
+  email: string,
+  platform: "ios" | "android",
+  expiresAt: Date,
+  storeTesterId?: string | null
+): Promise<ApkBetaTesterModel> => {
+  const existing = await client.query<ApkBetaTesterModel>(
+    `SELECT * FROM apk_beta_testers WHERE app_id = $1 AND LOWER(email) = LOWER($2) AND platform = $3`,
+    [appId, email, platform]
+  );
+
+  if (existing.rows.length > 0) {
+    const updated = await client.query<ApkBetaTesterModel>(
+      `UPDATE apk_beta_testers
+       SET status = 'active', expires_at = $1, store_tester_id = COALESCE($3, store_tester_id), revoked_reason = NULL, otp_code = NULL, otp_expires_at = NULL, updated_at = current_timestamp
+       WHERE id = $2
+       RETURNING *`,
+      [expiresAt, existing.rows[0].id, storeTesterId || null]
+    );
+    return updated.rows[0];
+  }
+
+  const res = await client.query<ApkBetaTesterModel>(
+    `INSERT INTO apk_beta_testers (app_id, email, platform, status, expires_at, store_tester_id)
+     VALUES ($1, LOWER($2), $3, 'active', $4, $5)
+     RETURNING *`,
+    [appId, email, platform, expiresAt, storeTesterId || null]
+  );
+  return res.rows[0];
+};
+

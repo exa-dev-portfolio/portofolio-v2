@@ -90,3 +90,62 @@ export const sendBetaTesterOtp = async (
   });
 };
 
+export const sendBetaAccessApproved = async (
+  to: string,
+  appName: string,
+  platform: "ios" | "android",
+  storeUrl: string,
+  expiresAt: Date
+) => {
+  const config = useRuntimeConfig();
+  const apiKey = config.resendApiKey as string | undefined;
+  if (!apiKey) {
+    logger.warn(`[Email] RESEND_API_KEY not configured. Store invite URL for ${to} is: ${storeUrl}`);
+    return;
+  }
+
+  const resend = new Resend(apiKey);
+  const platformName = platform === "ios" ? "Apple TestFlight" : "Google Play Testing";
+  const btnColor = platform === "ios" ? "#0284c7" : "#059669";
+
+  await resend.emails.send({
+    from: `Eka Apps <no-reply@eka-dev.cloud>`,
+    to,
+    subject: `Official Store Invite: ${appName} on ${platformName}`,
+    html: `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 540px; margin: 0 auto; background-color: #0c1222; color: #f1f5f9; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <div style="background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%); padding: 24px; text-align: center;">
+          <h1 style="margin: 0; color: #ffffff; font-size: 20px; font-weight: 700;">Access Pass Activated!</h1>
+          <p style="margin: 4px 0 0 0; color: rgba(255,255,255,0.85); font-size: 13px;">${appName} • ${platformName}</p>
+        </div>
+
+        <div style="padding: 28px 24px;">
+          <p style="margin: 0 0 16px 0; font-size: 14px; line-height: 1.6; color: #cbd5e1;">
+            Your official testing pass for <strong>${appName}</strong> has been activated and is valid until <strong>${expiresAt.toLocaleDateString()}</strong>.
+          </p>
+
+          <p style="margin: 0 0 20px 0; font-size: 13px; color: #94a3b8;">
+            Click the button below on your device to accept the invitation and install directly from ${platformName}:
+          </p>
+
+          <div style="text-align: center; margin: 24px 0;">
+            <a href="${storeUrl}" target="_blank" style="background-color: ${btnColor}; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 10px; font-weight: 700; font-size: 14px; display: inline-block;">
+              Install via ${platformName}
+            </a>
+          </div>
+
+          <p style="margin: 0 0 8px 0; font-size: 12px; color: #64748b; word-break: break-all;">
+            Or copy this link into your browser: <br />
+            <a href="${storeUrl}" style="color: #38bdf8;">${storeUrl}</a>
+          </p>
+        </div>
+
+        <div style="background: #080c16; padding: 16px 24px; border-top: 1px solid rgba(255, 255, 255, 0.05); text-align: center; font-size: 11px; color: #64748b;">
+          &copy; ${new Date().getFullYear()} Eka Portfolio • Self-Hosted App Distribution Platform
+        </div>
+      </div>
+    `,
+  });
+};
+
+

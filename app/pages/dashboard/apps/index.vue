@@ -138,6 +138,28 @@
                 <span>Releases: <strong class="text-white">{{ app.release_count || 1 }}</strong></span>
                 <span>Downloads: <strong class="text-emerald-400">{{ app.download_count || 0 }}x</strong></span>
               </div>
+
+              <!-- Store Integration Badges -->
+              <div class="flex flex-wrap items-center gap-2 pt-1">
+                <span
+                  :class="[
+                    'text-[10px] px-2 py-0.5 rounded-md font-mono flex items-center gap-1 border',
+                    app.play_store_url ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25' : 'bg-white/5 text-white/40 border-white/10'
+                  ]"
+                >
+                  <Icon name="carbon:logo-google" size="12" />
+                  <span>{{ app.play_store_url ? 'Google Play Linked' : 'No Play Store Link' }}</span>
+                </span>
+                <span
+                  :class="[
+                    'text-[10px] px-2 py-0.5 rounded-md font-mono flex items-center gap-1 border',
+                    app.testflight_url ? 'bg-blue-500/10 text-blue-400 border-blue-500/25' : 'bg-white/5 text-white/40 border-white/10'
+                  ]"
+                >
+                  <Icon name="carbon:apple" size="12" />
+                  <span>{{ app.testflight_url ? 'TestFlight Linked' : 'No TestFlight Link' }}</span>
+                </span>
+              </div>
             </div>
           </div>
 
@@ -161,6 +183,16 @@
                 :class="updatingStatusId === app.id ? 'animate-spin' : ''"
               />
               <span>{{ updatingStatusId === app.id ? 'Updating...' : (app.status === 'production' ? 'Set to Development' : 'Set to Full Release') }}</span>
+            </button>
+
+            <!-- Configure Store Links -->
+            <button
+              @click="openStoreLinksModal(app)"
+              class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-medium transition-colors cursor-pointer"
+              title="Configure Official Google Play & Apple TestFlight testing links"
+            >
+              <Icon name="carbon:store" size="15" />
+              <span>Store Links</span>
             </button>
 
             <!-- Manage Beta Testers -->
@@ -509,13 +541,78 @@
         </button>
 
         <!-- Header -->
-        <div class="flex items-center gap-3 pb-4 border-b border-white/10 shrink-0">
-          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
-            <Icon name="carbon:user-multiple" size="20" />
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10 shrink-0">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+              <Icon name="carbon:user-multiple" size="20" />
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-white">Beta Testers & Store Passes</h3>
+              <p class="text-xs text-white/50">{{ testersModalApp.app_name }} • {{ testersList.length }} testers registered</p>
+            </div>
           </div>
-          <div>
-            <h3 class="text-base font-bold text-white">Beta Testers & Store Passes</h3>
-            <p class="text-xs text-white/50">{{ testersModalApp.app_name }} • {{ testersList.length }} testers registered</p>
+
+          <div class="flex items-center gap-2">
+            <button
+              @click="copyActiveEmails()"
+              class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Copy active tester emails for Google Play / App Store Console"
+            >
+              <Icon name="carbon:copy" size="14" />
+              <span>Copy Emails</span>
+            </button>
+            <button
+              @click="showAddTesterForm = !showAddTesterForm"
+              class="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Icon :name="showAddTesterForm ? 'carbon:close' : 'carbon:add'" size="14" />
+              <span>{{ showAddTesterForm ? 'Cancel' : 'Add Tester' }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Inline Add Tester Form -->
+        <div v-if="showAddTesterForm" class="p-3.5 bg-white/[0.03] border border-cyan-500/30 rounded-xl space-y-3 my-3 shrink-0">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-white flex items-center gap-1.5">
+              <Icon name="carbon:user-follow" size="15" class="text-cyan-400" />
+              <span>Grant Direct Beta Tester Pass</span>
+            </span>
+            <span class="text-[10px] text-white/50 font-mono">Bypasses public OTP</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <div class="sm:col-span-2">
+              <input
+                v-model="newTesterForm.email"
+                type="email"
+                placeholder="user@example.com"
+                class="w-full px-3 py-2 rounded-lg bg-black/40 border border-white/15 text-xs text-white placeholder:text-white/30 focus:outline-none focus:border-cyan-400 font-mono"
+              />
+            </div>
+            <div>
+              <select
+                v-model="newTesterForm.platform"
+                class="w-full px-2 py-2 rounded-lg bg-black/60 border border-white/15 text-xs text-white focus:outline-none focus:border-cyan-400"
+              >
+                <option value="android">Android (Play)</option>
+                <option value="ios">iOS (TestFlight)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between pt-1">
+            <div class="text-[11px] text-white/50">
+              Validity: <strong class="text-cyan-400">14 Days</strong>
+            </div>
+            <button
+              @click="submitAddTester"
+              :disabled="submittingNewTester || !newTesterForm.email"
+              class="px-4 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs transition-all disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+            >
+              <Icon v-if="submittingNewTester" name="carbon:renew" size="13" class="animate-spin" />
+              <span>{{ submittingNewTester ? 'Granting...' : 'Grant Pass' }}</span>
+            </button>
           </div>
         </div>
 
@@ -527,7 +624,7 @@
           </div>
 
           <div v-else-if="testersList.length === 0" class="p-8 text-center text-xs text-white/50">
-            No beta testers registered for this app yet.
+            No beta testers registered for this app yet. Click "Add Tester" above or let users verify via /apps.
           </div>
 
           <div v-else class="divide-y divide-white/5 font-mono text-xs">
@@ -587,6 +684,84 @@
         </div>
       </div>
     </div>
+
+    <!-- Configure Store Links Modal -->
+    <div
+      v-if="storeLinksModalApp"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+      @click.self="storeLinksModalApp = null"
+    >
+      <div class="bg-[#0c1222] border border-white/10 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative">
+        <button
+          @click="storeLinksModalApp = null"
+          class="absolute top-4 right-4 text-white/40 hover:text-white transition-colors cursor-pointer"
+        >
+          <Icon name="carbon:close" size="20" />
+        </button>
+
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+            <Icon name="carbon:store" size="22" />
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Configure Store Testing Links</h3>
+            <p class="text-xs text-white/50">{{ storeLinksModalApp.app_name }} • {{ storeLinksModalApp.package_name }}</p>
+          </div>
+        </div>
+
+        <p class="text-xs text-white/60 mb-5 leading-relaxed">
+          Provide your official Google Play Closed/Internal Testing URL and Apple TestFlight public invite URL. Verified testers will automatically receive these links to install on their devices.
+        </p>
+
+        <form @submit.prevent="saveStoreLinks" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-white/80 mb-1 flex items-center gap-1.5">
+              <Icon name="carbon:logo-google" size="14" class="text-emerald-400" />
+              <span>Google Play Testing Track URL</span>
+            </label>
+            <input
+              v-model="storeLinksForm.play_store_url"
+              type="url"
+              placeholder="https://play.google.com/apps/testing/com.yourcompany.app"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/15 text-xs text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-purple-500"
+            />
+            <p class="text-[10px] text-white/40 mt-1">From Google Play Console &gt; Testing &gt; Closed testing &gt; Join on Android / Web URL.</p>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-white/80 mb-1 flex items-center gap-1.5">
+              <Icon name="carbon:apple" size="14" class="text-blue-400" />
+              <span>Apple TestFlight Public Invite URL</span>
+            </label>
+            <input
+              v-model="storeLinksForm.testflight_url"
+              type="url"
+              placeholder="https://testflight.apple.com/join/AbCd123"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/15 text-xs text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-purple-500"
+            />
+            <p class="text-[10px] text-white/40 mt-1">From App Store Connect &gt; TestFlight &gt; Public Link (or direct App Store URL).</p>
+          </div>
+
+          <div class="pt-3 border-t border-white/10 flex items-center justify-end gap-2.5">
+            <button
+              type="button"
+              @click="storeLinksModalApp = null"
+              class="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-white/70 transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              :disabled="savingStoreLinks"
+              class="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs transition-all flex items-center gap-1.5 cursor-pointer shadow-lg shadow-purple-500/20 disabled:opacity-50"
+            >
+              <Icon v-if="savingStoreLinks" name="carbon:renew" size="14" class="animate-spin" />
+              <span>{{ savingStoreLinks ? 'Saving...' : 'Save Store Links' }}</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -636,6 +811,21 @@ const deleting = ref(false);
 const testersModalApp = ref<any>(null);
 const testersList = ref<any[]>([]);
 const loadingTesters = ref(false);
+const showAddTesterForm = ref(false);
+const newTesterForm = ref({
+  email: "",
+  platform: "android" as "ios" | "android",
+  days: 14,
+});
+const submittingNewTester = ref(false);
+
+// Store links modal state
+const storeLinksModalApp = ref<any>(null);
+const storeLinksForm = ref({
+  play_store_url: "",
+  testflight_url: "",
+});
+const savingStoreLinks = ref(false);
 
 const form = ref({
   repo_slug: "",
@@ -714,6 +904,67 @@ const revokeTester = async (tester: any) => {
   } catch (err: any) {
     toast.showErrorToast("Revoke Failed", err.response?.data?.message || "Error revoking tester access");
   }
+};
+
+const openStoreLinksModal = (app: any) => {
+  storeLinksModalApp.value = app;
+  storeLinksForm.value = {
+    play_store_url: app.play_store_url || "",
+    testflight_url: app.testflight_url || "",
+  };
+};
+
+const saveStoreLinks = async () => {
+  if (!storeLinksModalApp.value) return;
+  savingStoreLinks.value = true;
+  try {
+    await $axios.patch(`/api/v1/admin/apk/apps/${storeLinksModalApp.value.id}/store-links`, {
+      play_store_url: storeLinksForm.value.play_store_url?.trim() || null,
+      testflight_url: storeLinksForm.value.testflight_url?.trim() || null,
+    });
+    storeLinksModalApp.value.play_store_url = storeLinksForm.value.play_store_url?.trim() || null;
+    storeLinksModalApp.value.testflight_url = storeLinksForm.value.testflight_url?.trim() || null;
+    toast.showSuccessToast("Store Links Saved", "Google Play and TestFlight URLs updated successfully");
+    storeLinksModalApp.value = null;
+  } catch (err: any) {
+    toast.showErrorToast("Save Failed", err.response?.data?.message || "Failed to update store links");
+  } finally {
+    savingStoreLinks.value = false;
+  }
+};
+
+const submitAddTester = async () => {
+  if (!testersModalApp.value || !newTesterForm.value.email) return;
+  submittingNewTester.value = true;
+  try {
+    await $axios.post(`/api/v1/admin/apk/apps/${testersModalApp.value.id}/testers`, {
+      email: newTesterForm.value.email.trim(),
+      platform: newTesterForm.value.platform,
+      days: Number(newTesterForm.value.days) || 14,
+    });
+    toast.showSuccessToast("Tester Added", `Granted 14-day pass to ${newTesterForm.value.email}`);
+    newTesterForm.value.email = "";
+    showAddTesterForm.value = false;
+    const refreshed = await $axios.get(`/api/v1/admin/apk/apps/${testersModalApp.value.id}/testers`);
+    testersList.value = refreshed.data?.data || [];
+  } catch (err: any) {
+    toast.showErrorToast("Add Failed", err.response?.data?.message || "Failed to add tester");
+  } finally {
+    submittingNewTester.value = false;
+  }
+};
+
+const copyActiveEmails = () => {
+  const active = testersList.value
+    .filter((t) => t.status === "active")
+    .map((t) => t.email);
+  if (active.length === 0) {
+    toast.showErrorToast("No Emails", "No active tester emails to copy");
+    return;
+  }
+  const text = active.join(", ");
+  navigator.clipboard.writeText(text);
+  toast.showSuccessToast("Copied to Clipboard", `Copied ${active.length} active tester email(s) for Play Console / TestFlight`);
 };
 
 const openRegisterModal = () => {

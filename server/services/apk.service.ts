@@ -7,8 +7,14 @@ import type {
 } from "~~/server/model/apk.model";
 import * as apkRepo from "~~/server/repositories/apk.repository";
 import { logger } from "~~/server/utils/logger";
-import { sendBetaTesterOtp } from "~~/server/lib/email";
+import { sendBetaTesterOtp, sendBetaAccessApproved } from "~~/server/lib/email";
 import { get as redisGet, set as redisSet } from "~~/server/db/redis";
+import {
+  addTesterToAppleTestFlight,
+  removeTesterFromAppleTestFlight,
+  addTesterToGooglePlay,
+  removeTesterFromGooglePlay,
+} from "./storeIntegration.service";
 
 const getWorkerConfig = () => {
   const config = useRuntimeConfig();
@@ -547,22 +553,53 @@ export async function verifyBetaAccessOtp(
           candidateToEvict.id,
           "Slot recycled: auto-evicted to accommodate new tester (FIFO policy)"
         );
+
+        // Revoke from Apple TestFlight if candidate had a store tester ID
+        if (platform === "ios" && candidateToEvict.store_tester_id) {
+          removeTesterFromAppleTestFlight(candidateToEvict.store_tester_id).catch(() => {});
+        } else if (platform === "android") {
+          removeTesterFromGooglePlay(candidateToEvict.email, app.package_name).catch(() => {});
+        }
+
         logger.info(
           `[Beta] Auto-evicted tester ${candidateToEvict.email} (${platform}) to free slot for ${cleanEmail}`
         );
       }
     }
 
+    // Call official Apple/Google Store API to add the tester
+    // When Apple TestFlight API accepts, Apple itself sends the official invitation email to the tester!
+    let storeTesterId: string | null = null;
+    let isDirectStoreInviteSent = false;
+    let storeMessage = "";
+
+    if (platform === "ios") {
+      const appleRes = await addTesterToAppleTestFlight(cleanEmail);
+      storeTesterId = appleRes.storeTesterId || null;
+      isDirectStoreInviteSent = appleRes.isDirectStoreInviteSent;
+      storeMessage = appleRes.message || "";
+    } else {
+      const googleRes = await addTesterToGooglePlay(cleanEmail, app.package_name);
+      isDirectStoreInviteSent = googleRes.isDirectStoreInviteSent;
+      storeMessage = googleRes.message || "";
+    }
+
     // Activate 14-day demo pass
     const expiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000); // 14 days
-    const activated = await apkRepo.activateBetaTester(client, tester.id, expiresAt);
+    const activated = await apkRepo.activateBetaTester(client, tester.id, expiresAt, storeTesterId);
+
+    const storeUrl = platform === "ios" ? app.testflight_url : app.play_store_url;
 
     return {
       success: true,
       email: cleanEmail,
       platform,
       expires_at: expiresAt,
-      message: `Verification successful! Your official store invite (${platform === "ios" ? "Apple TestFlight" : "Google Play Track"}) is now active for 14 days.`,
+      store_url: storeUrl || null,
+      is_direct_store_invite_sent: isDirectStoreInviteSent,
+      message: isDirectStoreInviteSent
+        ? `Official invite dispatched directly by ${platform === "ios" ? "Apple TestFlight" : "Google Play"} to ${cleanEmail}.`
+        : `Verification successful! Your official store invite (${platform === "ios" ? "Apple TestFlight" : "Google Play Track"}) is now active for 14 days.`,
     };
   });
 }
@@ -609,7 +646,69 @@ export async function adminRevokeBetaTester(testerId: string, reason?: string) {
     if (!updated) {
       throw new HttpError(404, "Beta tester not found");
     }
+
+    // Call store API to revoke from Apple/Google
+    if (updated.platform === "ios" && updated.store_tester_id) {
+      removeTesterFromAppleTestFlight(updated.store_tester_id).catch(() => {});
+    }
+
     return updated;
   });
 }
+
+/**
+ * Update app official store links (Play Store & TestFlight)
+ */
+export async function updateAppStoreLinks(
+  appId: string,
+  playStoreUrl?: string | null,
+  testflightUrl?: string | null
+) {
+  return withTransaction(async (client) => {
+    const updated = await apkRepo.updateAppStoreLinks(client, appId, playStoreUrl, testflightUrl);
+    if (!updated) {
+      throw new HttpError(404, "App not found");
+    }
+    return updated;
+  });
+}
+
+/**
+ * Admin manually adds a beta tester directly without OTP
+ */
+export async function adminAddBetaTester(
+  appId: string,
+  email: string,
+  platform: "ios" | "android",
+  days: number = 14
+) {
+  const cleanEmail = email.trim().toLowerCase();
+  return withTransaction(async (client) => {
+    const app = await apkRepo.getAppById(client, appId);
+    if (!app) {
+      throw new HttpError(404, "App not found");
+    }
+
+    let storeTesterId: string | null = null;
+    if (platform === "ios") {
+      const appleRes = await addTesterToAppleTestFlight(cleanEmail);
+      storeTesterId = appleRes.storeTesterId || null;
+    } else {
+      await addTesterToGooglePlay(cleanEmail, app.package_name);
+    }
+
+    const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+    const tester = await apkRepo.adminUpsertActiveTester(
+      client,
+      appId,
+      cleanEmail,
+      platform,
+      expiresAt,
+      storeTesterId
+    );
+
+    return tester;
+  });
+}
+
 

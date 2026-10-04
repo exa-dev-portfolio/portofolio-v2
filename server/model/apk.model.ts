@@ -51,6 +51,8 @@ export interface ApkAppModel {
   latest_version_code: number;
   latest_version_name: string | null;
   status: "development" | "production";
+  play_store_url?: string | null;
+  testflight_url?: string | null;
   is_published: boolean;
   download_count: number;
   created_at: string;
@@ -58,6 +60,17 @@ export interface ApkAppModel {
   repo_slug?: string;
   release_count?: number;
 }
+
+export const updateStoreLinksSchema = z.object({
+  play_store_url: z.string().nullable().optional(),
+  testflight_url: z.string().nullable().optional(),
+});
+
+export const adminAddTesterSchema = z.object({
+  email: z.string().email("Invalid email address").max(255),
+  platform: z.enum(["ios", "android"]),
+  days: z.number().int().min(1).max(90).optional().default(14),
+});
 
 export interface ApkReleaseModel {
   id: string;
@@ -111,6 +124,7 @@ export interface ApkBetaTesterModel {
   email: string;
   platform: "ios" | "android";
   status: "pending_otp" | "active" | "revoked" | "expired";
+  store_tester_id?: string | null;
   otp_code: string | null;
   otp_expires_at: string | null;
   otp_attempts: number;
