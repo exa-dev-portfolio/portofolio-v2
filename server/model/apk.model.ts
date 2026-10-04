@@ -93,3 +93,32 @@ export interface ApkSyncJobModel {
   created_at: string;
   updated_at: string;
 }
+
+export const requestBetaOtpSchema = z.object({
+  email: z.string().email("Invalid email address").max(255),
+  platform: z.enum(["ios", "android"]),
+});
+
+export const verifyBetaOtpSchema = z.object({
+  email: z.string().email("Invalid email address").max(255),
+  platform: z.enum(["ios", "android"]),
+  otp: z.string().min(6, "OTP must be 6 digits").max(6, "OTP must be 6 digits"),
+});
+
+export interface ApkBetaTesterModel {
+  id: string;
+  app_id: string;
+  email: string;
+  platform: "ios" | "android";
+  status: "pending_otp" | "active" | "revoked" | "expired";
+  otp_code: string | null;
+  otp_expires_at: string | null;
+  otp_attempts: number;
+  revoked_reason: string | null;
+  expires_at: string | null;
+  created_at: string;
+  updated_at: string;
+  app_name?: string;
+  package_name?: string;
+}
+

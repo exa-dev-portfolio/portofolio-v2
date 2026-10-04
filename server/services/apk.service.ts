@@ -7,6 +7,8 @@ import type {
 } from "~~/server/model/apk.model";
 import * as apkRepo from "~~/server/repositories/apk.repository";
 import { logger } from "~~/server/utils/logger";
+import { sendBetaTesterOtp } from "~~/server/lib/email";
+import { get as redisGet, set as redisSet } from "~~/server/db/redis";
 
 const getWorkerConfig = () => {
   const config = useRuntimeConfig();
@@ -379,3 +381,235 @@ export async function getDownloadRelease(packageName: string, versionCode?: numb
     return { app, release };
   });
 }
+
+// ==========================================
+// OFFICIAL STORE ACCESS & BETA ONBOARDING
+// ==========================================
+
+const MAX_BETA_SLOTS_PER_PLATFORM = 50;
+
+const DISPOSABLE_EMAIL_DOMAINS = new Set([
+  "mailinator.com",
+  "tempmail.com",
+  "10minutemail.com",
+  "guerrillamail.com",
+  "trashmail.com",
+  "yopmail.com",
+  "sharklasers.com",
+  "getairmail.com",
+  "dispostable.com",
+  "temp-mail.org",
+]);
+
+function isDisposableEmail(email: string): boolean {
+  const domain = email.split("@")[1]?.toLowerCase();
+  return domain ? DISPOSABLE_EMAIL_DOMAINS.has(domain) : false;
+}
+
+/**
+ * Request OTP for Official Store (TestFlight / Google Play) beta testing access
+ */
+export async function requestBetaAccessOtp(
+  packageName: string,
+  platform: "ios" | "android",
+  email: string,
+  clientIp?: string
+) {
+  const cleanEmail = email.trim().toLowerCase();
+
+  // Edge case 1: Reject burner / disposable emails
+  if (isDisposableEmail(cleanEmail)) {
+    throw new HttpError(
+      400,
+      "INVALID_EMAIL",
+      "Temporary / disposable emails are not permitted for official store access."
+    );
+  }
+
+  // Edge case 2: Rate limit by IP (max 3 requests per 15 minutes)
+  if (clientIp) {
+    const rateLimitKey = `rate:beta_otp:${clientIp}`;
+    const currentCount = await redisGet(rateLimitKey);
+    const count = currentCount ? parseInt(currentCount, 10) : 0;
+    if (count >= 3) {
+      throw new HttpError(
+        429,
+        "RATE_LIMIT_EXCEEDED",
+        "Too many verification requests. Please wait 15 minutes before trying again."
+      );
+    }
+    await redisSet(rateLimitKey, String(count + 1), 900); // 15 mins
+  }
+
+  return withTransaction(async (client) => {
+    const app = await apkRepo.getAppByPackageName(client, packageName);
+    if (!app) {
+      throw new HttpError(404, `App "${packageName}" not found`);
+    }
+
+    // Check if user is ALREADY active and not expired
+    const existing = await apkRepo.findBetaTester(client, app.id, cleanEmail, platform);
+    if (
+      existing &&
+      existing.status === "active" &&
+      existing.expires_at &&
+      new Date(existing.expires_at) > new Date()
+    ) {
+      return {
+        already_active: true,
+        expires_at: existing.expires_at,
+        message: `You already have active beta access for ${app.app_name} (${platform === "ios" ? "TestFlight" : "Google Play"}) until ${new Date(existing.expires_at).toLocaleDateString()}.`,
+      };
+    }
+
+    // Generate 6-digit cryptographic OTP code
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    await apkRepo.upsertBetaTesterOtp(
+      client,
+      app.id,
+      cleanEmail,
+      platform,
+      otpCode,
+      otpExpiresAt
+    );
+
+    // Send confirmation email via Resend
+    await sendBetaTesterOtp(cleanEmail, app.app_name, platform, otpCode);
+
+    return {
+      already_active: false,
+      message: `A 6-digit confirmation code has been sent to ${cleanEmail}. Please enter it to verify.`,
+    };
+  });
+}
+
+/**
+ * Verify OTP, apply auto-eviction if full, and activate 14-day beta pass
+ */
+export async function verifyBetaAccessOtp(
+  packageName: string,
+  platform: "ios" | "android",
+  email: string,
+  otpCode: string
+) {
+  const cleanEmail = email.trim().toLowerCase();
+
+  return withTransaction(async (client) => {
+    const app = await apkRepo.getAppByPackageName(client, packageName);
+    if (!app) {
+      throw new HttpError(404, `App "${packageName}" not found`);
+    }
+
+    const tester = await apkRepo.findBetaTester(client, app.id, cleanEmail, platform);
+    if (!tester) {
+      throw new HttpError(400, "NO_REQUEST_FOUND", "No pending verification request found for this email. Please request a new code.");
+    }
+
+    // Check attempts limit (max 5 failed attempts)
+    if (tester.otp_attempts >= 5) {
+      throw new HttpError(
+        400,
+        "MAX_ATTEMPTS_EXCEEDED",
+        "Too many failed verification attempts. Please request a new confirmation code."
+      );
+    }
+
+    // Check expiry
+    if (!tester.otp_expires_at || new Date(tester.otp_expires_at) < new Date()) {
+      throw new HttpError(
+        400,
+        "OTP_EXPIRED",
+        "Your verification code has expired. Please request a new code."
+      );
+    }
+
+    // Validate OTP
+    if (tester.otp_code !== otpCode.trim()) {
+      await apkRepo.incrementTesterOtpAttempts(client, tester.id);
+      throw new HttpError(
+        400,
+        "INVALID_OTP",
+        "Incorrect verification code. Please check your email and try again."
+      );
+    }
+
+    // Check active tester slot capacity
+    const activeCount = await apkRepo.countActiveTesters(client, app.id, platform);
+
+    // If slots are 100% full, auto-evict the oldest or expired tester (FIFO / LRU recycling)
+    if (activeCount >= MAX_BETA_SLOTS_PER_PLATFORM) {
+      const candidateToEvict = await apkRepo.getOldestActiveTester(client, app.id, platform);
+      if (candidateToEvict) {
+        await apkRepo.revokeBetaTester(
+          client,
+          candidateToEvict.id,
+          "Slot recycled: auto-evicted to accommodate new tester (FIFO policy)"
+        );
+        logger.info(
+          `[Beta] Auto-evicted tester ${candidateToEvict.email} (${platform}) to free slot for ${cleanEmail}`
+        );
+      }
+    }
+
+    // Activate 14-day demo pass
+    const expiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000); // 14 days
+    const activated = await apkRepo.activateBetaTester(client, tester.id, expiresAt);
+
+    return {
+      success: true,
+      email: cleanEmail,
+      platform,
+      expires_at: expiresAt,
+      message: `Verification successful! Your official store invite (${platform === "ios" ? "Apple TestFlight" : "Google Play Track"}) is now active for 14 days.`,
+    };
+  });
+}
+
+/**
+ * Get live slot availability for public showcase
+ */
+export async function getBetaSlotInfo(packageName: string, platform: "ios" | "android") {
+  return withTransaction(async (client) => {
+    const app = await apkRepo.getAppByPackageName(client, packageName);
+    if (!app) {
+      throw new HttpError(404, `App "${packageName}" not found`);
+    }
+
+    const activeTesters = await apkRepo.countActiveTesters(client, app.id, platform);
+    return {
+      platform,
+      max_slots: MAX_BETA_SLOTS_PER_PLATFORM,
+      active_testers: activeTesters,
+      remaining_slots: Math.max(0, MAX_BETA_SLOTS_PER_PLATFORM - activeTesters),
+    };
+  });
+}
+
+/**
+ * List beta testers for an app (admin dashboard)
+ */
+export async function listBetaTesters(appId: string) {
+  return withTransaction(async (client) => {
+    return await apkRepo.listBetaTestersByAppId(client, appId);
+  });
+}
+
+/**
+ * Admin manually revokes a tester
+ */
+export async function adminRevokeBetaTester(testerId: string, reason?: string) {
+  return withTransaction(async (client) => {
+    const updated = await apkRepo.revokeBetaTester(
+      client,
+      testerId,
+      reason || "Manually revoked by administrator"
+    );
+    if (!updated) {
+      throw new HttpError(404, "Beta tester not found");
+    }
+    return updated;
+  });
+}
+

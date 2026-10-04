@@ -209,24 +209,33 @@
             <!-- Direct Download Button -->
             <a
               :href="`/api/v1/apps/${app.package_name}/download`"
-              class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium text-sm shadow-lg shadow-cyan-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium text-sm shadow-lg shadow-cyan-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
             >
               <UIcon name="i-carbon-download" class="w-4 h-4" />
               <span>Download APK</span>
             </a>
 
+            <!-- Official Store Channels (TestFlight / Google Play) -->
+            <button
+              @click="openBetaModal(app)"
+              class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-white text-xs font-semibold border border-white/10 hover:border-cyan-500/30 transition-all cursor-pointer"
+            >
+              <UIcon name="i-carbon-badge" class="w-3.5 h-3.5 text-cyan-400" />
+              <span>Official Store Invite (iOS & Android)</span>
+            </button>
+
             <!-- Secondary Actions: QR Code & Details -->
             <div class="grid grid-cols-2 gap-2">
               <button
                 @click="openQrModal(app)"
-                class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 text-xs font-medium border border-white/5 transition-colors"
+                class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 text-xs font-medium border border-white/5 transition-colors cursor-pointer"
               >
                 <UIcon name="i-carbon-qr-code" class="w-3.5 h-3.5 text-cyan-400" />
                 <span>Scan QR</span>
               </button>
               <button
                 @click="openDetailModal(app)"
-                class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 text-xs font-medium border border-white/5 transition-colors"
+                class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 text-xs font-medium border border-white/5 transition-colors cursor-pointer"
               >
                 <UIcon name="i-carbon-document-view" class="w-3.5 h-3.5 text-blue-400" />
                 <span>Changelog</span>
@@ -429,13 +438,198 @@
           <div class="text-xs text-slate-400">
             Total app downloads: <span class="text-emerald-400 font-bold font-mono">{{ selectedAppDetail.download_count }}x</span>
           </div>
-          <a
-            :href="`/api/v1/apps/${selectedAppDetail.package_name}/download`"
-            class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-semibold shadow-lg shadow-cyan-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-1.5 cursor-pointer"
+          <div class="flex items-center gap-2">
+            <button
+              @click="openBetaModal(selectedAppDetail)"
+              class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-white/10 transition-colors flex items-center gap-1.5 cursor-pointer"
+            >
+              <UIcon name="i-carbon-badge" class="w-4 h-4 text-cyan-400" />
+              <span>Store Invite</span>
+            </button>
+            <a
+              :href="`/api/v1/apps/${selectedAppDetail.package_name}/download`"
+              class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-semibold shadow-lg shadow-cyan-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <UIcon name="i-carbon-download" class="w-4 h-4" />
+              <span>Download APK</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Official Store Invite Modal -->
+    <div
+      v-if="betaModalApp"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm"
+      @click.self="closeBetaModal"
+    >
+      <div class="bg-slate-900 border border-white/10 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+        <button
+          @click="closeBetaModal"
+          class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors cursor-pointer"
+        >
+          <UIcon name="i-carbon-close" class="w-5 h-5" />
+        </button>
+
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+            <UIcon name="i-carbon-security" class="w-5 h-5" />
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Official Store Invite</h3>
+            <p class="text-xs text-slate-400">{{ betaModalApp.app_name }} • 14-Day Testing Pass</p>
+          </div>
+        </div>
+
+        <!-- Step 1: Choose platform & Input Email -->
+        <div v-if="betaStep === 1" class="space-y-4">
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Get an official invite sent directly to your inbox to install securely via Apple TestFlight or Google Play Testing Track.
+          </p>
+
+          <!-- Platform Selector Tabs -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Select Your Platform</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                @click="setBetaPlatform('ios')"
+                :class="[
+                  'p-3 rounded-xl border text-left transition-all cursor-pointer',
+                  betaPlatform === 'ios'
+                    ? 'bg-cyan-500/10 border-cyan-500 text-white shadow-sm'
+                    : 'bg-slate-950/50 border-white/10 text-slate-400 hover:border-white/20'
+                ]"
+              >
+                <div class="flex items-center gap-2 font-semibold text-xs mb-1">
+                  <UIcon name="i-carbon-apple" class="w-4 h-4 text-cyan-400" />
+                  <span>iOS TestFlight</span>
+                </div>
+                <div class="text-[10px] text-slate-400 font-mono">
+                  {{ iosSlots.remaining }} / {{ iosSlots.max }} slots free
+                </div>
+              </button>
+
+              <button
+                type="button"
+                @click="setBetaPlatform('android')"
+                :class="[
+                  'p-3 rounded-xl border text-left transition-all cursor-pointer',
+                  betaPlatform === 'android'
+                    ? 'bg-cyan-500/10 border-cyan-500 text-white shadow-sm'
+                    : 'bg-slate-950/50 border-white/10 text-slate-400 hover:border-white/20'
+                ]"
+              >
+                <div class="flex items-center gap-2 font-semibold text-xs mb-1">
+                  <UIcon name="i-carbon-logo-google" class="w-4 h-4 text-emerald-400" />
+                  <span>Google Play</span>
+                </div>
+                <div class="text-[10px] text-slate-400 font-mono">
+                  {{ androidSlots.remaining }} / {{ androidSlots.max }} slots free
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Email Input -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">
+              {{ betaPlatform === 'ios' ? 'Apple ID / Email *' : 'Google Account Email *' }}
+            </label>
+            <input
+              v-model="betaEmail"
+              type="email"
+              required
+              placeholder="e.g. name@example.com"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors"
+            />
+            <p class="text-[11px] text-slate-500 mt-1">
+              A 6-digit confirmation code will be sent to verify your email.
+            </p>
+          </div>
+
+          <div v-if="betaError" class="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+            {{ betaError }}
+          </div>
+
+          <button
+            @click="submitRequestOtp"
+            :disabled="betaLoading || !betaEmail"
+            class="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold text-xs transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-cyan-500/20"
           >
-            <UIcon name="i-carbon-download" class="w-4 h-4" />
-            <span>Download APK</span>
-          </a>
+            <UIcon v-if="betaLoading" name="i-carbon-renew" class="w-4 h-4 animate-spin" />
+            <span>{{ betaLoading ? 'Sending Confirmation Code...' : 'Send Verification Code' }}</span>
+          </button>
+        </div>
+
+        <!-- Step 2: OTP Verification -->
+        <div v-else-if="betaStep === 2" class="space-y-4">
+          <p class="text-xs text-slate-300 leading-relaxed">
+            We sent a 6-digit code to <strong class="text-white">{{ betaEmail }}</strong>. Enter it below to activate your 14-day official pass:
+          </p>
+
+          <div>
+            <input
+              v-model="betaOtp"
+              type="text"
+              maxlength="6"
+              placeholder="123456"
+              class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-cyan-500/40 text-center font-mono font-bold text-xl tracking-[0.4em] text-cyan-300 focus:outline-none focus:border-cyan-400"
+            />
+          </div>
+
+          <div v-if="betaError" class="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+            {{ betaError }}
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button
+              @click="submitVerifyOtp"
+              :disabled="betaLoading || betaOtp.length !== 6"
+              class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold text-xs transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-cyan-500/20"
+            >
+              <UIcon v-if="betaLoading" name="i-carbon-renew" class="w-4 h-4 animate-spin" />
+              <span>{{ betaLoading ? 'Verifying...' : 'Verify & Activate Pass' }}</span>
+            </button>
+            <button
+              @click="betaStep = 1"
+              class="px-3 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs hover:bg-slate-700 transition-colors cursor-pointer"
+            >
+              Back
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 3: Success Confirmation -->
+        <div v-else-if="betaStep === 3" class="text-center space-y-4 py-2">
+          <div class="w-14 h-14 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-400">
+            <UIcon name="i-carbon-checkmark-filled" class="w-8 h-8" />
+          </div>
+
+          <div>
+            <h4 class="text-base font-bold text-white mb-1">Access Pass Activated!</h4>
+            <p class="text-xs text-slate-300 leading-relaxed max-w-sm mx-auto">
+              {{ betaSuccessMessage }}
+            </p>
+          </div>
+
+          <div class="p-3 bg-slate-950/80 rounded-xl border border-white/5 text-left text-xs space-y-1 font-mono">
+            <div>Platform: <strong class="text-white">{{ betaPlatform === 'ios' ? 'Apple TestFlight' : 'Google Play Track' }}</strong></div>
+            <div>Valid Until: <strong class="text-emerald-400">{{ formatDate(betaExpiresAt) }}</strong> (14 Days)</div>
+            <div>Recipient: <strong class="text-slate-300">{{ betaEmail }}</strong></div>
+          </div>
+
+          <p class="text-[11px] text-slate-400 italic">
+            Check your inbox now for the official email from {{ betaPlatform === 'ios' ? 'Apple' : 'Google' }} to complete device installation.
+          </p>
+
+          <button
+            @click="closeBetaModal"
+            class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition-colors cursor-pointer"
+          >
+            Done
+          </button>
         </div>
       </div>
     </div>
@@ -472,6 +666,20 @@ const selectedAppDetail = ref<any>(null);
 const selectedReleaseIndex = ref(0);
 const loadingDetail = ref(false);
 const copied = ref(false);
+
+// Beta Tester Modal State
+const betaModalApp = ref<any>(null);
+const betaStep = ref(1);
+const betaPlatform = ref<"ios" | "android">("ios");
+const betaEmail = ref("");
+const betaOtp = ref("");
+const betaLoading = ref(false);
+const betaError = ref<string | null>(null);
+const betaSuccessMessage = ref("");
+const betaExpiresAt = ref<string | null>(null);
+
+const iosSlots = ref({ remaining: 50, max: 50 });
+const androidSlots = ref({ remaining: 50, max: 50 });
 
 const selectedStatusFilter = ref<"all" | "production" | "development">("all");
 
@@ -562,6 +770,106 @@ const copyUrl = (text: string) => {
     setTimeout(() => {
       copied.value = false;
     }, 2000);
+  }
+};
+
+const openBetaModal = async (app: any) => {
+  betaModalApp.value = app;
+  betaStep.value = 1;
+  betaEmail.value = "";
+  betaOtp.value = "";
+  betaError.value = null;
+  betaPlatform.value = "ios";
+  await fetchBetaSlots(app);
+};
+
+const closeBetaModal = () => {
+  betaModalApp.value = null;
+  betaStep.value = 1;
+  betaEmail.value = "";
+  betaOtp.value = "";
+  betaError.value = null;
+};
+
+const setBetaPlatform = (platform: "ios" | "android") => {
+  betaPlatform.value = platform;
+  betaError.value = null;
+};
+
+const fetchBetaSlots = async (app: any) => {
+  try {
+    const [iosRes, androidRes] = await Promise.all([
+      $fetch<any>(`/api/v1/apps/${app.package_name}/beta/slots?platform=ios`),
+      $fetch<any>(`/api/v1/apps/${app.package_name}/beta/slots?platform=android`),
+    ]);
+    if (iosRes?.data) {
+      iosSlots.value = {
+        remaining: iosRes.data.remaining_slots,
+        max: iosRes.data.max_slots,
+      };
+    }
+    if (androidRes?.data) {
+      androidSlots.value = {
+        remaining: androidRes.data.remaining_slots,
+        max: androidRes.data.max_slots,
+      };
+    }
+  } catch (err) {
+    console.error("Failed to fetch beta slot info:", err);
+  }
+};
+
+const submitRequestOtp = async () => {
+  if (!betaEmail.value || !betaModalApp.value) return;
+  betaLoading.value = true;
+  betaError.value = null;
+  try {
+    const res = await $fetch<any>(`/api/v1/apps/${betaModalApp.value.package_name}/beta/request-otp`, {
+      method: "POST",
+      body: {
+        email: betaEmail.value,
+        platform: betaPlatform.value,
+      },
+    });
+
+    if (res?.data?.already_active) {
+      betaSuccessMessage.value = res.data.message;
+      betaExpiresAt.value = res.data.expires_at;
+      betaStep.value = 3;
+    } else {
+      betaStep.value = 2;
+    }
+  } catch (err: any) {
+    betaError.value = err?.data?.message || err?.message || "Failed to send verification code";
+  } finally {
+    betaLoading.value = false;
+  }
+};
+
+const submitVerifyOtp = async () => {
+  if (!betaOtp.value || betaOtp.value.length !== 6 || !betaModalApp.value) return;
+  betaLoading.value = true;
+  betaError.value = null;
+  try {
+    const res = await $fetch<any>(`/api/v1/apps/${betaModalApp.value.package_name}/beta/verify-otp`, {
+      method: "POST",
+      body: {
+        email: betaEmail.value,
+        platform: betaPlatform.value,
+        otp: betaOtp.value,
+      },
+    });
+
+    betaSuccessMessage.value = res?.data?.message || "Beta pass activated successfully!";
+    betaExpiresAt.value = res?.data?.expires_at || null;
+    betaStep.value = 3;
+    if (betaModalApp.value) {
+      fetchBetaSlots(betaModalApp.value);
+    }
+  } catch (err: any) {
+    betaError.value = err?.data?.message || err?.message || "Invalid or expired verification code";
+  } finally {
+    betaLoading.value = false;
   }
 };
 </script>

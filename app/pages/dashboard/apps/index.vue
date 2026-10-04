@@ -163,6 +163,16 @@
               <span>{{ updatingStatusId === app.id ? 'Updating...' : (app.status === 'production' ? 'Set to Development' : 'Set to Full Release') }}</span>
             </button>
 
+            <!-- Manage Beta Testers -->
+            <button
+              @click="openTestersModal(app)"
+              class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-medium transition-colors cursor-pointer"
+              title="Manage Official Store Beta Testers"
+            >
+              <Icon name="carbon:user-multiple" size="15" />
+              <span>Testers</span>
+            </button>
+
             <!-- Test Download -->
             <a
               :href="`/api/v1/apps/${app.package_name}/download`"
@@ -483,6 +493,100 @@
         </div>
       </div>
     </div>
+
+    <!-- Beta Testers Management Modal -->
+    <div
+      v-if="testersModalApp"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm"
+      @click.self="testersModalApp = null"
+    >
+      <div class="bg-[#0c1222] border border-white/10 rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative max-h-[85vh] flex flex-col">
+        <button
+          @click="testersModalApp = null"
+          class="absolute top-4 right-4 text-white/50 hover:text-white transition-colors cursor-pointer z-10"
+        >
+          <Icon name="carbon:close" size="20" />
+        </button>
+
+        <!-- Header -->
+        <div class="flex items-center gap-3 pb-4 border-b border-white/10 shrink-0">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+            <Icon name="carbon:user-multiple" size="20" />
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Beta Testers & Store Passes</h3>
+            <p class="text-xs text-white/50">{{ testersModalApp.app_name }} • {{ testersList.length }} testers registered</p>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="py-4 overflow-y-auto space-y-3">
+          <div v-if="loadingTesters" class="p-8 text-center text-xs text-white/50">
+            <Icon name="carbon:renew" size="18" class="animate-spin mx-auto mb-2 text-cyan-400" />
+            <span>Loading testers...</span>
+          </div>
+
+          <div v-else-if="testersList.length === 0" class="p-8 text-center text-xs text-white/50">
+            No beta testers registered for this app yet.
+          </div>
+
+          <div v-else class="divide-y divide-white/5 font-mono text-xs">
+            <div
+              v-for="t in testersList"
+              :key="t.id"
+              class="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+            >
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <span class="text-white font-sans font-medium">{{ t.email }}</span>
+                  <span
+                    :class="[
+                      'text-[10px] px-2 py-0.5 rounded-full font-bold uppercase',
+                      t.platform === 'ios'
+                        ? 'bg-blue-500/15 text-blue-400 border border-blue-500/30'
+                        : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                    ]"
+                  >
+                    {{ t.platform === 'ios' ? 'iOS TestFlight' : 'Google Play' }}
+                  </span>
+                  <span
+                    :class="[
+                      'text-[10px] px-2 py-0.5 rounded font-bold uppercase',
+                      t.status === 'active' ? 'bg-emerald-500/20 text-emerald-300' : (t.status === 'revoked' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-300')
+                    ]"
+                  >
+                    {{ t.status }}
+                  </span>
+                </div>
+                <div class="text-[11px] text-white/40 font-sans">
+                  <span>Expires: {{ t.expires_at ? formatDate(t.expires_at) : '-' }}</span>
+                  <span class="mx-2">•</span>
+                  <span>Joined: {{ formatDate(t.created_at) }}</span>
+                </div>
+              </div>
+
+              <div v-if="t.status === 'active'">
+                <button
+                  @click="revokeTester(t)"
+                  class="px-2.5 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-[11px] transition-colors cursor-pointer"
+                >
+                  Revoke Access
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-white/10 text-right shrink-0">
+          <button
+            @click="testersModalApp = null"
+            class="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-white transition-colors cursor-pointer"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -523,6 +627,11 @@ const webhookUrl = ref("");
 // Delete confirmation modal state
 const repoToDelete = ref<any>(null);
 const deleting = ref(false);
+
+// Beta testers modal state
+const testersModalApp = ref<any>(null);
+const testersList = ref<any[]>([]);
+const loadingTesters = ref(false);
 
 const form = ref({
   repo_slug: "",
@@ -574,6 +683,32 @@ const toggleAppStatus = async (app: any) => {
     toast.showErrorToast("Update Failed", err.response?.data?.message || "Failed to update status");
   } finally {
     updatingStatusId.value = null;
+  }
+};
+
+const openTestersModal = async (app: any) => {
+  testersModalApp.value = app;
+  loadingTesters.value = true;
+  testersList.value = [];
+  try {
+    const res = await $axios.get(`/api/v1/admin/apk/apps/${app.id}/testers`);
+    testersList.value = res.data?.data || [];
+  } catch (err: any) {
+    toast.showErrorToast("Failed to Load Testers", err.response?.data?.message || "Error fetching testers");
+  } finally {
+    loadingTesters.value = false;
+  }
+};
+
+const revokeTester = async (tester: any) => {
+  try {
+    await $axios.patch(`/api/v1/admin/apk/testers/${tester.id}/revoke`, {
+      reason: "Revoked manually by administrator",
+    });
+    tester.status = "revoked";
+    toast.showSuccessToast("Access Revoked", `Revoked access for ${tester.email}`);
+  } catch (err: any) {
+    toast.showErrorToast("Revoke Failed", err.response?.data?.message || "Error revoking tester access");
   }
 };
 

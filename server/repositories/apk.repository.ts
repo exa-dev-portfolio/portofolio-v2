@@ -1,6 +1,7 @@
 import type { PoolClient } from "pg";
 import type {
   ApkAppModel,
+  ApkBetaTesterModel,
   ApkReleaseModel,
   ApkRepositoryModel,
   ApkSyncJobModel,
@@ -452,4 +453,164 @@ export const listRecentSyncJobs = async (
   `;
   const res = await client.query<ApkSyncJobModel & { repo_slug: string }>(sql, [limit]);
   return res.rows;
+};
+
+// ==========================================
+// BETA TESTERS & STORE ACCESS
+// ==========================================
+
+export const upsertBetaTesterOtp = async (
+  client: PoolClient,
+  appId: string,
+  email: string,
+  platform: "ios" | "android",
+  otpCode: string,
+  otpExpiresAt: Date
+): Promise<ApkBetaTesterModel> => {
+  const existing = await client.query<ApkBetaTesterModel>(
+    `SELECT * FROM apk_beta_testers WHERE app_id = $1 AND LOWER(email) = LOWER($2) AND platform = $3`,
+    [appId, email, platform]
+  );
+
+  if (existing.rows.length > 0) {
+    const updated = await client.query<ApkBetaTesterModel>(
+      `UPDATE apk_beta_testers
+       SET otp_code = $1, otp_expires_at = $2, otp_attempts = 0, updated_at = current_timestamp
+       WHERE id = $3
+       RETURNING *`,
+      [otpCode, otpExpiresAt, existing.rows[0].id]
+    );
+    return updated.rows[0];
+  }
+
+  const res = await client.query<ApkBetaTesterModel>(
+    `INSERT INTO apk_beta_testers (app_id, email, platform, status, otp_code, otp_expires_at, otp_attempts)
+     VALUES ($1, LOWER($2), $3, 'pending_otp', $4, $5, 0)
+     RETURNING *`,
+    [appId, email, platform, otpCode, otpExpiresAt]
+  );
+  return res.rows[0];
+};
+
+export const findBetaTester = async (
+  client: PoolClient,
+  appId: string,
+  email: string,
+  platform: "ios" | "android"
+): Promise<ApkBetaTesterModel | null> => {
+  const res = await client.query<ApkBetaTesterModel>(
+    `SELECT * FROM apk_beta_testers
+     WHERE app_id = $1 AND LOWER(email) = LOWER($2) AND platform = $3`,
+    [appId, email, platform]
+  );
+  return res.rows[0] || null;
+};
+
+export const countActiveTesters = async (
+  client: PoolClient,
+  appId: string,
+  platform: "ios" | "android"
+): Promise<number> => {
+  // Count only active testers whose 14-day expiry has not passed yet
+  const res = await client.query<{ count: string }>(
+    `SELECT COUNT(*)::int AS count
+     FROM apk_beta_testers
+     WHERE app_id = $1 AND platform = $2 AND status = 'active' AND (expires_at IS NULL OR expires_at > current_timestamp)`,
+    [appId, platform]
+  );
+  return parseInt(res.rows[0]?.count || "0", 10);
+};
+
+export const getOldestActiveTester = async (
+  client: PoolClient,
+  appId: string,
+  platform: "ios" | "android"
+): Promise<ApkBetaTesterModel | null> => {
+  // Priority 1: Expired testers still marked active
+  const expired = await client.query<ApkBetaTesterModel>(
+    `SELECT * FROM apk_beta_testers
+     WHERE app_id = $1 AND platform = $2 AND status = 'active' AND expires_at <= current_timestamp
+     ORDER BY expires_at ASC
+     LIMIT 1`,
+    [appId, platform]
+  );
+  if (expired.rows.length > 0) return expired.rows[0];
+
+  // Priority 2: Oldest active tester (FIFO / LRU eviction)
+  const oldest = await client.query<ApkBetaTesterModel>(
+    `SELECT * FROM apk_beta_testers
+     WHERE app_id = $1 AND platform = $2 AND status = 'active'
+     ORDER BY created_at ASC
+     LIMIT 1`,
+    [appId, platform]
+  );
+  return oldest.rows[0] || null;
+};
+
+export const activateBetaTester = async (
+  client: PoolClient,
+  id: string,
+  expiresAt: Date
+): Promise<ApkBetaTesterModel> => {
+  const res = await client.query<ApkBetaTesterModel>(
+    `UPDATE apk_beta_testers
+     SET status = 'active', otp_code = NULL, otp_expires_at = NULL, expires_at = $1, updated_at = current_timestamp
+     WHERE id = $2
+     RETURNING *`,
+    [expiresAt, id]
+  );
+  return res.rows[0];
+};
+
+export const incrementTesterOtpAttempts = async (
+  client: PoolClient,
+  id: string
+): Promise<number> => {
+  const res = await client.query<{ otp_attempts: number }>(
+    `UPDATE apk_beta_testers
+     SET otp_attempts = otp_attempts + 1, updated_at = current_timestamp
+     WHERE id = $1
+     RETURNING otp_attempts`,
+    [id]
+  );
+  return res.rows[0]?.otp_attempts || 0;
+};
+
+export const revokeBetaTester = async (
+  client: PoolClient,
+  id: string,
+  reason: string
+): Promise<ApkBetaTesterModel | null> => {
+  const res = await client.query<ApkBetaTesterModel>(
+    `UPDATE apk_beta_testers
+     SET status = 'revoked', revoked_reason = $1, updated_at = current_timestamp
+     WHERE id = $2
+     RETURNING *`,
+    [reason, id]
+  );
+  return res.rows[0] || null;
+};
+
+export const listBetaTestersByAppId = async (
+  client: PoolClient,
+  appId: string
+): Promise<ApkBetaTesterModel[]> => {
+  const res = await client.query<ApkBetaTesterModel>(
+    `SELECT * FROM apk_beta_testers
+     WHERE app_id = $1
+     ORDER BY created_at DESC`,
+    [appId]
+  );
+  return res.rows;
+};
+
+export const expireOldBetaTesters = async (
+  client: PoolClient
+): Promise<number> => {
+  const res = await client.query(
+    `UPDATE apk_beta_testers
+     SET status = 'expired', updated_at = current_timestamp
+     WHERE status = 'active' AND expires_at <= current_timestamp`
+  );
+  return res.rowCount || 0;
 };
