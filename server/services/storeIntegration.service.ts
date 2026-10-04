@@ -270,12 +270,105 @@ export async function addTesterToGooglePlay(
 }
 
 /**
- * Remove tester from Google Play testing track
+ * Remove tester from Google Play testing track via Google Group Directory API
  */
 export async function removeTesterFromGooglePlay(
   email: string,
   packageName: string
 ): Promise<boolean> {
-  logger.info({ email, packageName }, "[StoreIntegration] Tester removed from Google Play testing tracking.");
-  return true;
+  const config = useRuntimeConfig();
+  const serviceAccountJson =
+    (config.googlePlayServiceAccountJson as string) ||
+    process.env.NUXT_GOOGLE_PLAY_SERVICE_ACCOUNT_JSON ||
+    process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON;
+  const testerGroupEmail =
+    (config.googlePlayTesterGroupEmail as string) ||
+    process.env.NUXT_GOOGLE_PLAY_TESTER_GROUP_EMAIL ||
+    process.env.GOOGLE_PLAY_TESTER_GROUP_EMAIL;
+
+  if (!serviceAccountJson || !testerGroupEmail) {
+    logger.info(
+      { email, packageName },
+      "[StoreIntegration] Google Play Service Account or Group Email not configured in .env. Skipping Google API call."
+    );
+    return true;
+  }
+
+  try {
+    let credentials: any;
+    try {
+      credentials = JSON.parse(serviceAccountJson);
+    } catch {
+      const fs = await import("node:fs");
+      credentials = JSON.parse(fs.readFileSync(serviceAccountJson, "utf8"));
+    }
+
+    if (!credentials.client_email || !credentials.private_key) {
+      logger.warn("[StoreIntegration] Invalid Google Play service account JSON structure");
+      return false;
+    }
+
+    const now = Math.floor(Date.now() / 1000);
+    const jwtPayload = {
+      iss: credentials.client_email,
+      scope: "https://www.googleapis.com/auth/admin.directory.group.member",
+      aud: "https://oauth2.googleapis.com/token",
+      exp: now + 3600,
+      iat: now,
+    };
+
+    const assertion = jwt.sign(jwtPayload, credentials.private_key, {
+      algorithm: "RS256",
+    });
+
+    const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+        assertion,
+      }),
+    });
+
+    const tokenData = (await tokenRes.json()) as { access_token?: string };
+    if (!tokenData.access_token) {
+      logger.warn(
+        { tokenData },
+        "[StoreIntegration] Failed to obtain Google OAuth access token for Group member removal"
+      );
+      return false;
+    }
+
+    const deleteRes = await fetch(
+      `https://admin.googleapis.com/admin/directory/v1/groups/${encodeURIComponent(
+        testerGroupEmail
+      )}/members/${encodeURIComponent(email)}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${tokenData.access_token}` },
+      }
+    );
+
+    if (deleteRes.status === 204 || deleteRes.status === 404) {
+      logger.info(
+        { email, testerGroupEmail, status: deleteRes.status },
+        "[StoreIntegration] Tester successfully removed from Google Play testing group"
+      );
+      return true;
+    }
+
+    const errBody = await deleteRes.text();
+    logger.warn(
+      { status: deleteRes.status, errBody },
+      "[StoreIntegration] Google Directory API returned non-204 on member deletion"
+    );
+    return false;
+  } catch (err: any) {
+    logger.error(
+      { err, email },
+      "[StoreIntegration] Failed to remove tester from Google Play group"
+    );
+    return false;
+  }
 }
+
