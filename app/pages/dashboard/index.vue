@@ -81,14 +81,26 @@ const recentProjects = computed(() => {
         updatedAt: formatDate(p.updated_at)
       }))
 })
+
+// Set page title
+useHead({
+  title: "Dashboard Overview | Eka Dev",
+});
 </script>
 
 <template>
   <div class="p-8">
     <!-- Welcome Section -->
-    <div class="mb-12">
-      <h1 class="text-4xl font-black text-white mb-2">Welcome back, {{ userName }}! 👋</h1>
-      <p class="text-white/60">Here's what's happening with your portfolio today.</p>
+    <div class="mb-10">
+      <div class="flex items-center gap-3 mb-2">
+        <h1 class="text-4xl font-black text-white tracking-tight">Dashboard Overview</h1>
+        <span class="text-xs font-mono font-semibold px-2.5 py-1 rounded-full bg-primary/20 text-primary border border-primary/30">
+          Admin Portal
+        </span>
+      </div>
+      <p class="text-white/60">
+        Welcome back, <span class="text-white font-medium">{{ userName }}</span>! 👋 Here's what's happening with your portfolio today.
+      </p>
     </div>
 
     <!-- Stats Grid -->

@@ -4,13 +4,13 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
       <div>
         <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight mb-2 flex items-center gap-3">
-          <span>APK Distribution Hub</span>
+          <span>Manage Applications (APK)</span>
           <span class="text-xs font-mono px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
             {{ repositories.length }} Repos
           </span>
         </h1>
         <p class="text-white/60 text-sm sm:text-base">
-          Manage GitHub repository integrations for automated APK releases, webhook ingestion, and MinIO storage.
+          Manage GitHub repository webhooks, automated APK releases, production/development visibility, and official store beta distribution.
         </p>
       </div>
 
@@ -599,6 +599,10 @@ definePageMeta({
   breadCrumb: [
     { title: "Apps (APK)" },
   ],
+});
+
+useHead({
+  title: "Apps & APK Distribution Hub | Dashboard",
 });
 
 const { isApkStoreEnabled } = useFeatureFlag();

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref} from 'vue'
+import {ref, computed} from 'vue'
 import {useBreadCrumbStore} from "~/stores/bread-crumb"
 import {jwtDecode} from 'jwt-decode'
 
@@ -150,6 +150,20 @@ watchEffect(
       }
     }
 )
+
+useHead({
+  title: computed(() => {
+    const list = breadCrumbStore.listBreadCrumbs
+    if (list && list.length > 1) {
+      const activeCrumb = list[list.length - 1]
+      if (activeCrumb?.title) {
+        return `${activeCrumb.title} | Dashboard`
+      }
+    }
+    return 'Dashboard | Eka Dev'
+  })
+})
+
 
 </script>
 
