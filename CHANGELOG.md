@@ -1,3 +1,15 @@
+# [1.1.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.0.0...v1.1.0) (2026-10-05)
+
+
+### Bug Fixes
+
+* **test:** align MAX_FAILED_OTP_ATTEMPTS threshold between service and integration test ([2a35513](https://github.com/exa-dev-portfolio/portofolio-v2/commit/2a35513c3d3b5215dd0a2900abf3e7eb6b058be1))
+
+
+### Features
+
+* **apk:** streamline TestFlight onboarding, relax OTP rate limits, and polish responsive navbar ([6aed712](https://github.com/exa-dev-portfolio/portofolio-v2/commit/6aed71290b7f41a3df257976d0f0de60a0debefe))
+
 # 1.0.0 (2026-10-05)
 
 
