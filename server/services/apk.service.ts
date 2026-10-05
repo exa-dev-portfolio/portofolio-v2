@@ -393,7 +393,8 @@ export async function getDownloadRelease(packageName: string, versionCode?: numb
 // OFFICIAL STORE ACCESS & BETA ONBOARDING
 // ==========================================
 
-const MAX_BETA_SLOTS_PER_PLATFORM = 50;
+export const MAX_BETA_SLOTS_PER_PLATFORM = 50;
+export const MAX_OTP_REQUESTS_PER_WINDOW = 20;
 
 const DISPOSABLE_EMAIL_DOMAINS = new Set([
   "mailinator.com",
@@ -433,12 +434,21 @@ export async function requestBetaAccessOtp(
     );
   }
 
-  // Edge case 2: Rate limit by IP (max 3 requests per 15 minutes)
+  // Edge case 2: Rate limit by IP (default 20 requests per 15 minutes, 100 for localhost)
   if (clientIp) {
+    const isLocalhost =
+      clientIp === "127.0.0.1" ||
+      clientIp === "::1" ||
+      clientIp === "localhost" ||
+      clientIp === "::ffff:127.0.0.1";
+    const maxAllowedRequests = isLocalhost
+      ? 100
+      : Number(process.env.NUXT_BETA_OTP_RATE_LIMIT || MAX_OTP_REQUESTS_PER_WINDOW);
+
     const rateLimitKey = `rate:beta_otp:${clientIp}`;
     const currentCount = await redisGet(rateLimitKey);
     const count = currentCount ? parseInt(currentCount, 10) : 0;
-    if (count >= 3) {
+    if (count >= maxAllowedRequests) {
       throw new HttpError(
         429,
         "RATE_LIMIT_EXCEEDED",
@@ -523,8 +533,8 @@ export async function verifyBetaAccessOtp(
       throw new HttpError(400, "NO_REQUEST_FOUND", "No pending verification request found for this email. Please request a new code.");
     }
 
-    // Check attempts limit (max 5 failed attempts)
-    if (tester.otp_attempts >= 5) {
+    // Check attempts limit (max 10 failed attempts)
+    if (tester.otp_attempts >= 10) {
       throw new HttpError(
         400,
         "MAX_ATTEMPTS_EXCEEDED",

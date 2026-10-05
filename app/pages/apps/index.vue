@@ -215,13 +215,14 @@
               <span>Download APK</span>
             </a>
 
-            <!-- Official Store Channels (TestFlight / Google Play) -->
+            <!-- Apple TestFlight Invite (iOS) -->
             <button
+              v-if="app.apple_beta_group_id"
               @click="openBetaModal(app)"
               class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-white text-xs font-semibold border border-white/10 hover:border-cyan-500/30 transition-all cursor-pointer"
             >
-              <UIcon name="i-carbon-badge" class="w-3.5 h-3.5 text-cyan-400" />
-              <span>Official Store Invite {{ app.apple_beta_group_id ? '(iOS & Android)' : '(Google Play)' }}</span>
+              <UIcon name="i-carbon-apple" class="w-3.5 h-3.5 text-cyan-400" />
+              <span>Apple TestFlight (iOS)</span>
             </button>
 
             <!-- Secondary Actions: QR Code & Details -->
@@ -474,80 +475,30 @@
 
         <div class="flex items-center gap-3 mb-4">
           <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
-            <UIcon name="i-carbon-security" class="w-5 h-5" />
+            <UIcon name="i-carbon-apple" class="w-5 h-5" />
           </div>
           <div>
-            <h3 class="text-base font-bold text-white">Official Store Invite</h3>
+            <h3 class="text-base font-bold text-white">Apple TestFlight Invite</h3>
             <p class="text-xs text-slate-400">{{ betaModalApp.app_name }} • 14-Day Testing Pass</p>
           </div>
         </div>
 
-        <!-- Step 1: Choose platform & Input Email -->
+        <!-- Step 1: Input Email -->
         <div v-if="betaStep === 1" class="space-y-4">
           <p class="text-xs text-slate-300 leading-relaxed">
-            Get an official invite sent directly to your inbox to install securely via Apple TestFlight or Google Play Testing Track.
+            Get an official TestFlight invite sent directly by Apple to your inbox to install securely on your iPhone or iPad.
           </p>
 
-          <!-- Platform Selector Tabs -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Select Your Platform</label>
-            <div class="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                :disabled="!isIosAvailable"
-                @click="isIosAvailable && setBetaPlatform('ios')"
-                :title="!isIosAvailable ? 'Apple TestFlight is not yet available for this app (Beta Group ID not configured)' : ''"
-                :class="[
-                  'p-3 rounded-xl border text-left transition-all relative',
-                  !isIosAvailable
-                    ? 'bg-slate-950/30 border-white/5 opacity-40 cursor-not-allowed select-none'
-                    : betaPlatform === 'ios'
-                      ? 'bg-cyan-500/10 border-cyan-500 text-white shadow-sm cursor-pointer'
-                      : 'bg-slate-950/50 border-white/10 text-slate-400 hover:border-white/20 cursor-pointer'
-                ]"
-              >
-                <div class="flex items-center justify-between mb-1">
-                  <div class="flex items-center gap-2 font-semibold text-xs">
-                    <UIcon name="i-carbon-apple" class="w-4 h-4" :class="isIosAvailable ? 'text-cyan-400' : 'text-slate-500'" />
-                    <span :class="isIosAvailable ? 'text-white' : 'text-slate-400'">iOS TestFlight</span>
-                  </div>
-                  <span
-                    v-if="!isIosAvailable"
-                    class="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400/90 border border-amber-500/20 font-semibold font-mono"
-                  >
-                    Unavailable
-                  </span>
-                </div>
-                <div class="text-[10px] font-mono" :class="!isIosAvailable ? 'text-slate-500 italic' : 'text-slate-400'">
-                  {{ !isIosAvailable ? 'Group ID not set' : `${iosSlots.remaining} / ${iosSlots.max} slots free` }}
-                </div>
-              </button>
-
-              <button
-                type="button"
-                @click="setBetaPlatform('android')"
-                :class="[
-                  'p-3 rounded-xl border text-left transition-all cursor-pointer',
-                  betaPlatform === 'android'
-                    ? 'bg-cyan-500/10 border-cyan-500 text-white shadow-sm'
-                    : 'bg-slate-950/50 border-white/10 text-slate-400 hover:border-white/20'
-                ]"
-              >
-                <div class="flex items-center gap-2 font-semibold text-xs mb-1">
-                  <UIcon name="i-carbon-logo-google" class="w-4 h-4 text-emerald-400" />
-                  <span>Google Play</span>
-                </div>
-                <div class="text-[10px] text-slate-400 font-mono">
-                  {{ androidSlots.remaining }} / {{ androidSlots.max }} slots free
-                </div>
-              </button>
-            </div>
+          <div class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-950/60 border border-white/5 text-xs text-slate-300">
+            <UIcon name="i-carbon-apple" class="w-4 h-4 text-cyan-400 shrink-0" />
+            <span class="font-medium">Platform: Apple TestFlight (iOS)</span>
+            <span class="ml-auto text-[10px] px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-mono font-semibold">14 Days</span>
           </div>
 
           <!-- Email Input -->
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1.5">
-              Email *
+              Email (Apple ID recommended) *
             </label>
             <input
               v-model="betaEmail"
@@ -573,12 +524,34 @@
             <UIcon v-if="betaLoading" name="i-carbon-renew" class="w-4 h-4 animate-spin" />
             <span>{{ betaLoading ? 'Sending Confirmation Code...' : 'Send Verification Code' }}</span>
           </button>
+
+          <!-- Direct Link to enter OTP for users who already requested code -->
+          <div class="text-center pt-1">
+            <button
+              type="button"
+              @click="goToStep2"
+              class="text-[11px] text-cyan-400/90 hover:text-cyan-300 transition-colors cursor-pointer"
+            >
+              Already requested a code? <span class="underline underline-offset-2">Enter verification code</span>
+            </button>
+          </div>
         </div>
 
         <!-- Step 2: OTP Verification -->
         <div v-else-if="betaStep === 2" class="space-y-4">
-          <p class="text-xs text-slate-300 leading-relaxed">
-            We sent a 6-digit code to <strong class="text-white">{{ betaEmail }}</strong>. Enter it below to activate your 14-day official pass:
+          <div class="flex items-center justify-between text-xs text-slate-300 bg-slate-950/60 p-2.5 rounded-xl border border-white/5">
+            <span class="truncate">Code sent to: <strong class="text-white">{{ betaEmail }}</strong></span>
+            <button
+              type="button"
+              @click="betaStep = 1; betaError = null;"
+              class="text-cyan-400 hover:text-cyan-300 text-[11px] underline shrink-0 cursor-pointer ml-2"
+            >
+              Change
+            </button>
+          </div>
+
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Enter the 6-digit confirmation code below to activate your 14-day official pass:
           </p>
 
           <div>
@@ -611,6 +584,17 @@
               Back
             </button>
           </div>
+
+          <div class="text-center pt-1">
+            <button
+              type="button"
+              @click="submitRequestOtp"
+              :disabled="betaLoading"
+              class="text-[11px] text-slate-400 hover:text-cyan-400 transition-colors cursor-pointer"
+            >
+              Didn't receive the code? <span class="text-cyan-400 underline">Resend code</span>
+            </button>
+          </div>
         </div>
 
         <!-- Step 3: Success Confirmation -->
@@ -620,20 +604,20 @@
           </div>
 
           <div>
-            <h4 class="text-base font-bold text-white mb-1">Access Pass Activated!</h4>
+            <h4 class="text-base font-bold text-white mb-1">TestFlight Pass Activated!</h4>
             <p class="text-xs text-slate-300 leading-relaxed max-w-sm mx-auto">
               {{ betaSuccessMessage }}
             </p>
           </div>
 
           <div class="p-3 bg-slate-950/80 rounded-xl border border-white/5 text-left text-xs space-y-1 font-mono">
-            <div>Platform: <strong class="text-white">{{ betaPlatform === 'ios' ? 'Apple TestFlight' : 'Google Play Track' }}</strong></div>
+            <div>Platform: <strong class="text-white">Apple TestFlight (iOS)</strong></div>
             <div>Valid Until: <strong class="text-emerald-400">{{ formatDate(betaExpiresAt) }}</strong> (14 Days)</div>
             <div>Recipient: <strong class="text-slate-300">{{ betaEmail }}</strong></div>
           </div>
 
           <p class="text-[11px] text-slate-400 italic">
-            Check your inbox now for the official email from {{ betaPlatform === 'ios' ? 'Apple' : 'Google' }} to complete device installation.
+            Check your inbox now for the official email from Apple (no_reply@email.apple.com) to install via TestFlight on your iPhone.
           </p>
 
           <button
@@ -689,9 +673,9 @@ const betaLoading = ref(false);
 const betaError = ref<string | null>(null);
 const betaSuccessMessage = ref("");
 const betaExpiresAt = ref<string | null>(null);
+const lastPendingAppPackage = ref<string | null>(null);
 
 const iosSlots = ref<{ remaining: number; max: number; is_available?: boolean }>({ remaining: 0, max: 0, is_available: false });
-const androidSlots = ref({ remaining: 50, max: 50 });
 
 const isIosAvailable = computed(() => {
   if (!betaModalApp.value) return false;
@@ -793,60 +777,62 @@ const copyUrl = (text: string) => {
   }
 };
 
-const openBetaModal = async (app: any) => {
-  betaModalApp.value = app;
-  betaStep.value = 1;
-  betaEmail.value = "";
-  betaOtp.value = "";
+const goToStep2 = () => {
+  if (!betaEmail.value || !betaEmail.value.includes("@")) {
+    betaError.value = "Please enter your email above before entering the verification code.";
+    return;
+  }
   betaError.value = null;
+  betaStep.value = 2;
+  lastPendingAppPackage.value = betaModalApp.value?.package_name || null;
+};
 
-  const hasIosGroup = Boolean(app.apple_beta_group_id && app.apple_beta_group_id.trim());
-  iosSlots.value = {
-    remaining: 0,
-    max: hasIosGroup ? 50 : 0,
-    is_available: hasIosGroup,
-  };
+const openBetaModal = async (app: any) => {
+  const isSamePending = lastPendingAppPackage.value === app.package_name && betaStep.value === 2 && betaEmail.value;
+  betaModalApp.value = app;
 
-  betaPlatform.value = hasIosGroup ? "ios" : "android";
+  if (isSamePending) {
+    betaError.value = null;
+  } else {
+    betaStep.value = 1;
+    betaOtp.value = "";
+    betaError.value = null;
+
+    const hasIosGroup = Boolean(app.apple_beta_group_id && app.apple_beta_group_id.trim());
+    iosSlots.value = {
+      remaining: 0,
+      max: hasIosGroup ? 50 : 0,
+      is_available: hasIosGroup,
+    };
+
+    betaPlatform.value = "ios";
+  }
+
   await fetchBetaSlots(app);
 };
 
 const closeBetaModal = () => {
+  if (betaStep.value === 2) {
+    lastPendingAppPackage.value = betaModalApp.value?.package_name || null;
+    betaModalApp.value = null;
+    return;
+  }
   betaModalApp.value = null;
   betaStep.value = 1;
   betaEmail.value = "";
   betaOtp.value = "";
   betaError.value = null;
-};
-
-const setBetaPlatform = (platform: "ios" | "android") => {
-  if (platform === "ios" && !isIosAvailable.value) {
-    return;
-  }
-  betaPlatform.value = platform;
-  betaError.value = null;
+  lastPendingAppPackage.value = null;
 };
 
 const fetchBetaSlots = async (app: any) => {
   try {
-    const [iosRes, androidRes] = await Promise.all([
-      $fetch<any>(`/api/v1/apps/${app.package_name}/beta/slots?platform=ios`),
-      $fetch<any>(`/api/v1/apps/${app.package_name}/beta/slots?platform=android`),
-    ]);
+    const iosRes = await $fetch<any>(`/api/v1/apps/${app.package_name}/beta/slots?platform=ios`);
     if (iosRes?.data) {
       iosSlots.value = {
         remaining: iosRes.data.remaining_slots,
         max: iosRes.data.max_slots,
         is_available: iosRes.data.is_available,
-      };
-      if (iosRes.data.is_available === false && betaPlatform.value === "ios") {
-        betaPlatform.value = "android";
-      }
-    }
-    if (androidRes?.data) {
-      androidSlots.value = {
-        remaining: androidRes.data.remaining_slots,
-        max: androidRes.data.max_slots,
       };
     }
   } catch (err) {
@@ -877,6 +863,7 @@ const submitRequestOtp = async () => {
       betaStep.value = 3;
     } else {
       betaStep.value = 2;
+      lastPendingAppPackage.value = betaModalApp.value?.package_name || null;
     }
   } catch (err: any) {
     betaError.value = err?.data?.message || err?.message || "Failed to send verification code";

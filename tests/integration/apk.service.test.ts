@@ -42,6 +42,7 @@ import {
   updateAppStoreLinks,
   getBetaSlotInfo,
   listBetaTesters,
+  MAX_OTP_REQUESTS_PER_WINDOW,
 } from "~~/server/services/apk.service";
 
 describe("APK & Beta Testing Integration Tests (PostgreSQL & Redis Testcontainers)", () => {
@@ -379,12 +380,12 @@ describe("APK & Beta Testing Integration Tests (PostgreSQL & Redis Testcontainer
       const testEmail = "rate-limited-user@example.com";
       const testIp = "192.168.1.100";
 
-      // 3 allowed requests
-      await requestBetaAccessOtp(app.package_name, "android", testEmail, testIp);
-      await requestBetaAccessOtp(app.package_name, "android", testEmail, testIp);
-      await requestBetaAccessOtp(app.package_name, "android", testEmail, testIp);
+      // Allowed requests up to MAX_OTP_REQUESTS_PER_WINDOW
+      for (let i = 0; i < MAX_OTP_REQUESTS_PER_WINDOW; i++) {
+        await requestBetaAccessOtp(app.package_name, "android", testEmail, testIp);
+      }
 
-      // 4th request must be rate limited by Redis!
+      // Next request must be rate limited by Redis!
       await expect(
         requestBetaAccessOtp(app.package_name, "android", testEmail, testIp)
       ).rejects.toMatchObject({
