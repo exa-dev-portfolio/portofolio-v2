@@ -395,6 +395,7 @@ export async function getDownloadRelease(packageName: string, versionCode?: numb
 
 export const MAX_BETA_SLOTS_PER_PLATFORM = 50;
 export const MAX_OTP_REQUESTS_PER_WINDOW = 20;
+export const MAX_FAILED_OTP_ATTEMPTS = 10;
 
 const DISPOSABLE_EMAIL_DOMAINS = new Set([
   "mailinator.com",
@@ -533,8 +534,8 @@ export async function verifyBetaAccessOtp(
       throw new HttpError(400, "NO_REQUEST_FOUND", "No pending verification request found for this email. Please request a new code.");
     }
 
-    // Check attempts limit (max 10 failed attempts)
-    if (tester.otp_attempts >= 10) {
+    // Check attempts limit (max failed attempts)
+    if (tester.otp_attempts >= MAX_FAILED_OTP_ATTEMPTS) {
       throw new HttpError(
         400,
         "MAX_ATTEMPTS_EXCEEDED",

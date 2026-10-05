@@ -43,6 +43,7 @@ import {
   getBetaSlotInfo,
   listBetaTesters,
   MAX_OTP_REQUESTS_PER_WINDOW,
+  MAX_FAILED_OTP_ATTEMPTS,
 } from "~~/server/services/apk.service";
 
 describe("APK & Beta Testing Integration Tests (PostgreSQL & Redis Testcontainers)", () => {
@@ -332,16 +333,16 @@ describe("APK & Beta Testing Integration Tests (PostgreSQL & Redis Testcontainer
       expect(dbCheck.rows[0].otp_attempts).toBe(1);
     });
 
-    it("should throw MAX_ATTEMPTS_EXCEEDED after 5 failed attempts", async () => {
+    it(`should throw MAX_ATTEMPTS_EXCEEDED after reaching failed attempts threshold`, async () => {
       const app = await createTestApp({
         packageName: "com.test.maxattempts",
       });
 
-      // Insert tester with 5 attempts already
+      // Insert tester with MAX_FAILED_OTP_ATTEMPTS attempts already
       await query(
         `INSERT INTO apk_beta_testers (app_id, email, platform, status, otp_code, otp_expires_at, otp_attempts)
-         VALUES ($1, $2, 'android', 'pending_otp', '123456', NOW() + INTERVAL '10 minutes', 5)`,
-        [app.id, "max-attempts@example.com"]
+         VALUES ($1, $2, 'android', 'pending_otp', '123456', NOW() + INTERVAL '10 minutes', $3)`,
+        [app.id, "max-attempts@example.com", MAX_FAILED_OTP_ATTEMPTS]
       );
 
       await expect(
