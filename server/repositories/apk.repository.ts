@@ -1,4 +1,5 @@
 import type { PoolClient } from "pg";
+import { query } from "~~/server/db/postgres";
 import type {
   ApkAppModel,
   ApkBetaTesterModel,
@@ -269,18 +270,26 @@ export const updateAppStatus = async (
 export const updateAppStoreLinks = async (
   client: PoolClient,
   id: string,
-  playStoreUrl: string | null | undefined,
-  testflightUrl: string | null | undefined
+  playStoreUrl?: string | null,
+  testflightUrl?: string | null,
+  appleBetaGroupId?: string | null,
+  googleTesterGroupEmail?: string | null
 ): Promise<ApkAppModel | null> => {
   const sql = `
     UPDATE apk_apps
-    SET play_store_url = $1, testflight_url = $2, updated_at = current_timestamp
-    WHERE id = $3
+    SET play_store_url = $1,
+        testflight_url = $2,
+        apple_beta_group_id = $3,
+        google_tester_group_email = $4,
+        updated_at = current_timestamp
+    WHERE id = $5
     RETURNING *
   `;
   const res = await client.query<ApkAppModel>(sql, [
     playStoreUrl && playStoreUrl.trim() ? playStoreUrl.trim() : null,
     testflightUrl && testflightUrl.trim() ? testflightUrl.trim() : null,
+    appleBetaGroupId && appleBetaGroupId.trim() ? appleBetaGroupId.trim() : null,
+    googleTesterGroupEmail && googleTesterGroupEmail.trim() ? googleTesterGroupEmail.trim() : null,
     id,
   ]);
   return res.rows[0] || null;
@@ -585,16 +594,18 @@ export const activateBetaTester = async (
 };
 
 export const incrementTesterOtpAttempts = async (
-  client: PoolClient,
+  client: PoolClient | null | undefined,
   id: string
 ): Promise<number> => {
-  const res = await client.query<{ otp_attempts: number }>(
-    `UPDATE apk_beta_testers
-     SET otp_attempts = otp_attempts + 1, updated_at = current_timestamp
-     WHERE id = $1
-     RETURNING otp_attempts`,
-    [id]
-  );
+  const sql = `
+    UPDATE apk_beta_testers
+    SET otp_attempts = otp_attempts + 1, updated_at = current_timestamp
+    WHERE id = $1
+    RETURNING otp_attempts
+  `;
+  const res = client
+    ? await client.query<{ otp_attempts: number }>(sql, [id])
+    : await query<{ otp_attempts: number }>(sql, [id]);
   return res.rows[0]?.otp_attempts || 0;
 };
 

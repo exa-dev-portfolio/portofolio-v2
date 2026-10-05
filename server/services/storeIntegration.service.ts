@@ -105,21 +105,26 @@ function getAppStoreConnectJwt(keyId: string, issuerId: string, privateKey: stri
  */
 export async function addTesterToAppleTestFlight(
   email: string,
-  customBetaGroupId?: string | null
+  betaGroupId?: string | null
 ): Promise<StoreInviteResult> {
   const config = useRuntimeConfig();
+
+  if (!betaGroupId || !betaGroupId.trim()) {
+    return {
+      success: false,
+      isDirectStoreInviteSent: false,
+      message: "Apple TestFlight Beta Group ID has not been configured for this app.",
+    };
+  }
 
   const keyId = (config.appleAscKeyId as string) || process.env.NUXT_APPLE_ASC_KEY_ID || process.env.APPLE_ASC_KEY_ID;
   const issuerId = (config.appleAscIssuerId as string) || process.env.NUXT_APPLE_ASC_ISSUER_ID || process.env.APPLE_ASC_ISSUER_ID;
   const privateKey = (config.appleAscPrivateKey as string) || process.env.NUXT_APPLE_ASC_PRIVATE_KEY || process.env.APPLE_ASC_PRIVATE_KEY;
-  const defaultBetaGroupId = (config.appleAscBetaGroupId as string) || process.env.NUXT_APPLE_ASC_BETA_GROUP_ID || process.env.APPLE_ASC_BETA_GROUP_ID;
-
-  const betaGroupId = customBetaGroupId || defaultBetaGroupId;
 
   if (!keyId || !issuerId || !privateKey) {
     logger.info(
       { email },
-      "[StoreIntegration] Apple App Store Connect credentials not configured in .env (NUXT_APPLE_ASC_KEY_ID, NUXT_APPLE_ASC_ISSUER_ID, NUXT_APPLE_ASC_PRIVATE_KEY). Simulation mode: tester saved in database."
+      "[StoreIntegration] Apple App Store Connect credentials not configured in .env. Simulation mode: tester saved in database."
     );
     return {
       success: true,
@@ -271,13 +276,16 @@ export async function removeTesterFromAppleTestFlight(
  */
 export async function addTesterToGooglePlay(
   email: string,
-  packageName: string
+  packageName: string,
+  customTesterGroupEmail?: string | null
 ): Promise<StoreInviteResult> {
   const config = useRuntimeConfig();
   const serviceAccountJson =
     (config.googlePlayServiceAccountJson as string) || process.env.NUXT_GOOGLE_PLAY_SERVICE_ACCOUNT_JSON;
   const testerGroupEmail =
-    (config.googlePlayTesterGroupEmail as string) || process.env.NUXT_GOOGLE_PLAY_TESTER_GROUP_EMAIL;
+    customTesterGroupEmail ||
+    (config.googlePlayTesterGroupEmail as string) ||
+    process.env.NUXT_GOOGLE_PLAY_TESTER_GROUP_EMAIL;
 
   if (!serviceAccountJson && !testerGroupEmail) {
     logger.info(
@@ -292,22 +300,71 @@ export async function addTesterToGooglePlay(
   }
 
   try {
-    // If Service Account JSON is provided, authenticate with Google Android Publisher / Groups API
-    if (serviceAccountJson) {
+    // If Service Account JSON and tester group email are configured, add tester to Google Group via Directory API
+    if (serviceAccountJson && testerGroupEmail) {
       const credentials = parseServiceAccountJson(serviceAccountJson);
 
-      const { GoogleAuth } = await import("google-auth-library");
-      const auth = new GoogleAuth({
-        credentials,
-        scopes: ["https://www.googleapis.com/auth/androidpublisher"],
-      });
+      if (credentials.client_email && credentials.private_key) {
+        const now = Math.floor(Date.now() / 1000);
+        const jwtPayload = {
+          iss: credentials.client_email,
+          scope: "https://www.googleapis.com/auth/admin.directory.group.member",
+          aud: "https://oauth2.googleapis.com/token",
+          exp: now + 3600,
+          iat: now,
+        };
 
-      const client = await auth.getClient();
-      // Google Play Android Publisher API allows managing tester tracks
-      logger.info(
-        { email, packageName },
-        "[StoreIntegration] Google Play Publisher API client authenticated for tester registration."
-      );
+        const assertion = jwt.sign(jwtPayload, credentials.private_key, {
+          algorithm: "RS256",
+        });
+
+        const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+            assertion,
+          }),
+        });
+
+        const tokenData = (await tokenRes.json()) as { access_token?: string };
+        if (tokenData.access_token) {
+          const addRes = await fetch(
+            `https://admin.googleapis.com/admin/directory/v1/groups/${encodeURIComponent(
+              testerGroupEmail
+            )}/members`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${tokenData.access_token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                email,
+                role: "MEMBER",
+              }),
+            }
+          );
+
+          if (addRes.status === 200 || addRes.status === 409) {
+            logger.info(
+              { email, testerGroupEmail, status: addRes.status },
+              "[StoreIntegration] Tester successfully added to Google Play testing group"
+            );
+            return {
+              success: true,
+              isDirectStoreInviteSent: true,
+              message: `Tester added to Google Group (${testerGroupEmail}). Play Store testing access unlocked at https://play.google.com/apps/testing/${packageName}`,
+            };
+          } else {
+            const errText = await addRes.text();
+            logger.warn(
+              { email, testerGroupEmail, status: addRes.status, errText },
+              "[StoreIntegration] Failed to add member to Google Group via Directory API"
+            );
+          }
+        }
+      }
     }
 
     return {
@@ -330,7 +387,8 @@ export async function addTesterToGooglePlay(
  */
 export async function removeTesterFromGooglePlay(
   email: string,
-  packageName: string
+  packageName: string,
+  customTesterGroupEmail?: string | null
 ): Promise<boolean> {
   const config = useRuntimeConfig();
   const serviceAccountJson =
@@ -338,6 +396,7 @@ export async function removeTesterFromGooglePlay(
     process.env.NUXT_GOOGLE_PLAY_SERVICE_ACCOUNT_JSON ||
     process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON;
   const testerGroupEmail =
+    customTesterGroupEmail ||
     (config.googlePlayTesterGroupEmail as string) ||
     process.env.NUXT_GOOGLE_PLAY_TESTER_GROUP_EMAIL ||
     process.env.GOOGLE_PLAY_TESTER_GROUP_EMAIL;

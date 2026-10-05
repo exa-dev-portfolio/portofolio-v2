@@ -74,8 +74,8 @@
       </div>
 
       <!-- Loading State -->
-      <div v-if="loading" class="p-8 text-center text-white/60 text-xs">
-        <Icon name="carbon:renew" size="20" class="animate-spin mx-auto mb-2 text-cyan-400" />
+      <div v-if="loading" class="p-16 flex flex-col items-center justify-center text-white/60 text-xs">
+        <Icon name="carbon:renew" size="24" class="animate-spin mb-3 text-cyan-400" />
         <span>Loading applications...</span>
       </div>
 
@@ -247,8 +247,8 @@
       </div>
 
       <!-- Loading State -->
-      <div v-if="loading" class="p-12 text-center text-white/60 text-sm">
-        <Icon name="carbon:renew" size="24" class="animate-spin mx-auto mb-3 text-primary" />
+      <div v-if="loading" class="p-16 flex flex-col items-center justify-center text-white/60 text-sm">
+        <Icon name="carbon:renew" size="28" class="animate-spin mb-3 text-primary" />
         <span>Loading repositories...</span>
       </div>
 
@@ -618,8 +618,8 @@
 
         <!-- Content -->
         <div class="py-4 overflow-y-auto space-y-3">
-          <div v-if="loadingTesters" class="p-8 text-center text-xs text-white/50">
-            <Icon name="carbon:renew" size="18" class="animate-spin mx-auto mb-2 text-cyan-400" />
+          <div v-if="loadingTesters" class="p-10 flex flex-col items-center justify-center text-xs text-white/50">
+            <Icon name="carbon:renew" size="20" class="animate-spin mb-2 text-cyan-400" />
             <span>Loading testers...</span>
           </div>
 
@@ -742,6 +742,36 @@
             <p class="text-[10px] text-white/40 mt-1">From App Store Connect &gt; TestFlight &gt; Public Link (or direct App Store URL).</p>
           </div>
 
+          <div>
+            <label class="block text-xs font-semibold text-white/80 mb-1 flex items-center gap-1.5">
+              <Icon name="carbon:identification" size="14" class="text-blue-400" />
+              <span>Apple TestFlight Beta Group ID</span>
+            </label>
+            <input
+              v-model="storeLinksForm.apple_beta_group_id"
+              type="text"
+              placeholder="e.g. 1a2b3c4d-5678-90ef-..."
+              class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/15 text-xs text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-purple-500"
+            />
+            <p class="text-[10px] text-white/40 mt-1">Required for iOS. Found in App Store Connect &gt; App &gt; TestFlight &gt; Groups &gt; Group Details.</p>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-white/80 mb-1 flex items-center gap-1.5">
+              <Icon name="carbon:email" size="14" class="text-emerald-400" />
+              <span>Google Play Tester Group Email (Optional)</span>
+            </label>
+            <input
+              v-model="storeLinksForm.google_tester_group_email"
+              type="email"
+              placeholder="testers@googlegroups.com (Leave empty if using Email List)"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/15 text-xs text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-purple-500"
+            />
+            <p class="text-[10px] text-white/40 mt-1">
+              <strong>Opsional:</strong> Biarkan kosong jika memakai metode <strong>Email List</strong> biasa di Play Console. Cukup copy daftar email dari tombol "Copy Emails" di menu tester lalu paste ke Play Console.
+            </p>
+          </div>
+
           <div class="pt-3 border-t border-white/10 flex items-center justify-end gap-2.5">
             <button
               type="button"
@@ -824,6 +854,8 @@ const storeLinksModalApp = ref<any>(null);
 const storeLinksForm = ref({
   play_store_url: "",
   testflight_url: "",
+  apple_beta_group_id: "",
+  google_tester_group_email: "",
 });
 const savingStoreLinks = ref(false);
 
@@ -911,6 +943,8 @@ const openStoreLinksModal = (app: any) => {
   storeLinksForm.value = {
     play_store_url: app.play_store_url || "",
     testflight_url: app.testflight_url || "",
+    apple_beta_group_id: app.apple_beta_group_id || "",
+    google_tester_group_email: app.google_tester_group_email || "",
   };
 };
 
@@ -921,10 +955,14 @@ const saveStoreLinks = async () => {
     await $axios.patch(`/api/v1/admin/apk/apps/${storeLinksModalApp.value.id}/store-links`, {
       play_store_url: storeLinksForm.value.play_store_url?.trim() || null,
       testflight_url: storeLinksForm.value.testflight_url?.trim() || null,
+      apple_beta_group_id: storeLinksForm.value.apple_beta_group_id?.trim() || null,
+      google_tester_group_email: storeLinksForm.value.google_tester_group_email?.trim() || null,
     });
     storeLinksModalApp.value.play_store_url = storeLinksForm.value.play_store_url?.trim() || null;
     storeLinksModalApp.value.testflight_url = storeLinksForm.value.testflight_url?.trim() || null;
-    toast.showSuccessToast("Store Links Saved", "Google Play and TestFlight URLs updated successfully");
+    storeLinksModalApp.value.apple_beta_group_id = storeLinksForm.value.apple_beta_group_id?.trim() || null;
+    storeLinksModalApp.value.google_tester_group_email = storeLinksForm.value.google_tester_group_email?.trim() || null;
+    toast.showSuccessToast("Store Config Saved", "Google Play and TestFlight configuration updated successfully");
     storeLinksModalApp.value = null;
   } catch (err: any) {
     toast.showErrorToast("Save Failed", err.response?.data?.message || "Failed to update store links");

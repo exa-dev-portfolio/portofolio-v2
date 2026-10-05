@@ -221,7 +221,7 @@
               class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-white text-xs font-semibold border border-white/10 hover:border-cyan-500/30 transition-all cursor-pointer"
             >
               <UIcon name="i-carbon-badge" class="w-3.5 h-3.5 text-cyan-400" />
-              <span>Official Store Invite (iOS & Android)</span>
+              <span>Official Store Invite {{ app.apple_beta_group_id ? '(iOS & Android)' : '(Google Play)' }}</span>
             </button>
 
             <!-- Secondary Actions: QR Code & Details -->
@@ -494,20 +494,32 @@
             <div class="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                @click="setBetaPlatform('ios')"
+                :disabled="!isIosAvailable"
+                @click="isIosAvailable && setBetaPlatform('ios')"
+                :title="!isIosAvailable ? 'Apple TestFlight is not yet available for this app (Beta Group ID not configured)' : ''"
                 :class="[
-                  'p-3 rounded-xl border text-left transition-all cursor-pointer',
-                  betaPlatform === 'ios'
-                    ? 'bg-cyan-500/10 border-cyan-500 text-white shadow-sm'
-                    : 'bg-slate-950/50 border-white/10 text-slate-400 hover:border-white/20'
+                  'p-3 rounded-xl border text-left transition-all relative',
+                  !isIosAvailable
+                    ? 'bg-slate-950/30 border-white/5 opacity-40 cursor-not-allowed select-none'
+                    : betaPlatform === 'ios'
+                      ? 'bg-cyan-500/10 border-cyan-500 text-white shadow-sm cursor-pointer'
+                      : 'bg-slate-950/50 border-white/10 text-slate-400 hover:border-white/20 cursor-pointer'
                 ]"
               >
-                <div class="flex items-center gap-2 font-semibold text-xs mb-1">
-                  <UIcon name="i-carbon-apple" class="w-4 h-4 text-cyan-400" />
-                  <span>iOS TestFlight</span>
+                <div class="flex items-center justify-between mb-1">
+                  <div class="flex items-center gap-2 font-semibold text-xs">
+                    <UIcon name="i-carbon-apple" class="w-4 h-4" :class="isIosAvailable ? 'text-cyan-400' : 'text-slate-500'" />
+                    <span :class="isIosAvailable ? 'text-white' : 'text-slate-400'">iOS TestFlight</span>
+                  </div>
+                  <span
+                    v-if="!isIosAvailable"
+                    class="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400/90 border border-amber-500/20 font-semibold font-mono"
+                  >
+                    Unavailable
+                  </span>
                 </div>
-                <div class="text-[10px] text-slate-400 font-mono">
-                  {{ iosSlots.remaining }} / {{ iosSlots.max }} slots free
+                <div class="text-[10px] font-mono" :class="!isIosAvailable ? 'text-slate-500 italic' : 'text-slate-400'">
+                  {{ !isIosAvailable ? 'Group ID not set' : `${iosSlots.remaining} / ${iosSlots.max} slots free` }}
                 </div>
               </button>
 
@@ -535,7 +547,7 @@
           <!-- Email Input -->
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1.5">
-              {{ betaPlatform === 'ios' ? 'Apple ID / Email *' : 'Google Account Email *' }}
+              Email *
             </label>
             <input
               v-model="betaEmail"
@@ -678,8 +690,16 @@ const betaError = ref<string | null>(null);
 const betaSuccessMessage = ref("");
 const betaExpiresAt = ref<string | null>(null);
 
-const iosSlots = ref({ remaining: 50, max: 50 });
+const iosSlots = ref<{ remaining: number; max: number; is_available?: boolean }>({ remaining: 0, max: 0, is_available: false });
 const androidSlots = ref({ remaining: 50, max: 50 });
+
+const isIosAvailable = computed(() => {
+  if (!betaModalApp.value) return false;
+  if (!betaModalApp.value.apple_beta_group_id || !betaModalApp.value.apple_beta_group_id.trim()) {
+    return false;
+  }
+  return iosSlots.value.is_available !== false;
+});
 
 const selectedStatusFilter = ref<"all" | "production" | "development">("all");
 
@@ -779,7 +799,15 @@ const openBetaModal = async (app: any) => {
   betaEmail.value = "";
   betaOtp.value = "";
   betaError.value = null;
-  betaPlatform.value = "ios";
+
+  const hasIosGroup = Boolean(app.apple_beta_group_id && app.apple_beta_group_id.trim());
+  iosSlots.value = {
+    remaining: 0,
+    max: hasIosGroup ? 50 : 0,
+    is_available: hasIosGroup,
+  };
+
+  betaPlatform.value = hasIosGroup ? "ios" : "android";
   await fetchBetaSlots(app);
 };
 
@@ -792,6 +820,9 @@ const closeBetaModal = () => {
 };
 
 const setBetaPlatform = (platform: "ios" | "android") => {
+  if (platform === "ios" && !isIosAvailable.value) {
+    return;
+  }
   betaPlatform.value = platform;
   betaError.value = null;
 };
@@ -806,7 +837,11 @@ const fetchBetaSlots = async (app: any) => {
       iosSlots.value = {
         remaining: iosRes.data.remaining_slots,
         max: iosRes.data.max_slots,
+        is_available: iosRes.data.is_available,
       };
+      if (iosRes.data.is_available === false && betaPlatform.value === "ios") {
+        betaPlatform.value = "android";
+      }
     }
     if (androidRes?.data) {
       androidSlots.value = {
@@ -821,6 +856,10 @@ const fetchBetaSlots = async (app: any) => {
 
 const submitRequestOtp = async () => {
   if (!betaEmail.value || !betaModalApp.value) return;
+  if (betaPlatform.value === "ios" && !isIosAvailable.value) {
+    betaError.value = "Apple TestFlight is currently unavailable (Group ID not configured).";
+    return;
+  }
   betaLoading.value = true;
   betaError.value = null;
   try {

@@ -7,7 +7,7 @@ import {generateEmail, reviseEmail} from "~~/server/lib/ai-apply";
 import {sendEmail, fetchAttachmentBuffer, exchangeCodeForTokens} from "~~/server/lib/gmail";
 import {getMinioClient} from "~~/server/lib/minio";
 import {getUserSettings} from "~~/server/repositories/settings.repository";
-import type {H3Event} from "h3";
+import { type H3Event, readMultipartFormData } from "h3";
 import crypto from 'crypto';
 
 export const create = async (event: H3Event, data: {

@@ -1,5 +1,6 @@
 import {HttpError} from '~~/server/errors/HttpError'
 import {UNIQUE_CONSTRAINT_FIELD_MAP} from '~~/server/constants/pgConstraints'
+import {logger} from './logger'
 
 export function formatPgError(err: any): never {
     // UNIQUE VIOLATION

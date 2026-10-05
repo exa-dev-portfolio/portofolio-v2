@@ -35,11 +35,15 @@ export interface AsynqScheduleOptions {
 function encodeVarint(val: number | bigint): Buffer {
   let v = BigInt(val);
   const bytes: number[] = [];
-  while (v >= 0x80n) {
-    bytes.push(Number((v & 0x7fn) | 0x80n));
-    v >>= 7n;
+  const mask = BigInt(0x7f);
+  const cont = BigInt(0x80);
+  const shift = BigInt(7);
+
+  while (v >= cont) {
+    bytes.push(Number((v & mask) | cont));
+    v >>= shift;
   }
-  bytes.push(Number(v & 0x7fn));
+  bytes.push(Number(v & mask));
   return Buffer.from(bytes);
 }
 
@@ -58,7 +62,7 @@ function encodeBytes(fieldNum: number, buf: Buffer | Uint8Array | undefined): Bu
 }
 
 function encodeInt(fieldNum: number, val: number | bigint | undefined): Buffer {
-  if (!val || val === 0 || val === 0n) return Buffer.alloc(0);
+  if (!val || Number(val) === 0) return Buffer.alloc(0);
   const tag = (fieldNum << 3) | 0;
   return Buffer.concat([encodeVarint(tag), encodeVarint(val)]);
 }

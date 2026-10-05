@@ -454,6 +454,15 @@ export async function requestBetaAccessOtp(
       throw new HttpError(404, `App "${packageName}" not found`);
     }
 
+    // Edge case: if platform is iOS, verify TestFlight Beta Group ID is configured for this app
+    if (platform === "ios" && (!app.apple_beta_group_id || !app.apple_beta_group_id.trim())) {
+      throw new HttpError(
+        400,
+        "BETA_UNAVAILABLE",
+        `Apple TestFlight beta testing for "${app.app_name}" is not yet available. Please configure the Beta Group ID in the dashboard.`
+      );
+    }
+
     // Check if user is ALREADY active and not expired
     const existing = await apkRepo.findBetaTester(client, app.id, cleanEmail, platform);
     if (
@@ -534,7 +543,7 @@ export async function verifyBetaAccessOtp(
 
     // Validate OTP
     if (tester.otp_code !== otpCode.trim()) {
-      await apkRepo.incrementTesterOtpAttempts(client, tester.id);
+      await apkRepo.incrementTesterOtpAttempts(null, tester.id);
       throw new HttpError(
         400,
         "INVALID_OTP",
@@ -559,7 +568,11 @@ export async function verifyBetaAccessOtp(
         if (platform === "ios" && candidateToEvict.store_tester_id) {
           removeTesterFromAppleTestFlight(candidateToEvict.store_tester_id).catch(() => {});
         } else if (platform === "android") {
-          removeTesterFromGooglePlay(candidateToEvict.email, app.package_name).catch(() => {});
+          removeTesterFromGooglePlay(
+            candidateToEvict.email,
+            app.package_name,
+            app.google_tester_group_email?.trim() || undefined
+          ).catch(() => {});
         }
 
         logger.info(
@@ -575,12 +588,23 @@ export async function verifyBetaAccessOtp(
     let storeMessage = "";
 
     if (platform === "ios") {
-      const appleRes = await addTesterToAppleTestFlight(cleanEmail);
+      if (!app.apple_beta_group_id || !app.apple_beta_group_id.trim()) {
+        throw new HttpError(
+          400,
+          "BETA_UNAVAILABLE",
+          `Apple TestFlight beta testing for "${app.app_name}" is not yet available. Please configure the Beta Group ID in the dashboard.`
+        );
+      }
+      const appleRes = await addTesterToAppleTestFlight(cleanEmail, app.apple_beta_group_id.trim());
       storeTesterId = appleRes.storeTesterId || null;
       isDirectStoreInviteSent = appleRes.isDirectStoreInviteSent;
       storeMessage = appleRes.message || "";
     } else {
-      const googleRes = await addTesterToGooglePlay(cleanEmail, app.package_name);
+      const googleRes = await addTesterToGooglePlay(
+        cleanEmail,
+        app.package_name,
+        app.google_tester_group_email?.trim() || undefined
+      );
       isDirectStoreInviteSent = googleRes.isDirectStoreInviteSent;
       storeMessage = googleRes.message || "";
     }
@@ -590,7 +614,7 @@ export async function verifyBetaAccessOtp(
     const activated = await apkRepo.activateBetaTester(client, tester.id, expiresAt, storeTesterId);
 
     // Schedule automatic expiration via Asynq task queue
-    scheduleBetaTesterExpiration(tester.id, expiresAt).catch((err) => {
+    await scheduleBetaTesterExpiration(tester.id, expiresAt).catch((err) => {
       logger.error({ err, testerId: tester.id }, "[apk.service] Failed to schedule beta tester expiration in Asynq");
     });
 
@@ -620,12 +644,15 @@ export async function getBetaSlotInfo(packageName: string, platform: "ios" | "an
       throw new HttpError(404, `App "${packageName}" not found`);
     }
 
+    const isAvailable = platform === "ios" ? Boolean(app.apple_beta_group_id && app.apple_beta_group_id.trim()) : true;
     const activeTesters = await apkRepo.countActiveTesters(client, app.id, platform);
+
     return {
       platform,
+      is_available: isAvailable,
       max_slots: MAX_BETA_SLOTS_PER_PLATFORM,
       active_testers: activeTesters,
-      remaining_slots: Math.max(0, MAX_BETA_SLOTS_PER_PLATFORM - activeTesters),
+      remaining_slots: isAvailable ? Math.max(0, MAX_BETA_SLOTS_PER_PLATFORM - activeTesters) : 0,
     };
   });
 }
@@ -656,6 +683,15 @@ export async function adminRevokeBetaTester(testerId: string, reason?: string) {
     // Call store API to revoke from Apple/Google
     if (updated.platform === "ios" && updated.store_tester_id) {
       removeTesterFromAppleTestFlight(updated.store_tester_id).catch(() => {});
+    } else if (updated.platform === "android") {
+      const app = await apkRepo.getAppById(client, updated.app_id);
+      if (app) {
+        removeTesterFromGooglePlay(
+          updated.email,
+          app.package_name,
+          app.google_tester_group_email?.trim() || undefined
+        ).catch(() => {});
+      }
     }
 
     return updated;
@@ -668,10 +704,19 @@ export async function adminRevokeBetaTester(testerId: string, reason?: string) {
 export async function updateAppStoreLinks(
   appId: string,
   playStoreUrl?: string | null,
-  testflightUrl?: string | null
+  testflightUrl?: string | null,
+  appleBetaGroupId?: string | null,
+  googleTesterGroupEmail?: string | null
 ) {
   return withTransaction(async (client) => {
-    const updated = await apkRepo.updateAppStoreLinks(client, appId, playStoreUrl, testflightUrl);
+    const updated = await apkRepo.updateAppStoreLinks(
+      client,
+      appId,
+      playStoreUrl,
+      testflightUrl,
+      appleBetaGroupId,
+      googleTesterGroupEmail
+    );
     if (!updated) {
       throw new HttpError(404, "App not found");
     }
@@ -697,10 +742,21 @@ export async function adminAddBetaTester(
 
     let storeTesterId: string | null = null;
     if (platform === "ios") {
-      const appleRes = await addTesterToAppleTestFlight(cleanEmail);
+      if (!app.apple_beta_group_id || !app.apple_beta_group_id.trim()) {
+        throw new HttpError(
+          400,
+          "BETA_UNAVAILABLE",
+          `Apple TestFlight beta testing for "${app.app_name}" is not yet available. Please configure the Beta Group ID in the dashboard.`
+        );
+      }
+      const appleRes = await addTesterToAppleTestFlight(cleanEmail, app.apple_beta_group_id.trim());
       storeTesterId = appleRes.storeTesterId || null;
     } else {
-      await addTesterToGooglePlay(cleanEmail, app.package_name);
+      await addTesterToGooglePlay(
+        cleanEmail,
+        app.package_name,
+        app.google_tester_group_email?.trim() || undefined
+      );
     }
 
     const expiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
@@ -714,7 +770,7 @@ export async function adminAddBetaTester(
     );
 
     // Schedule automatic expiration via Asynq task queue
-    scheduleBetaTesterExpiration(tester.id, expiresAt).catch((err) => {
+    await scheduleBetaTesterExpiration(tester.id, expiresAt).catch((err) => {
       logger.error({ err, testerId: tester.id }, "[apk.service] Failed to schedule beta tester expiration in Asynq");
     });
 

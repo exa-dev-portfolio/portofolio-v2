@@ -16,6 +16,12 @@ export default withAuth(async (event) => {
     throw new HttpError(400, "VALIDATION_ERROR", parsed.error.issues[0]?.message || "Invalid store links");
   }
 
-  const updated = await updateAppStoreLinks(id, parsed.data.play_store_url, parsed.data.testflight_url);
+  const updated = await updateAppStoreLinks(
+    id,
+    parsed.data.play_store_url,
+    parsed.data.testflight_url,
+    parsed.data.apple_beta_group_id,
+    parsed.data.google_tester_group_email
+  );
   return sendSuccess(event, updated, "App official store links updated successfully");
 });

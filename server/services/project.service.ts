@@ -11,6 +11,7 @@ import { get, set, del } from "~~/server/db/redis";
 import { getMinioClient } from "~~/server/lib/minio";
 import type { ParsedFile } from "~~/server/utils/common";
 import { processImageToWebP, type ProcessedImageResult } from "~~/server/utils/image";
+import { sendSuccess } from "~~/server/utils/response";
 
 export async function invalidateProjectsCache() {
   try {

@@ -1,69 +1,52 @@
-name: Build & Deploy Portofolio v2 to VPS via GHCR
+name: Test & Deploy Frontend
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  packages: write
+  issues: write
+  pull-requests: write
 
 jobs:
-  build-and-deploy:
+  test:
+    name: Run Integration Tests
     runs-on: ubuntu-latest
-
     steps:
-      # 1️⃣ Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Get short SHA
-      - name: Get Commit SHA (short)
-        id: vars
-        run: echo "sha=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
-
-      # 3️⃣ Login to GHCR
-      - name: Log in to GHCR
-        run: |
-          echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io \
-            -u ${{ github.actor }} \
-            --password-stdin
-
-      # 4️⃣ Build Docker Image
-      - name: Build Docker image
-        run: |
-          IMAGE=ghcr.io/${{ github.repository_owner }}/portofolio-v2:${{ steps.vars.outputs.sha }}
-          docker build -t $IMAGE .
-
-      # 5️⃣ Push Docker Image
-      - name: Push Docker image
-        run: |
-          IMAGE=ghcr.io/${{ github.repository_owner }}/portofolio-v2:${{ steps.vars.outputs.sha }}
-          docker push $IMAGE
-
-      # 6️⃣ Setup SSH known_hosts
-      - name: Setup SSH known_hosts
-        run: |
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          ssh-keyscan -p 31080 -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
-
-      # 7️⃣ Start SSH Agent (SECURE)
-      - name: Start SSH Agent
-        uses: webfactory/ssh-agent@v0.9.0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          ssh-private-key: ${{ secrets.SSH_KEY }}
+          node-version: 22
+          cache: npm
 
-      # 8️⃣ Deploy to VPS
-      - name: Deploy to VPS
-        run: |
-          ssh -p 31080 deploy@${{ secrets.VPS_HOST }} << 'EOF'
-            set -e
+      - name: Install dependencies
+        run: npm ci
 
-            export KUBECONFIG=/home/deploy/.kube/config         
+      - name: Run Integration Tests
+        run: npm test
 
-            NEW_IMAGE="ghcr.io/${{ github.repository_owner }}/portofolio-v2:${{ steps.vars.outputs.sha }}"
-
-            kubectl set image deployment/portofolio-v2 \
-              -n portfolio \
-              portofolio-v2=$NEW_IMAGE
-
-            # kubectl rollout status deployment/portofolio-v2 \
-            #   -n portfolio
-          EOF
+  deploy:
+    name: Deploy to Production
+    needs: [test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    uses: exa31/github-workflows/.github/workflows/frontend.yml@v1.0.0
+    with:
+      app_name: portofolio-v2
+      namespace: portfolio
+      image_name: ghcr.io/exa31/portofolio-v2
+      rollout_timeout: 300s
+      push_latest: true
+      ssh_port: 31080
+    secrets:
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+      SSH_KEY: ${{ secrets.SSH_KEY }}
+      VPS_HOST: ${{ secrets.VPS_HOST }}

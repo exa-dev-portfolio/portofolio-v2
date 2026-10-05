@@ -53,6 +53,8 @@ export interface ApkAppModel {
   status: "development" | "production";
   play_store_url?: string | null;
   testflight_url?: string | null;
+  apple_beta_group_id?: string | null;
+  google_tester_group_email?: string | null;
   is_published: boolean;
   download_count: number;
   created_at: string;
@@ -64,6 +66,8 @@ export interface ApkAppModel {
 export const updateStoreLinksSchema = z.object({
   play_store_url: z.string().nullable().optional(),
   testflight_url: z.string().nullable().optional(),
+  apple_beta_group_id: z.string().nullable().optional(),
+  google_tester_group_email: z.string().nullable().optional(),
 });
 
 export const adminAddTesterSchema = z.object({
