@@ -243,8 +243,18 @@ useHead({
       href: "/favicon.ico",
     },
     {
+      rel: "icon",
+      type: "image/png",
+      href: "/favicon.png",
+    },
+    {
+      rel: "icon",
+      type: "image/svg+xml",
+      href: "/favicon.svg",
+    },
+    {
       rel: "apple-touch-icon",
-      href: "/favicon.ico",
+      href: "/favicon.png",
     },
     {
       rel: "preconnect",

@@ -110,6 +110,9 @@ export default defineNuxtConfig({
       ],
       link: [
         { rel: "icon", href: "/favicon.ico" },
+        { rel: "icon", type: "image/png", href: "/favicon.png" },
+        { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+        { rel: "apple-touch-icon", href: "/favicon.png" },
         { rel: "canonical", href: "https://eka-dev.cloud" },
         { rel: "preconnect", href: "https://fonts.googleapis.com" },
         { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" },

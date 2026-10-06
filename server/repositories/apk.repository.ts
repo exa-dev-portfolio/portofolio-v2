@@ -142,14 +142,15 @@ export const upsertApp = async (
     icon_url?: string | null;
     latest_version_code: number;
     latest_version_name?: string | null;
+    supported_platforms?: string[];
   }
 ): Promise<ApkAppModel> => {
   const sql = `
     INSERT INTO apk_apps (
       repo_id, package_name, app_name, description, icon_url,
-      latest_version_code, latest_version_name, updated_at
+      latest_version_code, latest_version_name, supported_platforms, updated_at
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, current_timestamp)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, COALESCE($8, ARRAY['android']::text[]), current_timestamp)
     ON CONFLICT (package_name) DO UPDATE SET
       repo_id = EXCLUDED.repo_id,
       app_name = EXCLUDED.app_name,
@@ -160,6 +161,11 @@ export const upsertApp = async (
         WHEN EXCLUDED.latest_version_code >= apk_apps.latest_version_code
         THEN EXCLUDED.latest_version_name
         ELSE apk_apps.latest_version_name
+      END,
+      supported_platforms = CASE
+        WHEN EXCLUDED.supported_platforms IS NOT NULL AND array_length(EXCLUDED.supported_platforms, 1) > 0
+        THEN (SELECT array_agg(DISTINCT p) FROM unnest(array_cat(apk_apps.supported_platforms, EXCLUDED.supported_platforms)) AS p)
+        ELSE apk_apps.supported_platforms
       END,
       updated_at = current_timestamp
     RETURNING *
@@ -172,6 +178,7 @@ export const upsertApp = async (
     data.icon_url || null,
     data.latest_version_code,
     data.latest_version_name || null,
+    data.supported_platforms || null,
   ];
   const res = await client.query<ApkAppModel>(sql, values);
   return res.rows[0];
@@ -182,7 +189,12 @@ export const getAppByPackageName = async (
   packageName: string
 ): Promise<ApkAppModel | null> => {
   const sql = `
-    SELECT a.*, r.repo_slug
+    SELECT a.*, r.repo_slug,
+      COALESCE(
+        (SELECT array_agg(DISTINCT rel.platform) FROM apk_releases rel WHERE rel.app_id = a.id),
+        a.supported_platforms,
+        ARRAY['android']::text[]
+      ) AS supported_platforms
     FROM apk_apps a
     JOIN apk_repositories r ON r.id = a.repo_id
     WHERE a.package_name = $1
@@ -196,7 +208,12 @@ export const getAppById = async (
   id: string
 ): Promise<ApkAppModel | null> => {
   const sql = `
-    SELECT a.*, r.repo_slug
+    SELECT a.*, r.repo_slug,
+      COALESCE(
+        (SELECT array_agg(DISTINCT rel.platform) FROM apk_releases rel WHERE rel.app_id = a.id),
+        a.supported_platforms,
+        ARRAY['android']::text[]
+      ) AS supported_platforms
     FROM apk_apps a
     JOIN apk_repositories r ON r.id = a.repo_id
     WHERE a.id = $1
@@ -210,12 +227,19 @@ export const listPublishedApps = async (
 ): Promise<(ApkAppModel & { latest_release?: ApkReleaseModel | null })[]> => {
   const sql = `
     SELECT a.*, r.repo_slug,
+      COALESCE(
+        (SELECT array_agg(DISTINCT rel2.platform) FROM apk_releases rel2 WHERE rel2.app_id = a.id),
+        a.supported_platforms,
+        ARRAY['android']::text[]
+      ) AS supported_platforms,
       json_build_object(
         'id', rel.id,
         'tag_name', rel.tag_name,
         'version_code', rel.version_code,
         'version_name', rel.version_name,
         'status', rel.status,
+        'platform', rel.platform,
+        'original_filename', rel.original_filename,
         'min_sdk', rel.min_sdk,
         'target_sdk', rel.target_sdk,
         'changelog', rel.changelog,
@@ -228,7 +252,7 @@ export const listPublishedApps = async (
     LEFT JOIN LATERAL (
       SELECT * FROM apk_releases
       WHERE app_id = a.id
-      ORDER BY version_code DESC
+      ORDER BY version_code DESC, created_at DESC
       LIMIT 1
     ) rel ON true
     WHERE a.is_published = true
@@ -243,6 +267,11 @@ export const listAllApps = async (
 ): Promise<(ApkAppModel & { release_count: number })[]> => {
   const sql = `
     SELECT a.*, r.repo_slug,
+      COALESCE(
+        (SELECT array_agg(DISTINCT rel2.platform) FROM apk_releases rel2 WHERE rel2.app_id = a.id),
+        a.supported_platforms,
+        ARRAY['android']::text[]
+      ) AS supported_platforms,
       (SELECT COUNT(*)::int FROM apk_releases WHERE app_id = a.id) AS release_count
     FROM apk_apps a
     JOIN apk_repositories r ON r.id = a.repo_id
@@ -332,6 +361,9 @@ export const upsertRelease = async (
     tag_name: string;
     version_code: number;
     version_name: string;
+    platform?: string;
+    original_filename?: string;
+    arch?: string | null;
     min_sdk?: number | null;
     target_sdk?: number | null;
     changelog?: string | null;
@@ -342,17 +374,22 @@ export const upsertRelease = async (
     published_at?: string | null;
   }
 ): Promise<ApkReleaseModel> => {
+  const platform = data.platform || "android";
+  const originalFilename = data.original_filename || "";
+
   const sql = `
     INSERT INTO apk_releases (
       app_id, github_release_id, tag_name, version_code, version_name,
+      platform, original_filename, arch,
       min_sdk, target_sdk, changelog, file_size_bytes, sha256_hash,
       storage_path, download_url, published_at, created_at
     )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, current_timestamp)
-    ON CONFLICT (app_id, version_code) DO UPDATE SET
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, current_timestamp)
+    ON CONFLICT (app_id, version_code, platform, original_filename) DO UPDATE SET
       github_release_id = COALESCE(EXCLUDED.github_release_id, apk_releases.github_release_id),
       tag_name = EXCLUDED.tag_name,
       version_name = EXCLUDED.version_name,
+      arch = COALESCE(EXCLUDED.arch, apk_releases.arch),
       min_sdk = COALESCE(EXCLUDED.min_sdk, apk_releases.min_sdk),
       target_sdk = COALESCE(EXCLUDED.target_sdk, apk_releases.target_sdk),
       changelog = COALESCE(EXCLUDED.changelog, apk_releases.changelog),
@@ -369,6 +406,9 @@ export const upsertRelease = async (
     data.tag_name,
     data.version_code,
     data.version_name,
+    platform,
+    originalFilename,
+    data.arch || "universal",
     data.min_sdk || null,
     data.target_sdk || null,
     data.changelog || null,
@@ -385,27 +425,39 @@ export const upsertRelease = async (
 export const getReleaseByVersion = async (
   client: PoolClient,
   appId: string,
-  versionCode: number
+  versionCode: number,
+  platform?: string
 ): Promise<ApkReleaseModel | null> => {
-  const sql = `
+  let sql = `
     SELECT * FROM apk_releases
     WHERE app_id = $1 AND version_code = $2
   `;
-  const res = await client.query<ApkReleaseModel>(sql, [appId, versionCode]);
+  const values: any[] = [appId, versionCode];
+  if (platform) {
+    sql += ` AND platform = $3`;
+    values.push(platform);
+  }
+  sql += ` ORDER BY created_at DESC LIMIT 1`;
+  const res = await client.query<ApkReleaseModel>(sql, values);
   return res.rows[0] || null;
 };
 
 export const getLatestRelease = async (
   client: PoolClient,
-  appId: string
+  appId: string,
+  platform?: string
 ): Promise<ApkReleaseModel | null> => {
-  const sql = `
+  let sql = `
     SELECT * FROM apk_releases
     WHERE app_id = $1
-    ORDER BY version_code DESC
-    LIMIT 1
   `;
-  const res = await client.query<ApkReleaseModel>(sql, [appId]);
+  const values: any[] = [appId];
+  if (platform) {
+    sql += ` AND platform = $2`;
+    values.push(platform);
+  }
+  sql += ` ORDER BY version_code DESC, created_at DESC LIMIT 1`;
+  const res = await client.query<ApkReleaseModel>(sql, values);
   return res.rows[0] || null;
 };
 

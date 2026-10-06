@@ -37,23 +37,23 @@
           <span>Self-Hosted & Realtime GitHub Sync</span>
         </div>
         <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mb-4">
-          Personal <span class="bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">Android App Store</span>
+          Personal <span class="bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">Software & Apps Store</span>
         </h1>
         <p class="text-slate-400 text-base sm:text-lg leading-relaxed">
-          Curated collection of Android applications built and maintained by me. Download official APK release binaries directly or scan the QR Code on your mobile device for instant installation.
+          Curated collection of cross-platform applications built and maintained by me. Download official release binaries for Windows, macOS, Android, and Linux with automated GitHub synchronization.
         </p>
       </div>
 
-      <!-- Search & Status Filter Bar -->
-      <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 mb-8">
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+      <!-- Search & Filters Bar -->
+      <div class="flex flex-col gap-4 mb-8">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
           <!-- Search Input -->
           <div class="relative w-full sm:w-72">
             <UIcon name="i-carbon-search" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
             <input
               v-model="searchQuery"
               type="text"
-              placeholder="Search apps or package..."
+              placeholder="Search apps or software..."
               class="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-900/80 border border-white/10 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors"
             />
           </div>
@@ -98,8 +98,28 @@
           </div>
         </div>
 
-        <div class="text-xs text-slate-400 flex items-center gap-2">
-          <span>Showing {{ filteredApps.length }} of {{ apps.length }} apps</span>
+        <!-- Platform Filter Tabs & Counter -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2 border-t border-white/5">
+          <div class="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-slate-900/60 border border-white/10">
+            <button
+              v-for="p in platformFilters"
+              :key="p.id"
+              @click="selectedPlatformFilter = p.id as any"
+              :class="[
+                'px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer',
+                selectedPlatformFilter === p.id
+                  ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/25'
+                  : 'text-slate-400 hover:text-white'
+              ]"
+            >
+              <PlatformIcon v-if="p.id !== 'all'" :platform="p.id" class="w-3.5 h-3.5 shrink-0" />
+              <span>{{ p.label }}</span>
+            </button>
+          </div>
+
+          <div class="text-xs text-slate-400 flex items-center gap-2">
+            <span>Showing {{ filteredApps.length }} of {{ apps.length }} apps</span>
+          </div>
         </div>
       </div>
 
@@ -180,6 +200,18 @@
                     {{ formatFileSize(app.latest_release.file_size_bytes) }}
                   </span>
                 </div>
+
+                <!-- Platform Badges -->
+                <div class="flex flex-wrap items-center gap-1 pt-1.5">
+                  <span
+                    v-for="plat in (app.supported_platforms || ['android'])"
+                    :key="plat"
+                    class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[10px] font-mono text-slate-300 uppercase"
+                  >
+                    <PlatformIcon :platform="plat" class="w-3 h-3 text-cyan-400 shrink-0" />
+                    <span>{{ plat }}</span>
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -206,23 +238,51 @@
 
           <!-- Card Bottom: Actions -->
           <div class="space-y-2 pt-2 border-t border-white/5">
-            <!-- Direct Download Button -->
+            <!-- Direct Download Buttons -->
+            <div v-if="(app.supported_platforms && app.supported_platforms.length > 1)" class="space-y-1.5">
+              <div class="text-[10px] uppercase font-mono text-slate-400 font-semibold tracking-wider flex items-center justify-between">
+                <span>Download Build</span>
+                <span class="text-cyan-400">{{ app.supported_platforms.length }} OS</span>
+              </div>
+              <div class="grid grid-cols-2 gap-1.5">
+                <a
+                  v-for="plat in app.supported_platforms"
+                  :key="plat"
+                  :href="`/api/v1/apps/${app.package_name}/download?platform=${plat}`"
+                  class="inline-flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl bg-gradient-to-r from-cyan-500/15 to-blue-600/15 hover:from-cyan-500 hover:to-blue-600 text-cyan-300 hover:text-white font-medium text-xs border border-cyan-500/25 transition-all cursor-pointer truncate"
+                >
+                  <PlatformIcon :platform="plat" class="w-3.5 h-3.5 shrink-0" />
+                  <span class="capitalize truncate">{{ plat }}</span>
+                </a>
+              </div>
+            </div>
             <a
-              :href="`/api/v1/apps/${app.package_name}/download`"
+              v-else
+              :href="`/api/v1/apps/${app.package_name}/download?platform=${(app.supported_platforms && app.supported_platforms[0]) || 'android'}`"
               class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium text-sm shadow-lg shadow-cyan-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
             >
-              <UIcon name="i-carbon-download" class="w-4 h-4" />
-              <span>Download APK</span>
+              <PlatformIcon :platform="(app.supported_platforms && app.supported_platforms[0]) || 'android'" class="w-4 h-4 shrink-0" />
+              <span>{{ getDownloadButtonLabel((app.supported_platforms && app.supported_platforms[0]) || 'android') }}</span>
             </a>
 
             <!-- Apple TestFlight Invite (iOS) -->
             <button
               v-if="app.apple_beta_group_id"
-              @click="openBetaModal(app)"
+              @click="openBetaModal(app, 'ios')"
               class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-white text-xs font-semibold border border-white/10 hover:border-cyan-500/30 transition-all cursor-pointer"
             >
               <UIcon name="i-carbon-apple" class="w-3.5 h-3.5 text-cyan-400" />
               <span>Apple TestFlight (iOS)</span>
+            </button>
+
+            <!-- Google Play Beta Invite (Android) -->
+            <button
+              v-else-if="app.play_store_url && (app.supported_platforms || []).includes('android')"
+              @click="openBetaModal(app, 'android')"
+              class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-white text-xs font-semibold border border-white/10 hover:border-emerald-500/30 transition-all cursor-pointer"
+            >
+              <UIcon name="i-carbon-logo-google" class="w-3.5 h-3.5 text-emerald-400" />
+              <span>Google Play Beta (Android)</span>
             </button>
 
             <!-- Secondary Actions: QR Code & Details -->
@@ -441,6 +501,7 @@
           </div>
           <div class="flex items-center gap-2">
             <button
+              v-if="hasStoreBeta(selectedAppDetail)"
               @click="openBetaModal(selectedAppDetail)"
               class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-white/10 transition-colors flex items-center gap-1.5 cursor-pointer"
             >
@@ -448,11 +509,13 @@
               <span>Store Invite</span>
             </button>
             <a
-              :href="`/api/v1/apps/${selectedAppDetail.package_name}/download`"
-              class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-semibold shadow-lg shadow-cyan-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-1.5 cursor-pointer"
+              v-for="plat in (selectedAppDetail.supported_platforms || ['android'])"
+              :key="plat"
+              :href="`/api/v1/apps/${selectedAppDetail.package_name}/download?platform=${plat}`"
+              class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-semibold shadow-lg shadow-cyan-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 cursor-pointer"
             >
-              <UIcon name="i-carbon-download" class="w-4 h-4" />
-              <span>Download APK</span>
+              <PlatformIcon :platform="plat" class="w-4 h-4 shrink-0" />
+              <span>Download for {{ getPlatformLabel(plat) }}</span>
             </a>
           </div>
         </div>
@@ -475,36 +538,46 @@
 
         <div class="flex items-center gap-3 mb-4">
           <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
-            <UIcon name="i-carbon-apple" class="w-5 h-5" />
+            <UIcon :name="betaPlatform === 'ios' ? 'i-carbon-apple' : 'i-carbon-logo-google'" class="w-5 h-5" />
           </div>
           <div>
-            <h3 class="text-base font-bold text-white">Apple TestFlight Invite</h3>
-            <p class="text-xs text-slate-400">{{ betaModalApp.app_name }} • 14-Day Testing Pass</p>
+            <h3 class="text-base font-bold text-white">
+              {{ betaPlatform === 'ios' ? 'Apple TestFlight Invite' : 'Google Play Beta Invite' }}
+            </h3>
+            <p class="text-xs text-slate-400">
+              {{ betaModalApp.app_name }} • 14-Day {{ betaPlatform === 'ios' ? 'iOS' : 'Android' }} Testing Pass
+            </p>
           </div>
         </div>
 
         <!-- Step 1: Input Email -->
         <div v-if="betaStep === 1" class="space-y-4">
           <p class="text-xs text-slate-300 leading-relaxed">
-            Get an official TestFlight invite sent directly by Apple to your inbox to install securely on your iPhone or iPad.
+            {{
+              betaPlatform === 'ios'
+                ? 'Get an official TestFlight invite sent directly by Apple to your inbox to install securely on your iPhone or iPad.'
+                : 'Get official closed testing access to install securely from Google Play Store on your Android device.'
+            }}
           </p>
 
           <div class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-950/60 border border-white/5 text-xs text-slate-300">
-            <UIcon name="i-carbon-apple" class="w-4 h-4 text-cyan-400 shrink-0" />
-            <span class="font-medium">Platform: Apple TestFlight (iOS)</span>
+            <UIcon :name="betaPlatform === 'ios' ? 'i-carbon-apple' : 'i-carbon-logo-google'" class="w-4 h-4 text-cyan-400 shrink-0" />
+            <span class="font-medium">
+              Platform: {{ betaPlatform === 'ios' ? 'Apple TestFlight (iOS)' : 'Google Play Testing (Android)' }}
+            </span>
             <span class="ml-auto text-[10px] px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-mono font-semibold">14 Days</span>
           </div>
 
           <!-- Email Input -->
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1.5">
-              Email (Apple ID recommended) *
+              {{ betaPlatform === 'ios' ? 'Email (Apple ID recommended) *' : 'Email (Google Play account) *' }}
             </label>
             <input
               v-model="betaEmail"
               type="email"
               required
-              placeholder="e.g. name@example.com"
+              :placeholder="betaPlatform === 'ios' ? 'e.g. appleid@example.com' : 'e.g. account@gmail.com'"
               class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors"
             />
             <p class="text-[11px] text-slate-500 mt-1">
@@ -604,20 +677,28 @@
           </div>
 
           <div>
-            <h4 class="text-base font-bold text-white mb-1">TestFlight Pass Activated!</h4>
+            <h4 class="text-base font-bold text-white mb-1">
+              {{ betaPlatform === 'ios' ? 'TestFlight Pass Activated!' : 'Google Play Pass Activated!' }}
+            </h4>
             <p class="text-xs text-slate-300 leading-relaxed max-w-sm mx-auto">
               {{ betaSuccessMessage }}
             </p>
           </div>
 
           <div class="p-3 bg-slate-950/80 rounded-xl border border-white/5 text-left text-xs space-y-1 font-mono">
-            <div>Platform: <strong class="text-white">Apple TestFlight (iOS)</strong></div>
+            <div>
+              Platform: <strong class="text-white">{{ betaPlatform === 'ios' ? 'Apple TestFlight (iOS)' : 'Google Play (Android)' }}</strong>
+            </div>
             <div>Valid Until: <strong class="text-emerald-400">{{ formatDate(betaExpiresAt) }}</strong> (14 Days)</div>
             <div>Recipient: <strong class="text-slate-300">{{ betaEmail }}</strong></div>
           </div>
 
           <p class="text-[11px] text-slate-400 italic">
-            Check your inbox now for the official email from Apple (no_reply@email.apple.com) to install via TestFlight on your iPhone.
+            {{
+              betaPlatform === 'ios'
+                ? 'Check your inbox now for the official email from Apple (no_reply@email.apple.com) to install via TestFlight on your iPhone.'
+                : 'Check your Google Play Store testing invitation or visit the link provided in your email to begin testing.'
+            }}
           </p>
 
           <button
@@ -686,6 +767,63 @@ const isIosAvailable = computed(() => {
 });
 
 const selectedStatusFilter = ref<"all" | "production" | "development">("all");
+const selectedPlatformFilter = ref<"all" | "android" | "windows" | "macos" | "linux">("all");
+
+const platformFilters = [
+  { id: "all", label: "All Platforms", icon: undefined },
+  { id: "windows", label: "Windows", icon: "simple-icons:windows" },
+  { id: "macos", label: "macOS", icon: "simple-icons:apple" },
+  { id: "android", label: "Android", icon: "simple-icons:android" },
+  { id: "linux", label: "Linux", icon: "simple-icons:linux" },
+];
+
+const getPlatformIcon = (plat?: string) => {
+  switch (plat?.toLowerCase()) {
+    case "windows":
+    case "win":
+      return "simple-icons:windows";
+    case "macos":
+    case "mac":
+    case "ios":
+      return "simple-icons:apple";
+    case "linux":
+      return "simple-icons:linux";
+    case "android":
+      return "simple-icons:android";
+    default:
+      return "carbon:application";
+  }
+};
+
+const getPlatformLabel = (plat?: string) => {
+  switch (plat?.toLowerCase()) {
+    case "windows":
+      return "Windows (.exe)";
+    case "macos":
+      return "macOS (.dmg)";
+    case "linux":
+      return "Linux";
+    case "android":
+      return "Android APK";
+    default:
+      return plat || "Download";
+  }
+};
+
+const getDownloadButtonLabel = (plat?: string) => {
+  switch (plat?.toLowerCase()) {
+    case "windows":
+      return "Download for Windows (.exe)";
+    case "macos":
+      return "Download for macOS (.dmg)";
+    case "linux":
+      return "Download for Linux";
+    case "android":
+      return "Download APK";
+    default:
+      return `Download for ${plat || "Device"}`;
+  }
+};
 
 const counts = computed(() => {
   const all = apps.value.length;
@@ -698,6 +836,12 @@ const filteredApps = computed(() => {
   let list = apps.value;
   if (selectedStatusFilter.value !== "all") {
     list = list.filter((app: any) => (app.status || "development") === selectedStatusFilter.value);
+  }
+  if (selectedPlatformFilter.value !== "all") {
+    list = list.filter((app: any) => {
+      const plats = app.supported_platforms || ["android"];
+      return plats.includes(selectedPlatformFilter.value);
+    });
   }
   if (!searchQuery.value.trim()) return list;
   const q = searchQuery.value.toLowerCase();
@@ -787,9 +931,30 @@ const goToStep2 = () => {
   lastPendingAppPackage.value = betaModalApp.value?.package_name || null;
 };
 
-const openBetaModal = async (app: any) => {
+const hasStoreBeta = (app: any) => {
+  if (!app) return false;
+  const platforms = app.supported_platforms || [];
+  const hasAndroid = platforms.includes("android");
+  const hasIosGroup = Boolean(app.apple_beta_group_id && app.apple_beta_group_id.trim());
+  return hasIosGroup || (hasAndroid && Boolean(app.play_store_url));
+};
+
+const openBetaModal = async (app: any, preferredPlatform?: "ios" | "android") => {
   const isSamePending = lastPendingAppPackage.value === app.package_name && betaStep.value === 2 && betaEmail.value;
   betaModalApp.value = app;
+
+  const hasIosGroup = Boolean(app.apple_beta_group_id && app.apple_beta_group_id.trim());
+  const hasAndroid = Boolean(app.play_store_url && (app.supported_platforms || []).includes("android"));
+
+  if (preferredPlatform) {
+    betaPlatform.value = preferredPlatform;
+  } else if (hasIosGroup) {
+    betaPlatform.value = "ios";
+  } else if (hasAndroid) {
+    betaPlatform.value = "android";
+  } else {
+    betaPlatform.value = "ios";
+  }
 
   if (isSamePending) {
     betaError.value = null;
@@ -798,14 +963,11 @@ const openBetaModal = async (app: any) => {
     betaOtp.value = "";
     betaError.value = null;
 
-    const hasIosGroup = Boolean(app.apple_beta_group_id && app.apple_beta_group_id.trim());
     iosSlots.value = {
       remaining: 0,
       max: hasIosGroup ? 50 : 0,
-      is_available: hasIosGroup,
+      is_available: betaPlatform.value === "ios" ? hasIosGroup : true,
     };
-
-    betaPlatform.value = "ios";
   }
 
   await fetchBetaSlots(app);
@@ -827,12 +989,12 @@ const closeBetaModal = () => {
 
 const fetchBetaSlots = async (app: any) => {
   try {
-    const iosRes = await $fetch<any>(`/api/v1/apps/${app.package_name}/beta/slots?platform=ios`);
-    if (iosRes?.data) {
+    const res = await $fetch<any>(`/api/v1/apps/${app.package_name}/beta/slots?platform=${betaPlatform.value}`);
+    if (res?.data) {
       iosSlots.value = {
-        remaining: iosRes.data.remaining_slots,
-        max: iosRes.data.max_slots,
-        is_available: iosRes.data.is_available,
+        remaining: res.data.remaining_slots,
+        max: res.data.max_slots,
+        is_available: res.data.is_available,
       };
     }
   } catch (err) {

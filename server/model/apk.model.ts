@@ -8,8 +8,10 @@ export const createApkRepositorySchema = z.object({
   is_private: z.boolean().default(false),
   access_token: z.string().optional().nullable(),
   webhook_secret: z.string().optional(),
-  asset_filter_regex: z.string().default(".*\\.apk$"),
+  asset_filter_regex: z.string().default(".*\\.(apk|exe|msi|dmg|pkg|AppImage|deb|zip)$"),
 });
+
+export type SupportedPlatform = "android" | "windows" | "macos" | "linux";
 
 export type CreateApkRepositoryInput = z.infer<typeof createApkRepositorySchema>;
 
@@ -51,6 +53,7 @@ export interface ApkAppModel {
   latest_version_code: number;
   latest_version_name: string | null;
   status: "development" | "production";
+  supported_platforms?: string[];
   play_store_url?: string | null;
   testflight_url?: string | null;
   apple_beta_group_id?: string | null;
@@ -84,6 +87,9 @@ export interface ApkReleaseModel {
   version_code: number;
   version_name: string;
   status: "development" | "production";
+  platform: string;
+  original_filename?: string;
+  arch?: string | null;
   min_sdk: number | null;
   target_sdk: number | null;
   changelog: string | null;

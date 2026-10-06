@@ -10,12 +10,34 @@ export default defineEventHandler(async (event) => {
     throw new HttpError(400, "MISSING_PACKAGE_NAME", "Package name is required");
   }
 
-  // Without versionCode, getDownloadRelease fetches latest
-  const { app, release } = await getDownloadRelease(packageName);
+  const query = getQuery(event);
+  const platformParam = typeof query.platform === "string" ? query.platform : undefined;
 
-  const safeFileName = `${app.app_name.replace(/[^a-zA-Z0-9_.-]/g, "_")}-v${release.version_name}.apk`;
+  // Without versionCode, getDownloadRelease fetches latest (optionally filtered by platform)
+  const { app, release } = await getDownloadRelease(packageName, undefined, platformParam);
 
-  setHeader(event, "Content-Type", "application/vnd.android.package-archive");
+  const platform = release.platform || "android";
+  let contentType = "application/octet-stream";
+  let ext = "bin";
+  if (platform === "android") {
+    contentType = "application/vnd.android.package-archive";
+    ext = "apk";
+  } else if (platform === "windows") {
+    contentType = "application/vnd.microsoft.portable-executable";
+    ext = release.original_filename?.endsWith(".msi") ? "msi" : "exe";
+  } else if (platform === "macos") {
+    contentType = "application/x-apple-diskimage";
+    ext = release.original_filename?.endsWith(".pkg") ? "pkg" : "dmg";
+  } else if (platform === "linux") {
+    contentType = "application/x-executable";
+    ext = release.original_filename?.endsWith(".deb") ? "deb" : "AppImage";
+  }
+
+  const safeFileName =
+    release.original_filename ||
+    `${app.app_name.replace(/[^a-zA-Z0-9_.-]/g, "_")}-v${release.version_name}.${ext}`;
+
+  setHeader(event, "Content-Type", contentType);
   setHeader(event, "Content-Disposition", `attachment; filename="${safeFileName}"`);
   if (release.file_size_bytes) {
     setHeader(event, "Content-Length", String(release.file_size_bytes));

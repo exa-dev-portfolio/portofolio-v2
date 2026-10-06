@@ -4,13 +4,13 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
       <div>
         <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight mb-2 flex items-center gap-3">
-          <span>Manage Applications (APK)</span>
+          <span>Manage Applications (Multi-Platform)</span>
           <span class="text-xs font-mono px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
             {{ repositories.length }} Repos
           </span>
         </h1>
         <p class="text-white/60 text-sm sm:text-base">
-          Manage GitHub repository webhooks, automated APK releases, production/development visibility, and official store beta distribution.
+          Manage GitHub repository webhooks, automated multi-platform releases (Windows, macOS, Android, Linux), production/development visibility, and official store distribution.
         </p>
       </div>
 
@@ -86,7 +86,7 @@
         </div>
         <p class="text-sm font-bold text-white">No applications ingested yet</p>
         <p class="text-xs text-white/50 mt-1">
-          Sync one of your repositories below to automatically extract app metadata and APK binaries.
+          Sync one of your repositories below to automatically extract app metadata and release binaries.
         </p>
       </div>
 
@@ -139,8 +139,20 @@
                 <span>Downloads: <strong class="text-emerald-400">{{ app.download_count || 0 }}x</strong></span>
               </div>
 
+              <!-- Supported Platform Badges -->
+              <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                <span
+                  v-for="plat in (app.supported_platforms || ['android'])"
+                  :key="plat"
+                  class="text-[10px] px-2 py-0.5 rounded-md font-mono flex items-center gap-1.5 bg-white/5 text-slate-300 border border-white/10 uppercase"
+                >
+                  <PlatformIcon :platform="plat" class="w-3 h-3 text-cyan-400 shrink-0" />
+                  <span>{{ plat }}</span>
+                </span>
+              </div>
+
               <!-- Store Integration Badges -->
-              <div class="flex flex-wrap items-center gap-2 pt-1">
+              <div class="flex flex-wrap items-center gap-2 pt-0.5">
                 <span
                   :class="[
                     'text-[10px] px-2 py-0.5 rounded-md font-mono flex items-center gap-1 border',
@@ -462,10 +474,10 @@
             <input
               v-model="form.asset_filter_regex"
               type="text"
-              placeholder=".*\.apk$"
+              placeholder=".*\\.(apk|exe|msi|dmg|pkg|AppImage|deb|zip)$"
               class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/15 text-sm text-white focus:outline-none focus:border-primary font-mono placeholder:text-white/30"
             />
-            <p class="text-[10px] text-white/50 mt-1">Regex pattern to filter APK binary files from GitHub release assets.</p>
+            <p class="text-[10px] text-white/50 mt-1">Regex pattern to match binary files from GitHub release assets (e.g. .apk, .exe, .dmg, .AppImage, .zip).</p>
           </div>
 
           <div class="pt-4 flex items-center justify-end gap-2.5 border-t border-white/10">
@@ -863,7 +875,7 @@ const form = ref({
   repo_slug: "",
   is_private: false,
   access_token: "",
-  asset_filter_regex: ".*\\.apk$",
+  asset_filter_regex: ".*\\.(apk|exe|msi|dmg|pkg|AppImage|deb|zip)$",
 });
 
 onMounted(() => {
@@ -1010,7 +1022,7 @@ const openRegisterModal = () => {
     repo_slug: "",
     is_private: false,
     access_token: "",
-    asset_filter_regex: ".*\\.apk$",
+    asset_filter_regex: ".*\\.(apk|exe|msi|dmg|pkg|AppImage|deb|zip)$",
   };
   showModal.value = true;
 };
@@ -1074,10 +1086,53 @@ const formatDate = (dateString?: string) => {
   });
 };
 
+const getPlatformIcon = (plat?: string) => {
+  switch (plat?.toLowerCase()) {
+    case "windows":
+    case "win":
+      return "simple-icons:windows";
+    case "macos":
+    case "mac":
+    case "ios":
+      return "simple-icons:apple";
+    case "linux":
+      return "simple-icons:linux";
+    case "android":
+      return "simple-icons:android";
+    default:
+      return "carbon:application";
+  }
+};
+
 const copyText = (text: string) => {
-  if (navigator?.clipboard) {
-    navigator.clipboard.writeText(text);
+  if (!text) return;
+  if (navigator?.clipboard?.writeText) {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        toast.showSuccessToast("Copied", "Copied to clipboard!");
+      })
+      .catch(() => {
+        fallbackCopy(text);
+      });
+  } else {
+    fallbackCopy(text);
+  }
+};
+
+const fallbackCopy = (text: string) => {
+  try {
+    const el = document.createElement("textarea");
+    el.value = text;
+    el.style.position = "fixed";
+    el.style.opacity = "0";
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand("copy");
+    document.body.removeChild(el);
     toast.showSuccessToast("Copied", "Copied to clipboard!");
+  } catch (err) {
+    toast.showErrorToast("Failed", "Could not copy to clipboard");
   }
 };
 </script>

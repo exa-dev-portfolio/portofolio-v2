@@ -363,7 +363,7 @@ export async function listRecentSyncJobs(limit = 20) {
 /**
  * Resolve APK release file for streaming download
  */
-export async function getDownloadRelease(packageName: string, versionCode?: number) {
+export async function getDownloadRelease(packageName: string, versionCode?: number, platform?: string) {
   return withTransaction(async (client) => {
     const app = await apkRepo.getAppByPackageName(client, packageName);
     if (!app) {
@@ -372,13 +372,13 @@ export async function getDownloadRelease(packageName: string, versionCode?: numb
 
     let release;
     if (versionCode) {
-      release = await apkRepo.getReleaseByVersion(client, app.id, versionCode);
+      release = await apkRepo.getReleaseByVersion(client, app.id, versionCode, platform);
     } else {
-      release = await apkRepo.getLatestRelease(client, app.id);
+      release = await apkRepo.getLatestRelease(client, app.id, platform);
     }
 
     if (!release) {
-      throw new HttpError(404, `Release not found for "${packageName}"`);
+      throw new HttpError(404, `Release not found for "${packageName}"${platform ? ` on ${platform}` : ""}`);
     }
 
     // Increment downloads inside transaction
