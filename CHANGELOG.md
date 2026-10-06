@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.1.0...v1.2.0) (2026-10-06)
+
+
+### Features
+
+* add multiplatform apps support, transparent favicon suite, and vector platform icons ([0b4924d](https://github.com/exa-dev-portfolio/portofolio-v2/commit/0b4924d66bb62c7b6bfc6159e69ca61e9a2f3207))
+
 # [1.1.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.0.0...v1.1.0) (2026-10-05)
 
 
