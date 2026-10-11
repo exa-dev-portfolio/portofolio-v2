@@ -165,6 +165,15 @@
                 <span
                   :class="[
                     'text-[10px] px-2 py-0.5 rounded-md font-mono flex items-center gap-1 border',
+                    app.app_store_url ? 'bg-sky-500/10 text-sky-400 border-sky-500/25' : 'bg-white/5 text-white/40 border-white/10'
+                  ]"
+                >
+                  <Icon name="carbon:apple" size="12" />
+                  <span>{{ app.app_store_url ? 'App Store Linked' : 'No App Store Link' }}</span>
+                </span>
+                <span
+                  :class="[
+                    'text-[10px] px-2 py-0.5 rounded-md font-mono flex items-center gap-1 border',
                     app.testflight_url ? 'bg-blue-500/10 text-blue-400 border-blue-500/25' : 'bg-white/5 text-white/40 border-white/10'
                   ]"
                 >
@@ -716,72 +725,163 @@
             <Icon name="carbon:store" size="22" />
           </div>
           <div>
-            <h3 class="text-base font-bold text-white">Configure Store Testing Links</h3>
+            <h3 class="text-base font-bold text-white">Official Store & Testing Links</h3>
             <p class="text-xs text-white/50">{{ storeLinksModalApp.app_name }} • {{ storeLinksModalApp.package_name }}</p>
           </div>
         </div>
 
         <p class="text-xs text-white/60 mb-5 leading-relaxed">
-          Provide your official Google Play Closed/Internal Testing URL and Apple TestFlight public invite URL. Verified testers will automatically receive these links to install on their devices.
+          Configure direct official store links for public users (visitors will be redirected directly to Google Play / App Store when clicking buttons on <code class="text-purple-300">/apps</code>), as well as optional beta testing tracks if conducting closed tests.
         </p>
 
+        <!-- Tab Switcher: Release vs Testing -->
+        <div class="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-white/5 border border-white/10 mb-4">
+          <button
+            type="button"
+            @click="activeStoreTab = 'release'"
+            :class="[
+              'py-2 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer',
+              activeStoreTab === 'release'
+                ? 'bg-gradient-to-r from-emerald-500/20 to-sky-500/20 text-white border border-emerald-500/30 shadow-md'
+                : 'text-white/50 hover:text-white'
+            ]"
+          >
+            <Icon name="carbon:launch" size="14" class="text-emerald-400" />
+            <span>Official Store (Release)</span>
+            <span
+              v-if="storeLinksForm.play_store_url || storeLinksForm.app_store_url"
+              class="w-1.5 h-1.5 rounded-full bg-emerald-400"
+              title="Release URLs configured"
+            />
+          </button>
+
+          <button
+            type="button"
+            @click="activeStoreTab = 'testing'"
+            :class="[
+              'py-2 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer',
+              activeStoreTab === 'testing'
+                ? 'bg-purple-500/20 text-purple-200 border border-purple-500/30 shadow-md'
+                : 'text-white/50 hover:text-white'
+            ]"
+          >
+            <Icon name="carbon:badge" size="14" class="text-purple-400" />
+            <span>Beta Testing Track</span>
+            <span
+              v-if="storeLinksForm.apple_beta_group_id || storeLinksForm.google_tester_group_email || storeLinksForm.testflight_url"
+              class="w-1.5 h-1.5 rounded-full bg-purple-400"
+              title="Testing configured"
+            />
+          </button>
+        </div>
+
+        <!-- Mode Indicator Banner -->
+        <div
+          v-if="storeLinksForm.play_store_url || storeLinksForm.app_store_url"
+          class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-[11px] mb-4 flex items-center gap-2"
+        >
+          <Icon name="carbon:checkmark-filled" size="15" class="text-emerald-400 shrink-0" />
+          <span><strong>Status: Release Active.</strong> Direct store buttons will be displayed on <code class="text-white">/apps</code>. Testing buttons are automatically hidden.</span>
+        </div>
+        <div
+          v-else-if="storeLinksForm.apple_beta_group_id || storeLinksForm.google_tester_group_email"
+          class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[11px] mb-4 flex items-center gap-2"
+        >
+          <Icon name="carbon:warning-alt" size="15" class="text-amber-400 shrink-0" />
+          <span><strong>Status: Testing Active.</strong> No public store release URLs configured yet, so beta testing buttons will be displayed on <code class="text-white">/apps</code>.</span>
+        </div>
+
         <form @submit.prevent="saveStoreLinks" class="space-y-4">
-          <div>
-            <label class="block text-xs font-semibold text-white/80 mb-1 flex items-center gap-1.5">
-              <Icon name="carbon:logo-google" size="14" class="text-emerald-400" />
-              <span>Google Play Testing Track URL</span>
-            </label>
-            <input
-              v-model="storeLinksForm.play_store_url"
-              type="url"
-              placeholder="https://play.google.com/apps/testing/com.yourcompany.app"
-              class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/15 text-xs text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-purple-500"
-            />
-            <p class="text-[10px] text-white/40 mt-1">From Google Play Console &gt; Testing &gt; Closed testing &gt; Join on Android / Web URL.</p>
+          <!-- Section 1: Public Store Links (Release) -->
+          <div v-show="activeStoreTab === 'release'" class="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 space-y-3">
+            <div class="flex items-center justify-between pb-1 border-b border-white/5">
+              <div class="flex items-center gap-2">
+                <Icon name="carbon:launch" size="14" class="text-emerald-400" />
+                <span class="text-xs font-semibold text-white">Public Store Links (Direct Redirect)</span>
+              </div>
+              <span class="text-[10px] text-emerald-400 font-mono">1 Link per OS</span>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-white/80 mb-1 flex items-center gap-1.5">
+                <Icon name="carbon:logo-google" size="14" class="text-emerald-400" />
+                <span>Google Play Store URL (Direct Link)</span>
+              </label>
+              <input
+                v-model="storeLinksForm.play_store_url"
+                type="url"
+                placeholder="https://play.google.com/store/apps/details?id=com.yourcompany.app"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/15 text-xs text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-purple-500"
+              />
+              <p class="text-[10px] text-white/40 mt-1">Visitors on the apps page will be redirected directly to your app on Google Play Store.</p>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-white/80 mb-1 flex items-center gap-1.5">
+                <Icon name="carbon:apple" size="14" class="text-sky-400" />
+                <span>Apple App Store URL (Direct Link)</span>
+              </label>
+              <input
+                v-model="storeLinksForm.app_store_url"
+                type="url"
+                placeholder="https://apps.apple.com/app/your-app/id1234567890"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/15 text-xs text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-purple-500"
+              />
+              <p class="text-[10px] text-white/40 mt-1">Visitors on the apps page will be redirected directly to your app on Apple App Store.</p>
+            </div>
           </div>
 
-          <div>
-            <label class="block text-xs font-semibold text-white/80 mb-1 flex items-center gap-1.5">
-              <Icon name="carbon:apple" size="14" class="text-blue-400" />
-              <span>Apple TestFlight Public Invite URL</span>
-            </label>
-            <input
-              v-model="storeLinksForm.testflight_url"
-              type="url"
-              placeholder="https://testflight.apple.com/join/AbCd123"
-              class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/15 text-xs text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-purple-500"
-            />
-            <p class="text-[10px] text-white/40 mt-1">From App Store Connect &gt; TestFlight &gt; Public Link (or direct App Store URL).</p>
-          </div>
+          <!-- Section 2: Beta Testing & TestFlight (Testing) -->
+          <div v-show="activeStoreTab === 'testing'" class="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-3">
+            <div class="flex items-center justify-between pb-1 border-b border-white/5">
+              <div class="flex items-center gap-2">
+                <Icon name="carbon:badge" size="14" class="text-purple-400" />
+                <span class="text-xs font-semibold text-white/80">Beta Testing Track</span>
+              </div>
+              <span class="text-[10px] text-purple-400 font-mono">Shown when not yet Released</span>
+            </div>
 
-          <div>
-            <label class="block text-xs font-semibold text-white/80 mb-1 flex items-center gap-1.5">
-              <Icon name="carbon:identification" size="14" class="text-blue-400" />
-              <span>Apple TestFlight Beta Group ID</span>
-            </label>
-            <input
-              v-model="storeLinksForm.apple_beta_group_id"
-              type="text"
-              placeholder="e.g. 1a2b3c4d-5678-90ef-..."
-              class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/15 text-xs text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-purple-500"
-            />
-            <p class="text-[10px] text-white/40 mt-1">Required for iOS. Found in App Store Connect &gt; App &gt; TestFlight &gt; Groups &gt; Group Details.</p>
-          </div>
+            <div>
+              <label class="block text-xs font-semibold text-white/70 mb-1 flex items-center gap-1.5">
+                <Icon name="carbon:apple" size="14" class="text-blue-400" />
+                <span>Apple TestFlight Public Invite URL</span>
+              </label>
+              <input
+                v-model="storeLinksForm.testflight_url"
+                type="url"
+                placeholder="https://testflight.apple.com/join/AbCd123"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/15 text-xs text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-purple-500"
+              />
+              <p class="text-[10px] text-white/40 mt-1">Public TestFlight invite link from App Store Connect.</p>
+            </div>
 
-          <div>
-            <label class="block text-xs font-semibold text-white/80 mb-1 flex items-center gap-1.5">
-              <Icon name="carbon:email" size="14" class="text-emerald-400" />
-              <span>Google Play Tester Group Email (Optional)</span>
-            </label>
-            <input
-              v-model="storeLinksForm.google_tester_group_email"
-              type="email"
-              placeholder="testers@googlegroups.com (Leave empty if using Email List)"
-              class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/15 text-xs text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-purple-500"
-            />
-            <p class="text-[10px] text-white/40 mt-1">
-              <strong>Opsional:</strong> Biarkan kosong jika memakai metode <strong>Email List</strong> biasa di Play Console. Cukup copy daftar email dari tombol "Copy Emails" di menu tester lalu paste ke Play Console.
-            </p>
+            <div>
+              <label class="block text-xs font-semibold text-white/70 mb-1 flex items-center gap-1.5">
+                <Icon name="carbon:identification" size="14" class="text-blue-400" />
+                <span>Apple TestFlight Beta Group ID</span>
+              </label>
+              <input
+                v-model="storeLinksForm.apple_beta_group_id"
+                type="text"
+                placeholder="e.g. 1a2b3c4d-5678-90ef-..."
+                class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/15 text-xs text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-purple-500"
+              />
+              <p class="text-[10px] text-white/40 mt-1">External group UUID in App Store Connect for automated 14-day beta invitations.</p>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-white/70 mb-1 flex items-center gap-1.5">
+                <Icon name="carbon:email" size="14" class="text-emerald-400" />
+                <span>Google Play Tester Group Email (Optional)</span>
+              </label>
+              <input
+                v-model="storeLinksForm.google_tester_group_email"
+                type="email"
+                placeholder="testers@googlegroups.com"
+                class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/15 text-xs text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-purple-500"
+              />
+              <p class="text-[10px] text-white/40 mt-1">Google Group for automated Google Play closed testing track.</p>
+            </div>
           </div>
 
           <div class="pt-3 border-t border-white/10 flex items-center justify-end gap-2.5">
@@ -863,8 +963,10 @@ const submittingNewTester = ref(false);
 
 // Store links modal state
 const storeLinksModalApp = ref<any>(null);
+const activeStoreTab = ref<"release" | "testing">("release");
 const storeLinksForm = ref({
   play_store_url: "",
+  app_store_url: "",
   testflight_url: "",
   apple_beta_group_id: "",
   google_tester_group_email: "",
@@ -954,10 +1056,19 @@ const openStoreLinksModal = (app: any) => {
   storeLinksModalApp.value = app;
   storeLinksForm.value = {
     play_store_url: app.play_store_url || "",
+    app_store_url: app.app_store_url || "",
     testflight_url: app.testflight_url || "",
     apple_beta_group_id: app.apple_beta_group_id || "",
     google_tester_group_email: app.google_tester_group_email || "",
   };
+
+  if (app.play_store_url || app.app_store_url) {
+    activeStoreTab.value = "release";
+  } else if (app.apple_beta_group_id || app.google_tester_group_email || app.testflight_url) {
+    activeStoreTab.value = "testing";
+  } else {
+    activeStoreTab.value = "release";
+  }
 };
 
 const saveStoreLinks = async () => {
@@ -966,15 +1077,17 @@ const saveStoreLinks = async () => {
   try {
     await $axios.patch(`/api/v1/admin/apk/apps/${storeLinksModalApp.value.id}/store-links`, {
       play_store_url: storeLinksForm.value.play_store_url?.trim() || null,
+      app_store_url: storeLinksForm.value.app_store_url?.trim() || null,
       testflight_url: storeLinksForm.value.testflight_url?.trim() || null,
       apple_beta_group_id: storeLinksForm.value.apple_beta_group_id?.trim() || null,
       google_tester_group_email: storeLinksForm.value.google_tester_group_email?.trim() || null,
     });
     storeLinksModalApp.value.play_store_url = storeLinksForm.value.play_store_url?.trim() || null;
+    storeLinksModalApp.value.app_store_url = storeLinksForm.value.app_store_url?.trim() || null;
     storeLinksModalApp.value.testflight_url = storeLinksForm.value.testflight_url?.trim() || null;
     storeLinksModalApp.value.apple_beta_group_id = storeLinksForm.value.apple_beta_group_id?.trim() || null;
     storeLinksModalApp.value.google_tester_group_email = storeLinksForm.value.google_tester_group_email?.trim() || null;
-    toast.showSuccessToast("Store Config Saved", "Google Play and TestFlight configuration updated successfully");
+    toast.showSuccessToast("Store Config Saved", "Official store links updated successfully");
     storeLinksModalApp.value = null;
   } catch (err: any) {
     toast.showErrorToast("Save Failed", err.response?.data?.message || "Failed to update store links");

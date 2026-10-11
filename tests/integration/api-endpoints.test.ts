@@ -527,12 +527,14 @@ describe("Full HTTP API Endpoints Integration Tests (Real HTTP Requests)", () =>
           headers: authHeaders,
           body: {
             play_store_url: "https://play.google.com/store/apps/details?id=com.test.httpapp",
+            app_store_url: "https://apps.apple.com/app/test-http-app/id123456789",
             testflight_url: "https://testflight.apple.com/join/HTTPTest",
           },
         }
       );
       expect(linksPatchRes.status).toBe(200);
       expect(linksPatchRes.data.success).toBe(true);
+      expect(linksPatchRes.data.data.app_store_url).toBe("https://apps.apple.com/app/test-http-app/id123456789");
 
       // 5. Admin Revoke Beta Tester via PATCH /api/v1/admin/apk/testers/:id/revoke
       const revokeRes = await apiRequest(

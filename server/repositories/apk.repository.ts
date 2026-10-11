@@ -300,6 +300,7 @@ export const updateAppStoreLinks = async (
   client: PoolClient,
   id: string,
   playStoreUrl?: string | null,
+  appStoreUrl?: string | null,
   testflightUrl?: string | null,
   appleBetaGroupId?: string | null,
   googleTesterGroupEmail?: string | null
@@ -307,15 +308,17 @@ export const updateAppStoreLinks = async (
   const sql = `
     UPDATE apk_apps
     SET play_store_url = $1,
-        testflight_url = $2,
-        apple_beta_group_id = $3,
-        google_tester_group_email = $4,
+        app_store_url = $2,
+        testflight_url = $3,
+        apple_beta_group_id = $4,
+        google_tester_group_email = $5,
         updated_at = current_timestamp
-    WHERE id = $5
+    WHERE id = $6
     RETURNING *
   `;
   const res = await client.query<ApkAppModel>(sql, [
     playStoreUrl && playStoreUrl.trim() ? playStoreUrl.trim() : null,
+    appStoreUrl && appStoreUrl.trim() ? appStoreUrl.trim() : null,
     testflightUrl && testflightUrl.trim() ? testflightUrl.trim() : null,
     appleBetaGroupId && appleBetaGroupId.trim() ? appleBetaGroupId.trim() : null,
     googleTesterGroupEmail && googleTesterGroupEmail.trim() ? googleTesterGroupEmail.trim() : null,

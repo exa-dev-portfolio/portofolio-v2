@@ -40,7 +40,7 @@
           Personal <span class="bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">Software & Apps Store</span>
         </h1>
         <p class="text-slate-400 text-base sm:text-lg leading-relaxed">
-          Curated collection of cross-platform applications built and maintained by me. Download official release binaries for Windows, macOS, Android, and Linux with automated GitHub synchronization.
+          Curated collection of cross-platform applications built and maintained by me. Download official binaries directly or install seamlessly via Google Play Store, Apple App Store, and TestFlight.
         </p>
       </div>
 
@@ -265,25 +265,44 @@
               <span>{{ getDownloadButtonLabel((app.supported_platforms && app.supported_platforms[0]) || 'android') }}</span>
             </a>
 
-            <!-- Apple TestFlight Invite (iOS) -->
-            <button
-              v-if="app.apple_beta_group_id"
-              @click="openBetaModal(app, 'ios')"
-              class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-white text-xs font-semibold border border-white/10 hover:border-cyan-500/30 transition-all cursor-pointer"
+            <!-- Official Store or Testing Actions (Release prioritized; Testing only if not released) -->
+            <div
+              v-if="getAppStoreActions(app).length > 0"
+              class="grid gap-1.5"
+              :class="getAppStoreActions(app).length > 1 ? 'grid-cols-2' : 'grid-cols-1'"
             >
-              <UIcon name="i-carbon-apple" class="w-3.5 h-3.5 text-cyan-400" />
-              <span>Apple TestFlight (iOS)</span>
-            </button>
+              <template v-for="action in getAppStoreActions(app)" :key="action.label">
+                <!-- Release Direct Link -->
+                <a
+                  v-if="action.type === 'link'"
+                  :href="action.url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  :class="[
+                    'inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer truncate shadow-sm group/store',
+                    action.class
+                  ]"
+                  :title="`Open in ${action.label}`"
+                >
+                  <UIcon :name="action.icon" class="w-3.5 h-3.5 shrink-0" />
+                  <span class="truncate">{{ action.label }}</span>
+                  <UIcon name="i-carbon-launch" class="w-3 h-3 opacity-60 group-hover/store:opacity-100 shrink-0 ml-0.5" />
+                </a>
 
-            <!-- Google Play Beta Invite (Android) -->
-            <button
-              v-else-if="app.play_store_url && (app.supported_platforms || []).includes('android')"
-              @click="openBetaModal(app, 'android')"
-              class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-white text-xs font-semibold border border-white/10 hover:border-emerald-500/30 transition-all cursor-pointer"
-            >
-              <UIcon name="i-carbon-logo-google" class="w-3.5 h-3.5 text-emerald-400" />
-              <span>Google Play Beta (Android)</span>
-            </button>
+                <!-- Beta Testing Button (Only shown if NOT released) -->
+                <button
+                  v-else
+                  @click="openBetaModal(app, action.platform)"
+                  :class="[
+                    'inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer truncate shadow-sm',
+                    action.class
+                  ]"
+                >
+                  <UIcon :name="action.icon" class="w-3.5 h-3.5 shrink-0" />
+                  <span class="truncate">{{ action.label }}</span>
+                </button>
+              </template>
+            </div>
 
             <!-- Secondary Actions: QR Code & Details -->
             <div class="grid grid-cols-2 gap-2">
@@ -495,18 +514,47 @@
         </div>
 
         <!-- Footer / Download Action -->
-        <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between gap-3 shrink-0">
+        <div class="mt-4 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 shrink-0">
           <div class="text-xs text-slate-400">
             Total app downloads: <span class="text-emerald-400 font-bold font-mono">{{ selectedAppDetail.download_count }}x</span>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Google Play Store Direct Link -->
+            <a
+              v-if="selectedAppDetail.play_store_url"
+              :href="selectedAppDetail.play_store_url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="px-3.5 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 hover:text-white border border-emerald-500/25 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+              title="Open in Google Play Store"
+            >
+              <UIcon name="i-carbon-logo-google" class="w-4 h-4 text-emerald-400" />
+              <span>Google Play</span>
+              <UIcon name="i-carbon-launch" class="w-3 h-3 opacity-60" />
+            </a>
+
+            <!-- Apple App Store Direct Link -->
+            <a
+              v-if="selectedAppDetail.app_store_url"
+              :href="selectedAppDetail.app_store_url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="px-3.5 py-2 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 hover:text-white border border-sky-500/25 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+              title="Open in Apple App Store"
+            >
+              <UIcon name="i-carbon-apple" class="w-4 h-4 text-sky-400" />
+              <span>App Store</span>
+              <UIcon name="i-carbon-launch" class="w-3 h-3 opacity-60" />
+            </a>
+
+            <!-- Store Beta Pass -->
             <button
               v-if="hasStoreBeta(selectedAppDetail)"
               @click="openBetaModal(selectedAppDetail)"
-              class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-white/10 transition-colors flex items-center gap-1.5 cursor-pointer"
+              class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-white/10 transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <UIcon name="i-carbon-badge" class="w-4 h-4 text-cyan-400" />
-              <span>Store Invite</span>
+              <span>Beta Pass (14d)</span>
             </button>
             <a
               v-for="plat in (selectedAppDetail.supported_platforms || ['android'])"
@@ -931,26 +979,100 @@ const goToStep2 = () => {
   lastPendingAppPackage.value = betaModalApp.value?.package_name || null;
 };
 
+interface AppStoreAction {
+  type: "link" | "beta";
+  label: string;
+  url?: string;
+  platform: "android" | "ios";
+  isRelease: boolean;
+  icon: string;
+  class: string;
+}
+
+const getAppStoreActions = (app: any): AppStoreAction[] => {
+  if (!app) return [];
+  const actions: AppStoreAction[] = [];
+  const platforms = app.supported_platforms || ["android"];
+  const supportsAndroid = platforms.includes("android");
+  const supportsIos = platforms.includes("ios") || Boolean(app.app_store_url || app.apple_beta_group_id);
+
+  // Android: Prioritize Release (Google Play) > Closed Beta
+  if (supportsAndroid) {
+    if (app.play_store_url) {
+      actions.push({
+        type: "link",
+        label: "Google Play",
+        url: app.play_store_url,
+        platform: "android",
+        isRelease: true,
+        icon: "i-carbon-logo-google",
+        class: "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 hover:text-white border-emerald-500/25 hover:border-emerald-500/40",
+      });
+    } else if (app.google_tester_group_email) {
+      actions.push({
+        type: "beta",
+        label: "Google Play Beta",
+        platform: "android",
+        isRelease: false,
+        icon: "i-carbon-logo-google",
+        class: "bg-slate-800/80 hover:bg-slate-700/80 text-emerald-300 hover:text-white border-white/10 hover:border-emerald-500/30",
+      });
+    }
+  }
+
+  // iOS: Prioritize Release (App Store) > TestFlight Beta
+  if (supportsIos) {
+    if (app.app_store_url) {
+      actions.push({
+        type: "link",
+        label: "App Store",
+        url: app.app_store_url,
+        platform: "ios",
+        isRelease: true,
+        icon: "i-carbon-apple",
+        class: "bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 hover:text-white border-sky-500/25 hover:border-sky-500/40",
+      });
+    } else if (app.apple_beta_group_id || app.testflight_url) {
+      actions.push({
+        type: "beta",
+        label: "Apple TestFlight",
+        platform: "ios",
+        isRelease: false,
+        icon: "i-carbon-apple",
+        class: "bg-slate-800/80 hover:bg-slate-700/80 text-cyan-300 hover:text-white border-white/10 hover:border-cyan-500/30",
+      });
+    }
+  }
+
+  return actions;
+};
+
 const hasStoreBeta = (app: any) => {
   if (!app) return false;
-  const platforms = app.supported_platforms || [];
+  const platforms = app.supported_platforms || ["android"];
   const hasAndroid = platforms.includes("android");
-  const hasIosGroup = Boolean(app.apple_beta_group_id && app.apple_beta_group_id.trim());
-  return hasIosGroup || (hasAndroid && Boolean(app.play_store_url));
+  const hasIos = platforms.includes("ios") || Boolean(app.app_store_url || app.apple_beta_group_id);
+
+  // If Android is released on Play Store, it is NOT in beta
+  const hasAndroidBeta = !app.play_store_url && hasAndroid && Boolean(app.google_tester_group_email && app.google_tester_group_email.trim());
+  // If iOS is released on App Store, it is NOT in beta
+  const hasIosBeta = !app.app_store_url && hasIos && Boolean(app.apple_beta_group_id && app.apple_beta_group_id.trim());
+
+  return hasAndroidBeta || hasIosBeta;
 };
 
 const openBetaModal = async (app: any, preferredPlatform?: "ios" | "android") => {
   const isSamePending = lastPendingAppPackage.value === app.package_name && betaStep.value === 2 && betaEmail.value;
   betaModalApp.value = app;
 
-  const hasIosGroup = Boolean(app.apple_beta_group_id && app.apple_beta_group_id.trim());
-  const hasAndroid = Boolean(app.play_store_url && (app.supported_platforms || []).includes("android"));
+  const hasIosGroup = !app.app_store_url && Boolean(app.apple_beta_group_id && app.apple_beta_group_id.trim());
+  const hasAndroidGroup = !app.play_store_url && Boolean(app.google_tester_group_email && (app.supported_platforms || []).includes("android"));
 
   if (preferredPlatform) {
     betaPlatform.value = preferredPlatform;
   } else if (hasIosGroup) {
     betaPlatform.value = "ios";
-  } else if (hasAndroid) {
+  } else if (hasAndroidGroup) {
     betaPlatform.value = "android";
   } else {
     betaPlatform.value = "ios";

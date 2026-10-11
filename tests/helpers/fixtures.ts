@@ -26,9 +26,9 @@ export async function createTestApp(options: CreateTestAppOptions = {}) {
     `INSERT INTO apk_apps (
        repo_id, package_name, app_name, is_published,
        apple_beta_group_id, google_tester_group_email,
-       play_store_url, testflight_url
+       play_store_url, app_store_url, testflight_url
      )
-     VALUES ($1, $2, $3, true, $4, $5, $6, $7)
+     VALUES ($1, $2, $3, true, $4, $5, $6, $7, $8)
      RETURNING *`,
     [
       repoId,
@@ -37,6 +37,7 @@ export async function createTestApp(options: CreateTestAppOptions = {}) {
       options.appleBetaGroupId ?? null,
       options.googleTesterGroupEmail ?? null,
       options.playStoreUrl ?? null,
+      options.appStoreUrl ?? null,
       options.testflightUrl ?? null,
     ]
   );

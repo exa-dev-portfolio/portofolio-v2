@@ -504,22 +504,25 @@ describe("APK & Beta Testing Integration Tests (PostgreSQL & Redis Testcontainer
       const updated = await updateAppStoreLinks(
         app.id,
         "https://play.google.com/store/apps/details?id=com.test.updatelinks",
+        "https://apps.apple.com/app/test-app/id987654321",
         "https://testflight.apple.com/join/XYZ123",
         "group-apple-9999",
         "testers-google@group.com"
       );
 
       expect(updated.play_store_url).toBe("https://play.google.com/store/apps/details?id=com.test.updatelinks");
+      expect(updated.app_store_url).toBe("https://apps.apple.com/app/test-app/id987654321");
       expect(updated.testflight_url).toBe("https://testflight.apple.com/join/XYZ123");
       expect(updated.apple_beta_group_id).toBe("group-apple-9999");
       expect(updated.google_tester_group_email).toBe("testers-google@group.com");
 
       // Verify persisted in DB
       const dbCheck = await query(
-        `SELECT play_store_url, testflight_url, apple_beta_group_id, google_tester_group_email
+        `SELECT play_store_url, app_store_url, testflight_url, apple_beta_group_id, google_tester_group_email
          FROM apk_apps WHERE id = $1`,
         [app.id]
       );
+      expect(dbCheck.rows[0].app_store_url).toBe("https://apps.apple.com/app/test-app/id987654321");
       expect(dbCheck.rows[0].apple_beta_group_id).toBe("group-apple-9999");
       expect(dbCheck.rows[0].google_tester_group_email).toBe("testers-google@group.com");
     });

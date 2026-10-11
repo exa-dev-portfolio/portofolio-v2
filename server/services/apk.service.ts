@@ -710,11 +710,12 @@ export async function adminRevokeBetaTester(testerId: string, reason?: string) {
 }
 
 /**
- * Update app official store links (Play Store & TestFlight)
+ * Update app official store links (Play Store, App Store & TestFlight)
  */
 export async function updateAppStoreLinks(
   appId: string,
   playStoreUrl?: string | null,
+  appStoreUrl?: string | null,
   testflightUrl?: string | null,
   appleBetaGroupId?: string | null,
   googleTesterGroupEmail?: string | null
@@ -724,6 +725,7 @@ export async function updateAppStoreLinks(
       client,
       appId,
       playStoreUrl,
+      appStoreUrl,
       testflightUrl,
       appleBetaGroupId,
       googleTesterGroupEmail

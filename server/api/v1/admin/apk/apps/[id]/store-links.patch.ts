@@ -19,6 +19,7 @@ export default withAuth(async (event) => {
   const updated = await updateAppStoreLinks(
     id,
     parsed.data.play_store_url,
+    parsed.data.app_store_url,
     parsed.data.testflight_url,
     parsed.data.apple_beta_group_id,
     parsed.data.google_tester_group_email
