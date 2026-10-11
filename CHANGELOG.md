@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.2.0...v1.3.0) (2026-10-11)
+
+
+### Features
+
+* **apps:** add direct Play Store and App Store release links with testing separation ([4175c73](https://github.com/exa-dev-portfolio/portofolio-v2/commit/4175c730ad643670c01323f61bb79713ea5abb45))
+
 # [1.2.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.1.0...v1.2.0) (2026-10-06)
 
 
