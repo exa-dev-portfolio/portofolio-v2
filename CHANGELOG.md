@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.3.0...v1.4.0) (2026-10-16)
+
+
+### Features
+
+* **apps:** support direct Apple TestFlight public invite URL link ([57fb3bb](https://github.com/exa-dev-portfolio/portofolio-v2/commit/57fb3bb2c191a233ddb88e0415d47ad1b2754fb8))
+
 # [1.3.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.2.0...v1.3.0) (2026-10-11)
 
 
