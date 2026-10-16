@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.4.0...v1.4.1) (2026-10-16)
+
+
+### Bug Fixes
+
+* **apk:** accept released and edited release webhook actions with assets ([c27a37d](https://github.com/exa-dev-portfolio/portofolio-v2/commit/c27a37dd80373bc7963023feaac58c70e276fd4f))
+
 # [1.4.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.3.0...v1.4.0) (2026-10-16)
 
 
