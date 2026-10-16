@@ -784,7 +784,7 @@
           <span><strong>Status: Release Active.</strong> Direct store buttons will be displayed on <code class="text-white">/apps</code>. Testing buttons are automatically hidden.</span>
         </div>
         <div
-          v-else-if="storeLinksForm.apple_beta_group_id || storeLinksForm.google_tester_group_email"
+          v-else-if="storeLinksForm.apple_beta_group_id || storeLinksForm.google_tester_group_email || storeLinksForm.testflight_url"
           class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[11px] mb-4 flex items-center gap-2"
         >
           <Icon name="carbon:warning-alt" size="15" class="text-amber-400 shrink-0" />
@@ -852,7 +852,7 @@
                 placeholder="https://testflight.apple.com/join/AbCd123"
                 class="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/15 text-xs text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-purple-500"
               />
-              <p class="text-[10px] text-white/40 mt-1">Public TestFlight invite link from App Store Connect.</p>
+              <p class="text-[10px] text-white/40 mt-1">Public TestFlight invite link from App Store Connect (visitors can click directly to join via TestFlight).</p>
             </div>
 
             <div>

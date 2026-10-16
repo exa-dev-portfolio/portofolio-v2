@@ -547,6 +547,20 @@
               <UIcon name="i-carbon-launch" class="w-3 h-3 opacity-60" />
             </a>
 
+            <!-- Apple TestFlight Direct Link -->
+            <a
+              v-if="selectedAppDetail.testflight_url"
+              :href="selectedAppDetail.testflight_url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="px-3.5 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 hover:text-white border border-cyan-500/25 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+              title="Join via Apple TestFlight"
+            >
+              <UIcon name="i-carbon-apple" class="w-4 h-4 text-cyan-400" />
+              <span>TestFlight</span>
+              <UIcon name="i-carbon-launch" class="w-3 h-3 opacity-60" />
+            </a>
+
             <!-- Store Beta Pass -->
             <button
               v-if="hasStoreBeta(selectedAppDetail)"
@@ -749,6 +763,19 @@
             }}
           </p>
 
+          <div v-if="betaStoreUrl" class="pt-1">
+            <a
+              :href="betaStoreUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-lg shadow-cyan-500/20 cursor-pointer"
+            >
+              <UIcon :name="betaPlatform === 'ios' ? 'i-carbon-apple' : 'i-carbon-logo-google'" class="w-4 h-4" />
+              <span>{{ betaPlatform === 'ios' ? 'Open TestFlight Invitation' : 'Open Google Play Track' }}</span>
+              <UIcon name="i-carbon-launch" class="w-3.5 h-3.5 opacity-80" />
+            </a>
+          </div>
+
           <button
             @click="closeBetaModal"
             class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition-colors cursor-pointer"
@@ -802,6 +829,7 @@ const betaLoading = ref(false);
 const betaError = ref<string | null>(null);
 const betaSuccessMessage = ref("");
 const betaExpiresAt = ref<string | null>(null);
+const betaStoreUrl = ref<string | null>(null);
 const lastPendingAppPackage = ref<string | null>(null);
 
 const iosSlots = ref<{ remaining: number; max: number; is_available?: boolean }>({ remaining: 0, max: 0, is_available: false });
@@ -994,7 +1022,7 @@ const getAppStoreActions = (app: any): AppStoreAction[] => {
   const actions: AppStoreAction[] = [];
   const platforms = app.supported_platforms || ["android"];
   const supportsAndroid = platforms.includes("android");
-  const supportsIos = platforms.includes("ios") || Boolean(app.app_store_url || app.apple_beta_group_id);
+  const supportsIos = platforms.includes("ios") || Boolean(app.app_store_url || app.testflight_url || app.apple_beta_group_id);
 
   // Android: Prioritize Release (Google Play) > Closed Beta
   if (supportsAndroid) {
@@ -1020,7 +1048,7 @@ const getAppStoreActions = (app: any): AppStoreAction[] => {
     }
   }
 
-  // iOS: Prioritize Release (App Store) > TestFlight Beta
+  // iOS: Prioritize Release (App Store) > TestFlight Public Link > TestFlight Beta Pass
   if (supportsIos) {
     if (app.app_store_url) {
       actions.push({
@@ -1032,7 +1060,17 @@ const getAppStoreActions = (app: any): AppStoreAction[] => {
         icon: "i-carbon-apple",
         class: "bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 hover:text-white border-sky-500/25 hover:border-sky-500/40",
       });
-    } else if (app.apple_beta_group_id || app.testflight_url) {
+    } else if (app.testflight_url) {
+      actions.push({
+        type: "link",
+        label: "Apple TestFlight",
+        url: app.testflight_url,
+        platform: "ios",
+        isRelease: false,
+        icon: "i-carbon-apple",
+        class: "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 hover:text-white border-cyan-500/25 hover:border-cyan-500/40",
+      });
+    } else if (app.apple_beta_group_id) {
       actions.push({
         type: "beta",
         label: "Apple TestFlight",
@@ -1051,11 +1089,11 @@ const hasStoreBeta = (app: any) => {
   if (!app) return false;
   const platforms = app.supported_platforms || ["android"];
   const hasAndroid = platforms.includes("android");
-  const hasIos = platforms.includes("ios") || Boolean(app.app_store_url || app.apple_beta_group_id);
+  const hasIos = platforms.includes("ios") || Boolean(app.app_store_url || app.testflight_url || app.apple_beta_group_id);
 
   // If Android is released on Play Store, it is NOT in beta
   const hasAndroidBeta = !app.play_store_url && hasAndroid && Boolean(app.google_tester_group_email && app.google_tester_group_email.trim());
-  // If iOS is released on App Store, it is NOT in beta
+  // If iOS is released on App Store or only has a direct public link, it does not need OTP beta pass
   const hasIosBeta = !app.app_store_url && hasIos && Boolean(app.apple_beta_group_id && app.apple_beta_group_id.trim());
 
   return hasAndroidBeta || hasIosBeta;
@@ -1106,6 +1144,7 @@ const closeBetaModal = () => {
   betaEmail.value = "";
   betaOtp.value = "";
   betaError.value = null;
+  betaStoreUrl.value = null;
   lastPendingAppPackage.value = null;
 };
 
@@ -1144,6 +1183,7 @@ const submitRequestOtp = async () => {
     if (res?.data?.already_active) {
       betaSuccessMessage.value = res.data.message;
       betaExpiresAt.value = res.data.expires_at;
+      betaStoreUrl.value = res?.data?.store_url || null;
       betaStep.value = 3;
     } else {
       betaStep.value = 2;
@@ -1172,6 +1212,7 @@ const submitVerifyOtp = async () => {
 
     betaSuccessMessage.value = res?.data?.message || "Beta pass activated successfully!";
     betaExpiresAt.value = res?.data?.expires_at || null;
+    betaStoreUrl.value = res?.data?.store_url || null;
     betaStep.value = 3;
     if (betaModalApp.value) {
       fetchBetaSlots(betaModalApp.value);
