@@ -263,7 +263,10 @@ export async function handleGitHubWebhook(
   }
 
   const action = payload.action;
-  if (action !== "published") {
+  const isPublishedOrReleased = action === "published" || action === "released";
+  const isEditedWithAssets = action === "edited" && (payload.release?.assets?.length || 0) > 0;
+
+  if (!isPublishedOrReleased && !isEditedWithAssets) {
     return { ok: true, ignored: true, reason: `Ignored release action: ${action}` };
   }
 
