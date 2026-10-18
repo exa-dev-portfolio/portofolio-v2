@@ -337,7 +337,8 @@ const removePreviewItem = (index: number) => {
 
 // GitHub Org & Sub-Apps Handlers
 const handleFetchOrg = async () => {
-  if (!formData.value.github_org?.trim()) {
+  const orgInput = formData.value.github_org?.trim();
+  if (!orgInput) {
     toast.showErrorToast(
       "Validation",
       "Please enter a GitHub Organization URL or name",
@@ -345,15 +346,32 @@ const handleFetchOrg = async () => {
     return;
   }
   isFetchingOrg.value = true;
+  const loadingToast = toast.showLoadingToast(
+    "Fetching Repositories",
+    `Discovering repositories for "${orgInput}"...`,
+  );
   try {
-    const data = await fetchOrgRepos(formData.value.github_org.trim());
+    const data = await fetchOrgRepos(orgInput);
     if (data) {
       orgData.value = data;
-      toast.showSuccessToast(
+      toast.updateToast(
+        loadingToast.id,
         "Organization Found",
         `Discovered ${data.total_repos} repositories from ${data.org}`,
+        "success",
+        3500,
       );
+    } else {
+      toast.removeToast(loadingToast.id);
     }
+  } catch (err: any) {
+    toast.updateToast(
+      loadingToast.id,
+      "GitHub Error",
+      err?.message || "Failed to fetch repositories",
+      "error",
+      4000,
+    );
   } finally {
     isFetchingOrg.value = false;
   }

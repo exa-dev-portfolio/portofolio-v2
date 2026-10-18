@@ -7,10 +7,33 @@ const canvasRef = ref<HTMLCanvasElement | null>(null);
 let renderer: THREE.WebGLRenderer | null = null;
 let scene: THREE.Scene | null = null;
 let camera: THREE.PerspectiveCamera | null = null;
+
+// Groups and Meshes
 let meshGroup: THREE.Group | null = null;
-let haloMesh: THREE.Mesh | null = null;
+let torusKnotMesh: THREE.Mesh | null = null;
+let wireKnotMesh: THREE.Mesh | null = null;
+let wireKnotPoints: THREE.Points | null = null;
+let innerGemMesh: THREE.Mesh | null = null;
+let innerGemWire: THREE.Mesh | null = null;
+
+// Multi-Axis Gimbal Rings
+let gyroRing1: THREE.Mesh | null = null;
+let gyroRing2: THREE.Mesh | null = null;
+let gyroRing3: THREE.Mesh | null = null;
+
+// Orbiting Satellites (Data Beacons)
+interface SatelliteNode {
+  mesh: THREE.Mesh;
+  orbitRadius: number;
+  speed: number;
+  inclinationX: number;
+  inclinationZ: number;
+  phase: number;
+}
+const satellites: SatelliteNode[] = [];
+
+// Particle Field
 let dustParticles: THREE.Points | null = null;
-let wireMat: THREE.MeshBasicMaterial | null = null;
 
 let animationFrameId: number | null = null;
 let scrollProgress = 0;
@@ -18,6 +41,7 @@ let targetScrollProgress = 0;
 let mouseX = 0;
 let mouseY = 0;
 let isMobile = false;
+let shockwaveScale = 1.0;
 
 // Cubic ease in-out for ultra smooth section transitions
 function easeInOutCubic(x: number): number {
@@ -33,6 +57,10 @@ function updateScrollProgress() {
 function handleMouseMove(e: MouseEvent) {
   mouseX = (e.clientX / window.innerWidth) * 2 - 1;
   mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+}
+
+function handleClick() {
+  shockwaveScale = 1.2;
 }
 
 function handleResize() {
@@ -56,11 +84,11 @@ function interpolateScroll(p: number) {
   let targetRotZ: number;
 
   if (isMobile) {
-    // Mobile mode: keep object mostly centered and further back so it never covers content
+    // Mobile mode: keep object centered and further back so it never covers content
     targetX = 0;
-    targetY = p < 0.2 ? 0.8 : -0.5;
-    targetZ = -2.5;
-    targetScale = 0.65;
+    targetY = p < 0.2 ? 0.7 : -0.5;
+    targetZ = -2.8;
+    targetScale = 0.62;
     targetRotZ = p * 0.5;
     return { x: targetX, y: targetY, z: targetZ, scale: targetScale, rotZ: targetRotZ };
   }
@@ -70,24 +98,24 @@ function interpolateScroll(p: number) {
     const t = p / 0.25;
     targetX = 2.4 + (-2.3 - 2.4) * easeInOutCubic(t);
     targetY = 0 + (0.2 - 0) * t;
-    targetZ = 0 + (1.1 - 0) * easeInOutCubic(t);
-    targetScale = 1.0 + (1.2 - 1.0) * t;
+    targetZ = 0 + (1.0 - 0) * easeInOutCubic(t);
+    targetScale = 1.0 + (1.18 - 1.0) * t;
     targetRotZ = t * 0.4;
   } else if (p < 0.50) {
     // Phase 2: About (Left) -> Skills/Stack (Center)
     const t = (p - 0.25) / 0.25;
     targetX = -2.3 + (0 - -2.3) * easeInOutCubic(t);
     targetY = 0.2 + (-0.2 - 0.2) * t;
-    targetZ = 1.1 + (-0.5 - 1.1) * easeInOutCubic(t);
-    targetScale = 1.2 + (0.9 - 1.2) * t;
+    targetZ = 1.0 + (-0.6 - 1.0) * easeInOutCubic(t);
+    targetScale = 1.18 + (0.88 - 1.18) * t;
     targetRotZ = 0.4 + (0 - 0.4) * t;
   } else if (p < 0.75) {
     // Phase 3: Skills (Center) -> Journey/Projects (Right-Side Orbit)
     const t = (p - 0.50) / 0.25;
     targetX = 0 + (2.1 - 0) * easeInOutCubic(t);
     targetY = -0.2 + (0.1 - -0.2) * t;
-    targetZ = -0.5 + (-1.2 - -0.5) * easeInOutCubic(t);
-    targetScale = 0.9 + (1.1 - 0.9) * t;
+    targetZ = -0.6 + (-1.2 - -0.6) * easeInOutCubic(t);
+    targetScale = 0.88 + (1.08 - 0.88) * t;
     targetRotZ = t * -0.2;
   } else {
     // Phase 4: Projects -> Contact (Deep Background Horizon Glow)
@@ -95,7 +123,7 @@ function interpolateScroll(p: number) {
     targetX = 2.1 + (1.6 - 2.1) * easeInOutCubic(t);
     targetY = 0.1 + (-0.4 - 0.1) * t;
     targetZ = -1.2 + (-3.5 - -1.2) * easeInOutCubic(t);
-    targetScale = 1.1 + (1.5 - 1.1) * t;
+    targetScale = 1.08 + (1.45 - 1.08) * t;
     targetRotZ = -0.2 + (-0.4 - -0.2) * t;
   }
 
@@ -111,7 +139,7 @@ onMounted(() => {
 
   // Scene setup with background fog matching portfolio theme (#070b14)
   scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x070b14, 0.04);
+  scene.fog = new THREE.FogExp2(0x070b14, 0.038);
 
   camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
   camera.position.set(0, 0, 8);
@@ -125,92 +153,173 @@ onMounted(() => {
   renderer.setSize(width, height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-  // Lighting
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.45);
+  // Lighting Suite (Cyber Neon Palette)
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
   scene.add(ambientLight);
 
-  const pointLightCyan = new THREE.PointLight(0x00f0ff, 3.2, 30);
+  const pointLightCyan = new THREE.PointLight(0x00f0ff, 3.6, 35);
   pointLightCyan.position.set(5, 5, 5);
   scene.add(pointLightCyan);
 
-  const pointLightBlue = new THREE.PointLight(0x3b82f6, 2.2, 30);
-  pointLightBlue.position.set(-5, -4, 3);
-  scene.add(pointLightBlue);
+  const pointLightIndigo = new THREE.PointLight(0x6366f1, 2.8, 35);
+  pointLightIndigo.position.set(-5, -4, 4);
+  scene.add(pointLightIndigo);
+
+  const pointLightPurple = new THREE.PointLight(0xa855f7, 2.0, 25);
+  pointLightPurple.position.set(0, 4, -3);
+  scene.add(pointLightPurple);
 
   // Group container for all 3D mesh components
   meshGroup = new THREE.Group();
   scene.add(meshGroup);
 
-  // 1. Inner Faceted Crystal Core
-  const coreGeom = new THREE.IcosahedronGeometry(1.5, 1);
-  const coreMat = new THREE.MeshStandardMaterial({
+  // 1. Quantum Torus Knot Core (Intricate, non-spherical mathematical geometry)
+  const knotGeom = new THREE.TorusKnotGeometry(1.22, 0.32, 128, 32, 2, 3);
+  const knotMat = new THREE.MeshStandardMaterial({
     color: 0x07111e,
-    roughness: 0.15,
-    metalness: 0.9,
-    flatShading: true,
-    emissive: 0x00203f,
-    emissiveIntensity: 0.3,
+    roughness: 0.18,
+    metalness: 0.88,
+    emissive: 0x09223a,
+    emissiveIntensity: 0.45,
   });
-  const coreMesh = new THREE.Mesh(coreGeom, coreMat);
-  meshGroup.add(coreMesh);
+  torusKnotMesh = new THREE.Mesh(knotGeom, knotMat);
+  meshGroup.add(torusKnotMesh);
 
-  // 2. Outer Wireframe Lattice (Guillaume Gouessan Minimalist Tech Signature)
-  const wireGeom = new THREE.IcosahedronGeometry(1.82, 1);
-  wireMat = new THREE.MeshBasicMaterial({
+  // 2. Holographic Outer Wireframe Cage
+  const wireKnotGeom = new THREE.TorusKnotGeometry(1.28, 0.34, 64, 16, 2, 3);
+  const wireKnotMat = new THREE.MeshBasicMaterial({
     color: 0x00f0ff,
     wireframe: true,
     transparent: true,
-    opacity: 0.38,
+    opacity: 0.32,
   });
-  const wireMesh = new THREE.Mesh(wireGeom, wireMat);
-  meshGroup.add(wireMesh);
+  wireKnotMesh = new THREE.Mesh(wireKnotGeom, wireKnotMat);
+  meshGroup.add(wireKnotMesh);
 
-  // 3. Glowing Vertex Points
+  // 3. Glowing Vertex Points (Node Matrix on the Knot)
   const pointsMat = new THREE.PointsMaterial({
-    color: 0x00f0ff,
-    size: 0.08,
+    color: 0x38bdf8,
+    size: 0.065,
     transparent: true,
-    opacity: 0.9,
+    opacity: 0.85,
   });
-  const pointsMesh = new THREE.Points(wireGeom, pointsMat);
-  meshGroup.add(pointsMesh);
+  wireKnotPoints = new THREE.Points(wireKnotGeom, pointsMat);
+  meshGroup.add(wireKnotPoints);
 
-  // 4. Toroidal Halo Ring
-  const haloGeom = new THREE.TorusGeometry(2.35, 0.02, 16, 100);
-  const haloMat = new THREE.MeshBasicMaterial({
+  // 4. Inner Quantum Energy Gem (Floating Dual-Pyramid Octahedron)
+  const gemGeom = new THREE.OctahedronGeometry(0.55, 0);
+  const gemMat = new THREE.MeshStandardMaterial({
+    color: 0x7c3aed,
+    roughness: 0.12,
+    metalness: 0.9,
+    flatShading: true,
+    emissive: 0x6366f1,
+    emissiveIntensity: 0.75,
+  });
+  innerGemMesh = new THREE.Mesh(gemGeom, gemMat);
+  meshGroup.add(innerGemMesh);
+
+  const gemWireGeom = new THREE.OctahedronGeometry(0.68, 0);
+  const gemWireMat = new THREE.MeshBasicMaterial({
+    color: 0xa855f7,
+    wireframe: true,
+    transparent: true,
+    opacity: 0.5,
+  });
+  innerGemWire = new THREE.Mesh(gemWireGeom, gemWireMat);
+  meshGroup.add(innerGemWire);
+
+  // 5. Multi-Axis Concentric Gyroscopic Rings (Gimbal System)
+  // Ring 1 (Inner Cyan Ring)
+  const ring1Geom = new THREE.TorusGeometry(2.25, 0.022, 16, 120);
+  const ring1Mat = new THREE.MeshBasicMaterial({
+    color: 0x00f0ff,
+    transparent: true,
+    opacity: 0.55,
+  });
+  gyroRing1 = new THREE.Mesh(ring1Geom, ring1Mat);
+  gyroRing1.rotation.x = Math.PI / 3;
+  meshGroup.add(gyroRing1);
+
+  // Ring 2 (Middle Violet / Indigo Ring)
+  const ring2Geom = new THREE.TorusGeometry(2.65, 0.016, 16, 120);
+  const ring2Mat = new THREE.MeshBasicMaterial({
+    color: 0x818cf8,
+    transparent: true,
+    opacity: 0.45,
+  });
+  gyroRing2 = new THREE.Mesh(ring2Geom, ring2Mat);
+  gyroRing2.rotation.y = Math.PI / 4;
+  gyroRing2.rotation.z = Math.PI / 6;
+  meshGroup.add(gyroRing2);
+
+  // Ring 3 (Outer Celestial Aura Ring)
+  const ring3Geom = new THREE.TorusGeometry(3.05, 0.012, 16, 120);
+  const ring3Mat = new THREE.MeshBasicMaterial({
     color: 0x38bdf8,
     transparent: true,
-    opacity: 0.28,
+    opacity: 0.32,
   });
-  haloMesh = new THREE.Mesh(haloGeom, haloMat);
-  haloMesh.rotation.x = Math.PI / 2.5;
-  meshGroup.add(haloMesh);
+  gyroRing3 = new THREE.Mesh(ring3Geom, ring3Mat);
+  gyroRing3.rotation.x = -Math.PI / 5;
+  meshGroup.add(gyroRing3);
 
-  // 5. Space Dust / Constellation Particle Field
-  const particleCount = isMobile ? 100 : 220;
+  // 6. Orbiting Satellite Nodes (Data Beacons)
+  const satelliteConfigs = [
+    { color: 0x00f0ff, radius: 2.25, speed: 0.85, incX: 0.6, incZ: 0.2, phase: 0 },
+    { color: 0xa855f7, radius: 2.65, speed: -0.65, incX: -0.4, incZ: 0.7, phase: Math.PI / 2 },
+    { color: 0x38bdf8, radius: 2.25, speed: 0.75, incX: 0.8, incZ: -0.3, phase: Math.PI },
+    { color: 0x34d399, radius: 3.05, speed: -0.5, incX: -0.5, incZ: -0.5, phase: (3 * Math.PI) / 2 },
+  ];
+
+  satellites.length = 0;
+  satelliteConfigs.forEach((cfg) => {
+    const satGeom = new THREE.OctahedronGeometry(0.1, 0);
+    const satMat = new THREE.MeshStandardMaterial({
+      color: cfg.color,
+      emissive: cfg.color,
+      emissiveIntensity: 0.8,
+      roughness: 0.2,
+      metalness: 0.8,
+    });
+    const satMesh = new THREE.Mesh(satGeom, satMat);
+    meshGroup?.add(satMesh);
+    satellites.push({
+      mesh: satMesh,
+      orbitRadius: cfg.radius,
+      speed: cfg.speed,
+      inclinationX: cfg.incX,
+      inclinationZ: cfg.incZ,
+      phase: cfg.phase,
+    });
+  });
+
+  // 7. Ambient Space Dust / Constellation Particle Field
+  const particleCount = isMobile ? 120 : 260;
   const particleGeom = new THREE.BufferGeometry();
   const positions = new Float32Array(particleCount * 3);
   for (let i = 0; i < particleCount * 3; i += 3) {
-    positions[i] = (Math.random() - 0.5) * 18;
-    positions[i + 1] = (Math.random() - 0.5) * 14;
-    positions[i + 2] = (Math.random() - 0.5) * 12;
+    positions[i] = (Math.random() - 0.5) * 20;
+    positions[i + 1] = (Math.random() - 0.5) * 16;
+    positions[i + 2] = (Math.random() - 0.5) * 14;
   }
   particleGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
   const dustMat = new THREE.PointsMaterial({
-    color: 0x64748b,
+    color: 0x7dd3fc,
     size: 0.035,
     transparent: true,
-    opacity: 0.5,
+    opacity: 0.45,
   });
   dustParticles = new THREE.Points(particleGeom, dustMat);
   scene.add(dustParticles);
 
   // Initial position in Hero Section
-  meshGroup.position.set(isMobile ? 0 : 2.4, isMobile ? 0.8 : 0, isMobile ? -2.5 : 0);
+  meshGroup.position.set(isMobile ? 0 : 2.4, isMobile ? 0.7 : 0, isMobile ? -2.8 : 0);
 
   // Event Listeners
   window.addEventListener('scroll', updateScrollProgress, { passive: true });
   window.addEventListener('mousemove', handleMouseMove, { passive: true });
+  window.addEventListener('click', handleClick, { passive: true });
   window.addEventListener('resize', handleResize);
   updateScrollProgress();
 
@@ -228,31 +337,76 @@ onMounted(() => {
     const wp = interpolateScroll(scrollProgress);
 
     // Apply target position with subtle mouse parallax
-    const pX = isMobile ? wp.x : wp.x + mouseX * 0.25;
-    const pY = isMobile ? wp.y : wp.y + mouseY * 0.18;
+    const pX = isMobile ? wp.x : wp.x + mouseX * 0.28;
+    const pY = isMobile ? wp.y : wp.y + mouseY * 0.20;
 
     meshGroup.position.x += (pX - meshGroup.position.x) * 0.08;
     meshGroup.position.y += (pY - meshGroup.position.y) * 0.08;
     meshGroup.position.z += (wp.z - meshGroup.position.z) * 0.08;
 
+    // Shockwave pulse decay
+    shockwaveScale += (1.0 - shockwaveScale) * 0.08;
     const currentScale = meshGroup.scale.x;
-    const nextScale = currentScale + (wp.scale - currentScale) * 0.08;
+    const baseTargetScale = wp.scale * shockwaveScale;
+    const nextScale = currentScale + (baseTargetScale - currentScale) * 0.08;
     meshGroup.scale.set(nextScale, nextScale, nextScale);
 
-    // Continuous subtle rotation + scroll velocity dynamic burst
+    // Continuous Torus Knot Rotation + scroll velocity boost
     const scrollSpeed = Math.abs(targetScrollProgress - scrollProgress) * 12;
-    meshGroup.rotation.y = elapsedTime * 0.16 + scrollProgress * Math.PI * 2;
-    meshGroup.rotation.x = elapsedTime * 0.10 + (isMobile ? 0 : mouseX * 0.15) + scrollSpeed * 0.4;
-    meshGroup.rotation.z = wp.rotZ;
-
-    // Independent halo ring rotation
-    if (haloMesh) {
-      haloMesh.rotation.z = elapsedTime * 0.28;
+    if (torusKnotMesh && wireKnotMesh && wireKnotPoints) {
+      const rotY = elapsedTime * 0.22 + scrollProgress * Math.PI * 2;
+      const rotX = elapsedTime * 0.14 + (isMobile ? 0 : mouseX * 0.16) + scrollSpeed * 0.4;
+      torusKnotMesh.rotation.set(rotX, rotY, wp.rotZ);
+      wireKnotMesh.rotation.set(rotX, rotY, wp.rotZ);
+      wireKnotPoints.rotation.set(rotX, rotY, wp.rotZ);
     }
+
+    // Inner Quantum Gem Independent Rotation & Pulsing
+    if (innerGemMesh && innerGemWire) {
+      const gemRot = elapsedTime * 0.6;
+      innerGemMesh.rotation.set(gemRot, gemRot * 1.2, gemRot * 0.8);
+      innerGemWire.rotation.set(-gemRot * 0.8, -gemRot * 1.1, gemRot);
+
+      const gemPulse = 1.0 + Math.sin(elapsedTime * 2.8) * 0.08;
+      innerGemMesh.scale.set(gemPulse, gemPulse, gemPulse);
+    }
+
+    // Multi-Axis Gyroscopic Rings Counter-Rotations
+    if (gyroRing1) {
+      gyroRing1.rotation.z = elapsedTime * 0.35;
+      gyroRing1.rotation.x = Math.PI / 3 + Math.sin(elapsedTime * 0.5) * 0.12;
+    }
+    if (gyroRing2) {
+      gyroRing2.rotation.z = -elapsedTime * 0.28;
+      gyroRing2.rotation.y = Math.PI / 4 + Math.cos(elapsedTime * 0.4) * 0.15;
+    }
+    if (gyroRing3) {
+      gyroRing3.rotation.z = elapsedTime * 0.18;
+      gyroRing3.rotation.x = -Math.PI / 5 + Math.sin(elapsedTime * 0.3) * 0.08;
+    }
+
+    // Orbiting Satellite Nodes Motion
+    satellites.forEach((sat) => {
+      const angle = elapsedTime * sat.speed + sat.phase;
+      const r = sat.orbitRadius;
+      const rawX = Math.cos(angle) * r;
+      const rawY = Math.sin(angle) * r;
+      const rawZ = Math.sin(angle * 2) * 0.35;
+
+      // Apply inclination tilt
+      sat.mesh.position.x = rawX * Math.cos(sat.inclinationZ) - rawY * Math.sin(sat.inclinationZ);
+      sat.mesh.position.y = (rawX * Math.sin(sat.inclinationZ) + rawY * Math.cos(sat.inclinationZ)) * Math.cos(sat.inclinationX);
+      sat.mesh.position.z = rawZ + rawY * Math.sin(sat.inclinationX);
+
+      // Rotate individual node
+      sat.mesh.rotation.x += 0.04;
+      sat.mesh.rotation.y += 0.05;
+    });
 
     // Ambient space dust drift
     if (dustParticles) {
-      dustParticles.rotation.y = elapsedTime * 0.02 + scrollProgress * 0.8;
+      dustParticles.rotation.y = elapsedTime * 0.018 + scrollProgress * 0.75;
+      dustParticles.rotation.x = Math.sin(elapsedTime * 0.2) * 0.05;
     }
 
     renderer.render(scene, camera);
@@ -265,6 +419,7 @@ onUnmounted(() => {
   if (typeof window !== 'undefined') {
     window.removeEventListener('scroll', updateScrollProgress);
     window.removeEventListener('mousemove', handleMouseMove);
+    window.removeEventListener('click', handleClick);
     window.removeEventListener('resize', handleResize);
   }
 

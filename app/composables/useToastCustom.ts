@@ -1,63 +1,91 @@
 export const useToastCustom = () => {
     const toast = useToast()
 
-    const showSuccessToast = (title: string, message: string) => {
-        return toast.add(
+    const showSuccessToast = (title: string, message: string, duration = 3000) => {
+        const t = toast.add(
             {
                 title: title,
-
                 description: message,
-                duration: 2000,
-                color: 'success'
+                duration: duration,
+                color: 'success',
+                close: true
             }
         )
+        const id = t?.id
+        if (id && duration && isFinite(duration) && duration > 0) {
+            setTimeout(() => {
+                toast.remove(id)
+            }, duration)
+        }
+        return t
     }
 
-    const showErrorToast = (title: string, message: string) => {
-        return toast.add(
+    const showErrorToast = (title: string, message: string, duration = 5000) => {
+        const t = toast.add(
             {
                 title: title,
-
                 description: message,
-                duration: 4000,
-                color: 'error'
+                duration: duration,
+                color: 'error',
+                close: true
             }
         )
+        const id = t?.id
+        if (id && duration && isFinite(duration) && duration > 0) {
+            setTimeout(() => {
+                toast.remove(id)
+            }, duration)
+        }
+        return t
     }
 
-    const showInfoToast = (title: string, message: string) => {
-        return toast.add(
+    const showInfoToast = (title: string, message: string, duration = 3000) => {
+        const t = toast.add(
             {
                 title: title,
-
                 description: message,
-                duration: 3000,
-                color: 'info'
+                duration: duration,
+                color: 'info',
+                close: true
             }
         )
+        const id = t?.id
+        if (id && duration && isFinite(duration) && duration > 0) {
+            setTimeout(() => {
+                toast.remove(id)
+            }, duration)
+        }
+        return t
     }
 
-    const showWarningToast = (title: string, message: string) => {
-        return toast.add(
+    const showWarningToast = (title: string, message: string, duration = 3500) => {
+        const t = toast.add(
             {
                 title: title,
-
                 description: message,
-                duration: 3000,
-                color: 'warning'
+                duration: duration,
+                color: 'warning',
+                close: true
             }
         )
+        const id = t?.id
+        if (id && duration && isFinite(duration) && duration > 0) {
+            setTimeout(() => {
+                toast.remove(id)
+            }, duration)
+        }
+        return t
     }
 
     const showLoadingToast = (title: string, message: string) => {
         return toast.add(
             {
                 title: title,
-
                 description: message,
                 duration: Infinity,
                 icon: 'line-md:loading-loop',
-                color: 'primary'
+                color: 'primary',
+                close: true
             }
         )
     }
@@ -67,10 +95,12 @@ export const useToastCustom = () => {
         title: string,
         message: string,
         color: "success" | "primary" | "secondary" | "info" | "warning" | "error" | "neutral" | undefined,
-        duration: number,
+        duration: number = 4000,
         icon?: string
     ) => {
         const id = typeof toastId === 'object' && toastId !== null ? toastId.id : toastId
+        if (!id) return
+
         const resolvedIcon = icon ?? (
             color === 'success' ? 'carbon:checkmark-filled' :
             color === 'error' ? 'carbon:error-filled' :
@@ -84,7 +114,8 @@ export const useToastCustom = () => {
             description: message,
             color: color,
             duration: duration,
-            icon: resolvedIcon
+            icon: resolvedIcon,
+            close: true
         })
 
         if (duration && isFinite(duration) && duration > 0) {
@@ -96,7 +127,9 @@ export const useToastCustom = () => {
 
     const removeToast = (toastId: any) => {
         const id = typeof toastId === 'object' && toastId !== null ? toastId.id : toastId
-        toast.remove(id)
+        if (id) {
+            toast.remove(id)
+        }
     }
 
     const showConfirmationToast = (title: string, message: string, onConfirm: () => void, onCancel?: () => void) => {
@@ -105,6 +138,7 @@ export const useToastCustom = () => {
             description: message,
             duration: 10000,
             color: 'warning',
+            close: true,
             actions: [
                 {
                     label: 'Confirm',
@@ -126,6 +160,11 @@ export const useToastCustom = () => {
                 }
             ]
         })
+        if (toastId?.id) {
+            setTimeout(() => {
+                toast.remove(toastId.id)
+            }, 10000)
+        }
     }
 
     return {
