@@ -1,3 +1,10 @@
+## [1.4.2](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.4.1...v1.4.2) (2026-10-18)
+
+
+### Bug Fixes
+
+* **project:** fix sticky fetch repos toast and revamp 3D mesh with quantum torus knot ([72d2505](https://github.com/exa-dev-portfolio/portofolio-v2/commit/72d2505dfb1fd158fc3cd4ee33d86191fa19b573))
+
 ## [1.4.1](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.4.0...v1.4.1) (2026-10-16)
 
 
