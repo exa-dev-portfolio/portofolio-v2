@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.7.0...v1.8.0) (2026-10-19)
+
+
+### Features
+
+* **dashboard:** add 1-click Connect Apple Music with MusicKit JS authorization ([b309641](https://github.com/exa-dev-portfolio/portofolio-v2/commit/b30964131a5ec06a78109001cee7e567c10e8381))
+
 # [1.7.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.6.0...v1.7.0) (2026-10-19)
 
 
