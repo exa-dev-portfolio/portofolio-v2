@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useToastCustom } from "~/composables/useToastCustom";
 
 definePageMeta({
@@ -227,13 +227,15 @@ const isTestingAppleMusic = ref(false);
 const appleMusicStatusResult = ref<any>(null);
 const manualMusicUserToken = ref("");
 const isSavingManualToken = ref(false);
+const showReauthForm = ref(false);
 
 const handleConnectAppleMusic = async () => {
   try {
     const token = await connectAppleMusic();
     if (token) {
       toast.showSuccessToast('Berhasil', 'Apple Music berhasil terhubung! Widget aktif di portfolio.');
-      await testAppleMusicConnection();
+      showReauthForm.value = false;
+      await testAppleMusicConnection(false);
     }
   } catch (err: any) {
     toast.showErrorToast('Koneksi Gagal', err?.message || 'Gagal menghubungkan Apple Music');
@@ -250,7 +252,8 @@ const handleSaveManualToken = async () => {
     await saveManualUserToken(manualMusicUserToken.value);
     toast.showSuccessToast('Berhasil', 'Music User Token berhasil disimpan!');
     manualMusicUserToken.value = '';
-    await testAppleMusicConnection();
+    showReauthForm.value = false;
+    await testAppleMusicConnection(false);
   } catch (err: any) {
     toast.showErrorToast('Gagal', err?.message || 'Gagal menyimpan Music User Token');
   } finally {
@@ -259,33 +262,44 @@ const handleSaveManualToken = async () => {
 };
 
 const handleDisconnectAppleMusic = async () => {
+  const confirmed = confirm("Apakah Anda yakin ingin memutuskan koneksi akun Apple Music?");
+  if (!confirmed) return;
+
   try {
     await disconnectAppleMusic();
     toast.showSuccessToast('Terputus', 'Akun Apple Music berhasil diputus.');
-    await testAppleMusicConnection();
+    await testAppleMusicConnection(false);
   } catch (err: any) {
     toast.showErrorToast('Error', err?.message || 'Gagal memutus koneksi Apple Music');
   }
 };
 
-const testAppleMusicConnection = async () => {
+const testAppleMusicConnection = async (showToast = true) => {
   isTestingAppleMusic.value = true;
   try {
     const res = await $fetch<any>('/api/music');
     if (res?.data) {
       appleMusicStatusResult.value = res.data;
-      if (res.data.is_configured) {
-        toast.showSuccessToast('Success', 'Apple Music status synced successfully!');
-      } else {
-        toast.showInfoToast('Info', 'Apple Music belum dikonfigurasi.');
+      if (showToast) {
+        if (res.data.is_configured) {
+          toast.showSuccessToast('Success', 'Apple Music status synced successfully!');
+        } else {
+          toast.showInfoToast('Info', 'Apple Music belum dikonfigurasi.');
+        }
       }
     }
   } catch (err: any) {
-    toast.showErrorToast('Error', err?.message || 'Failed to fetch Apple Music status');
+    if (showToast) {
+      toast.showErrorToast('Error', err?.message || 'Failed to fetch Apple Music status');
+    }
   } finally {
     isTestingAppleMusic.value = false;
   }
 };
+
+onMounted(() => {
+  testAppleMusicConnection(false);
+});
 
 const handleBindApple = async () => {
   const auth = await authorizeAppleForBinding();
@@ -756,7 +770,21 @@ const handleUnbindApple = async () => {
               <Icon name="carbon:music" size="18" />
             </div>
             <div>
-              <h2 class="text-xl font-bold text-white">Apple Music Integration</h2>
+              <div class="flex items-center gap-2">
+                <h2 class="text-xl font-bold text-white">Apple Music Integration</h2>
+                <span
+                  v-if="appleMusicStatusResult?.is_configured"
+                  class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                >
+                  <Icon name="carbon:checkmark-filled" size="12" /> Connected
+                </span>
+                <span
+                  v-else
+                  class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                >
+                  Not Connected
+                </span>
+              </div>
               <p class="text-xs text-white/50">Showcase Now Playing & Favorite Genres on portfolio</p>
             </div>
           </div>
@@ -767,8 +795,70 @@ const handleUnbindApple = async () => {
 
         <!-- Content -->
         <div class="p-6 space-y-5">
-          <!-- Guide Note -->
-          <div class="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08] text-xs space-y-2 text-slate-300 leading-relaxed">
+          <!-- Connected Banner (Persistent active status) -->
+          <div
+            v-if="appleMusicStatusResult?.is_configured"
+            class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+          >
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                <Icon name="carbon:checkmark-filled" size="22" />
+              </div>
+              <div>
+                <p class="text-sm font-bold text-white flex items-center gap-2">
+                  Akun Apple Music Terhubung
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Live Active</span>
+                </p>
+                <p class="text-xs text-white/60 mt-0.5">
+                  Widget di halaman portfolio sudah aktif dan tersinkronisasi otomatis. Anda tidak perlu menghubungkan ulang.
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                @click="testAppleMusicConnection(true)"
+                :disabled="isTestingAppleMusic"
+                class="px-3.5 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-white text-xs font-semibold border border-white/15 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                <Icon
+                  v-if="isTestingAppleMusic"
+                  name="icon-park-outline:loading-four"
+                  size="14"
+                  class="animate-spin"
+                />
+                <Icon v-else name="carbon:renew" size="14" />
+                <span>Sync Status</span>
+              </button>
+
+              <button
+                type="button"
+                @click="handleDisconnectAppleMusic"
+                class="px-3.5 py-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/20 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <Icon name="carbon:unlink" size="14" />
+                <span>Disconnect</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Collapsible Re-auth Toggle -->
+          <div v-if="appleMusicStatusResult?.is_configured" class="flex justify-end">
+            <button
+              type="button"
+              @click="showReauthForm = !showReauthForm"
+              class="text-xs text-white/40 hover:text-white/70 transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              <Icon :name="showReauthForm ? 'carbon:chevron-up' : 'carbon:chevron-down'" size="14" />
+              <span>{{ showReauthForm ? 'Tutup Opsi Sambung Ulang' : 'Hubungkan Ulang / Ganti Akun' }}</span>
+            </button>
+          </div>
+
+          <!-- Guide Note (Show only when not configured) -->
+          <div
+            v-if="!appleMusicStatusResult?.is_configured"
+            class="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08] text-xs space-y-2 text-slate-300 leading-relaxed"
+          >
             <p class="font-semibold text-white flex items-center gap-2">
               <Icon name="carbon:information" size="16" class="text-rose-400" />
               Konfigurasi Kredensial Apple Developer Program
@@ -787,83 +877,75 @@ const handleUnbindApple = async () => {
             </p>
           </div>
 
-          <!-- Action Buttons -->
-          <div class="flex flex-col sm:flex-row gap-3">
-            <button
-              type="button"
-              @click="handleConnectAppleMusic"
-              :disabled="isAppleMusicAuthorizing || isTestingAppleMusic"
-              class="flex-1 px-5 py-3 rounded-lg bg-gradient-to-r from-[#fa243c] to-[#fa586a] hover:brightness-110 text-white font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shadow-md shadow-[#fa243c]/15"
-            >
-              <Icon
-                v-if="isAppleMusicAuthorizing"
-                name="icon-park-outline:loading-four"
-                size="18"
-                class="animate-spin"
-              />
-              <Icon v-else name="carbon:music" size="18" />
-              <span>{{ isAppleMusicAuthorizing ? 'Connecting to Apple...' : 'Connect Apple Music' }}</span>
-            </button>
-
-            <button
-              v-if="appleMusicStatusResult?.is_configured"
-              type="button"
-              @click="handleDisconnectAppleMusic"
-              :disabled="isAppleMusicAuthorizing || isTestingAppleMusic"
-              class="px-4 py-3 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/20 font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-            >
-              <Icon name="carbon:unlink" size="16" />
-              <span>Disconnect</span>
-            </button>
-
-            <button
-              type="button"
-              @click="testAppleMusicConnection"
-              :disabled="isTestingAppleMusic || isAppleMusicAuthorizing"
-              class="px-5 py-3 rounded-lg bg-white/10 hover:bg-white/15 text-white font-medium border border-white/15 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-            >
-              <Icon
-                v-if="isTestingAppleMusic"
-                name="icon-park-outline:loading-four"
-                size="16"
-                class="animate-spin"
-              />
-              <Icon v-else name="carbon:renew" size="16" />
-              <span>Test Sync</span>
-            </button>
-          </div>
-
-          <!-- Manual Token Input (Alternative / Fallback) -->
-          <div class="pt-4 border-t border-white/10 space-y-3">
-            <div class="flex items-center justify-between">
-              <label class="text-xs font-semibold text-white flex items-center gap-2">
-                <Icon name="carbon:password" size="14" class="text-rose-400" />
-                Atau Paste Music User Token Manual
-              </label>
-              <span class="text-[11px] text-white/40">Alternatif jika popup Apple ID diblokir browser</span>
-            </div>
-            <div class="flex flex-col sm:flex-row gap-2">
-              <input
-                v-model="manualMusicUserToken"
-                type="text"
-                placeholder="Paste Apple Music-User-Token di sini..."
-                class="flex-1 px-4 py-2.5 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-rose-500/50 focus:bg-white/15 transition-all font-mono"
-              />
+          <!-- Connect Actions (Show if NOT configured OR if user opened reauth form) -->
+          <div v-if="!appleMusicStatusResult?.is_configured || showReauthForm" class="space-y-4">
+            <div class="flex flex-col sm:flex-row gap-3">
               <button
                 type="button"
-                @click="handleSaveManualToken"
-                :disabled="isSavingManualToken || !manualMusicUserToken.trim()"
-                class="px-4 py-2.5 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40"
+                @click="handleConnectAppleMusic"
+                :disabled="isAppleMusicAuthorizing || isTestingAppleMusic"
+                class="flex-1 px-5 py-3 rounded-lg bg-gradient-to-r from-[#fa243c] to-[#fa586a] hover:brightness-110 text-white font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shadow-md shadow-[#fa243c]/15"
               >
                 <Icon
-                  v-if="isSavingManualToken"
+                  v-if="isAppleMusicAuthorizing"
                   name="icon-park-outline:loading-four"
-                  size="14"
+                  size="18"
                   class="animate-spin"
                 />
-                <Icon v-else name="carbon:save" size="14" />
-                <span>Simpan Token</span>
+                <Icon v-else name="carbon:music" size="18" />
+                <span>{{ isAppleMusicAuthorizing ? 'Menghubungkan...' : 'Connect Apple Music' }}</span>
               </button>
+
+              <button
+                v-if="!appleMusicStatusResult?.is_configured"
+                type="button"
+                @click="testAppleMusicConnection(true)"
+                :disabled="isTestingAppleMusic || isAppleMusicAuthorizing"
+                class="px-5 py-3 rounded-lg bg-white/10 hover:bg-white/15 text-white font-medium border border-white/15 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                <Icon
+                  v-if="isTestingAppleMusic"
+                  name="icon-park-outline:loading-four"
+                  size="16"
+                  class="animate-spin"
+                />
+                <Icon v-else name="carbon:renew" size="16" />
+                <span>Test Sync</span>
+              </button>
+            </div>
+
+            <!-- Manual Token Input (Alternative / Fallback) -->
+            <div class="pt-4 border-t border-white/10 space-y-3">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-semibold text-white flex items-center gap-2">
+                  <Icon name="carbon:password" size="14" class="text-rose-400" />
+                  Atau Paste Music User Token Manual
+                </label>
+                <span class="text-[11px] text-white/40">Alternatif jika popup Apple ID diblokir browser</span>
+              </div>
+              <div class="flex flex-col sm:flex-row gap-2">
+                <input
+                  v-model="manualMusicUserToken"
+                  type="text"
+                  placeholder="Paste Apple Music-User-Token di sini..."
+                  class="flex-1 px-4 py-2.5 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-rose-500/50 focus:bg-white/15 transition-all font-mono"
+                />
+                <button
+                  type="button"
+                  @click="handleSaveManualToken"
+                  :disabled="isSavingManualToken || !manualMusicUserToken.trim()"
+                  class="px-4 py-2.5 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40"
+                >
+                  <Icon
+                    v-if="isSavingManualToken"
+                    name="icon-park-outline:loading-four"
+                    size="14"
+                    class="animate-spin"
+                  />
+                  <Icon v-else name="carbon:save" size="14" />
+                  <span>Simpan Token</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -916,6 +998,17 @@ const handleUnbindApple = async () => {
                 </div>
               </div>
             </template>
+
+            <!-- If Configured & No Current Track -->
+            <div v-else-if="appleMusicStatusResult.is_configured" class="p-3.5 rounded-lg bg-white/5 border border-white/10 text-xs">
+              <p class="font-semibold text-white mb-1 flex items-center gap-1.5">
+                <Icon name="carbon:headphones" size="14" class="text-rose-400" />
+                Belum Ada Lagu yang Diputar
+              </p>
+              <p class="text-white/60 text-[11px] leading-relaxed">
+                Akun Apple Music Anda sudah aktif terhubung! Saat Anda memutar lagu di aplikasi Apple Music (iPhone, Mac, atau Web), lagu dan genre favorit Anda akan otomatis muncul di sini dan di halaman portfolio.
+              </p>
+            </div>
           </div>
         </div>
       </div>
