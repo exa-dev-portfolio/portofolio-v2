@@ -1,3 +1,15 @@
+# [1.6.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.5.0...v1.6.0) (2026-10-19)
+
+
+### Bug Fixes
+
+* **config:** remove client-side public runtimeConfig for Apple Music ([b19d89c](https://github.com/exa-dev-portfolio/portofolio-v2/commit/b19d89c65163b4a2dfb70623d873ad64d017a57d))
+
+
+### Features
+
+* **music:** auto-hide Apple Music widget on frontend when not configured ([57d7e4b](https://github.com/exa-dev-portfolio/portofolio-v2/commit/57d7e4b1d3e7e708d9d001693ca72088cbe1ba38))
+
 # [1.5.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.4.2...v1.5.0) (2026-10-19)
 
 
