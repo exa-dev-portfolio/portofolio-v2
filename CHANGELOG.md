@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.4.2...v1.5.0) (2026-10-19)
+
+
+### Features
+
+* **music:** add Apple Music Now Playing and Favorite Genres integration ([06d2742](https://github.com/exa-dev-portfolio/portofolio-v2/commit/06d27429827ed2a5711dab16d939bc96b0920967))
+
 ## [1.4.2](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.4.1...v1.4.2) (2026-10-18)
 
 
