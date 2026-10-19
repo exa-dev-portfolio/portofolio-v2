@@ -3,12 +3,20 @@ import {
   getAppleMusicStatus,
   generateAppleMusicDeveloperToken,
   isAppleMusicConfigured,
+  hasAppleMusicDeveloperKeys,
+  saveAppleMusicUserToken,
+  clearAppleMusicUserToken,
 } from "~~/server/services/appleMusic.service";
 
 describe("Apple Music Service", () => {
   it("detects when Apple Music is not configured", () => {
     const configured = isAppleMusicConfigured();
     expect(typeof configured).toBe("boolean");
+  });
+
+  it("checks developer keys presence safely", () => {
+    const hasKeys = hasAppleMusicDeveloperKeys();
+    expect(typeof hasKeys).toBe("boolean");
   });
 
   it("returns is_configured: false and track: null without any fallback/demo tracks", async () => {
@@ -27,5 +35,10 @@ describe("Apple Music Service", () => {
   it("handles developer token generation safely without throwing when keys are missing", () => {
     const token = generateAppleMusicDeveloperToken();
     expect(token === null || typeof token === "string").toBe(true);
+  });
+
+  it("saves and clears user token safely", async () => {
+    await expect(saveAppleMusicUserToken("test-mock-token")).resolves.toBeUndefined();
+    await expect(clearAppleMusicUserToken()).resolves.toBeUndefined();
   });
 });

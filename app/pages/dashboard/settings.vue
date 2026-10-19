@@ -216,9 +216,32 @@ const closeCVModal = () => {
   showCVModal.value = false;
 };
 
-// Apple Music Integration Status & Test
+// Apple Music Integration & MusicKit
+const { connectAppleMusic, disconnectAppleMusic, isAuthorizing: isAppleMusicAuthorizing } = useMusicKit();
 const isTestingAppleMusic = ref(false);
 const appleMusicStatusResult = ref<any>(null);
+
+const handleConnectAppleMusic = async () => {
+  try {
+    const token = await connectAppleMusic();
+    if (token) {
+      toast.showSuccessToast('Berhasil', 'Apple Music berhasil terhubung! Widget aktif di portfolio.');
+      await testAppleMusicConnection();
+    }
+  } catch (err: any) {
+    toast.showErrorToast('Koneksi Gagal', err?.message || 'Gagal menghubungkan Apple Music');
+  }
+};
+
+const handleDisconnectAppleMusic = async () => {
+  try {
+    await disconnectAppleMusic();
+    toast.showSuccessToast('Terputus', 'Akun Apple Music berhasil diputus.');
+    await testAppleMusicConnection();
+  } catch (err: any) {
+    toast.showErrorToast('Error', err?.message || 'Gagal memutus koneksi Apple Music');
+  }
+};
 
 const testAppleMusicConnection = async () => {
   isTestingAppleMusic.value = true;
@@ -226,7 +249,11 @@ const testAppleMusicConnection = async () => {
     const res = await $fetch<any>('/api/music');
     if (res?.data) {
       appleMusicStatusResult.value = res.data;
-      toast.showSuccessToast('Success', 'Apple Music status synced successfully!');
+      if (res.data.is_configured) {
+        toast.showSuccessToast('Success', 'Apple Music status synced successfully!');
+      } else {
+        toast.showInfoToast('Info', 'Apple Music belum dikonfigurasi.');
+      }
     }
   } catch (err: any) {
     toast.showErrorToast('Error', err?.message || 'Failed to fetch Apple Music status');
@@ -735,22 +762,51 @@ const handleUnbindApple = async () => {
             </p>
           </div>
 
-          <!-- Connection Test Button -->
-          <button
-            type="button"
-            @click="testAppleMusicConnection"
-            :disabled="isTestingAppleMusic"
-            class="w-full px-6 py-3 rounded-lg bg-gradient-to-r from-[#fa243c] to-[#fa586a] hover:brightness-110 text-white font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-          >
-            <Icon
-              v-if="isTestingAppleMusic"
-              name="icon-park-outline:loading-four"
-              size="16"
-              class="animate-spin"
-            />
-            <Icon v-else name="carbon:renew" size="18" />
-            <span>{{ isTestingAppleMusic ? 'Testing Connection...' : 'Test Apple Music Status' }}</span>
-          </button>
+          <!-- Action Buttons -->
+          <div class="flex flex-col sm:flex-row gap-3">
+            <button
+              type="button"
+              @click="handleConnectAppleMusic"
+              :disabled="isAppleMusicAuthorizing || isTestingAppleMusic"
+              class="flex-1 px-5 py-3 rounded-lg bg-gradient-to-r from-[#fa243c] to-[#fa586a] hover:brightness-110 text-white font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shadow-md shadow-[#fa243c]/15"
+            >
+              <Icon
+                v-if="isAppleMusicAuthorizing"
+                name="icon-park-outline:loading-four"
+                size="18"
+                class="animate-spin"
+              />
+              <Icon v-else name="carbon:music" size="18" />
+              <span>{{ isAppleMusicAuthorizing ? 'Connecting to Apple...' : 'Connect Apple Music' }}</span>
+            </button>
+
+            <button
+              v-if="appleMusicStatusResult?.is_configured"
+              type="button"
+              @click="handleDisconnectAppleMusic"
+              :disabled="isAppleMusicAuthorizing || isTestingAppleMusic"
+              class="px-4 py-3 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/20 font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              <Icon name="carbon:unlink" size="16" />
+              <span>Disconnect</span>
+            </button>
+
+            <button
+              type="button"
+              @click="testAppleMusicConnection"
+              :disabled="isTestingAppleMusic || isAppleMusicAuthorizing"
+              class="px-5 py-3 rounded-lg bg-white/10 hover:bg-white/15 text-white font-medium border border-white/15 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              <Icon
+                v-if="isTestingAppleMusic"
+                name="icon-park-outline:loading-four"
+                size="16"
+                class="animate-spin"
+              />
+              <Icon v-else name="carbon:renew" size="16" />
+              <span>Test Sync</span>
+            </button>
+          </div>
 
           <!-- Live Result Display -->
           <div

@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import axios from "axios";
 import { logger } from "../utils/logger";
-import { getJson, setJson } from "../db/redis";
+import { get, set, del, getJson, setJson } from "../db/redis";
 import type { AppleMusicNowPlayingResponse, FavoriteGenre, MusicTrack } from "~/types/music";
 import { parsePrivateKey } from "./storeIntegration.service";
 
@@ -11,6 +11,58 @@ let memoryCacheData: { data: AppleMusicNowPlayingResponse; expiresAt: number } |
 
 const CACHE_TTL_SECONDS = 30; // 30 seconds cache for now-playing
 const DEV_TOKEN_CACHE_TTL = 86400; // 24 hours for developer token
+
+/**
+ * Check whether Developer Keys (.p8, Key ID, Team ID) are configured
+ */
+export function hasAppleMusicDeveloperKeys(): boolean {
+  const config = useRuntimeConfig();
+  const keyId = (config.appleMusicKeyId as string) || process.env.NUXT_APPLE_MUSIC_KEY_ID || process.env.APPLE_MUSIC_KEY_ID;
+  const teamId = (config.appleMusicTeamId as string) || process.env.NUXT_APPLE_MUSIC_TEAM_ID || process.env.APPLE_MUSIC_TEAM_ID;
+  const privateKey = (config.appleMusicPrivateKey as string) || process.env.NUXT_APPLE_MUSIC_PRIVATE_KEY || process.env.APPLE_MUSIC_PRIVATE_KEY;
+
+  return Boolean(keyId && keyId.trim() && teamId && teamId.trim() && privateKey && privateKey.trim());
+}
+
+/**
+ * Get active Apple Music User Token (from Redis or env)
+ */
+export async function getStoredAppleMusicUserToken(): Promise<string | null> {
+  try {
+    const redisToken = await get("apple_music_user_token");
+    if (redisToken && redisToken.trim()) {
+      return redisToken.trim();
+    }
+  } catch {}
+
+  const config = useRuntimeConfig();
+  const envToken = (config.appleMusicUserToken as string) || process.env.NUXT_APPLE_MUSIC_USER_TOKEN || process.env.APPLE_MUSIC_USER_TOKEN;
+  return envToken && envToken.trim() ? envToken.trim() : null;
+}
+
+/**
+ * Save user token from MusicKit interactive login
+ */
+export async function saveAppleMusicUserToken(token: string): Promise<void> {
+  const clean = token.trim();
+  // Valid for 180 days
+  await set("apple_music_user_token", clean, 180 * 86400);
+  try {
+    await del("apple_music_status");
+  } catch {}
+  memoryCacheData = null;
+}
+
+/**
+ * Disconnect user token
+ */
+export async function clearAppleMusicUserToken(): Promise<void> {
+  try {
+    await del("apple_music_user_token");
+    await del("apple_music_status");
+  } catch {}
+  memoryCacheData = null;
+}
 
 /**
  * Generate Apple Music Developer Token (ES256 JWT)
@@ -132,25 +184,14 @@ function extractFavoriteGenres(tracks: MusicTrack[]): FavoriteGenre[] {
 }
 
 /**
- * Check whether Apple Music credentials are fully configured
+ * Check whether Apple Music credentials are fully configured (sync check)
  */
 export function isAppleMusicConfigured(): boolean {
+  const hasDevKeys = hasAppleMusicDeveloperKeys();
   const config = useRuntimeConfig();
-  const keyId = (config.appleMusicKeyId as string) || process.env.NUXT_APPLE_MUSIC_KEY_ID || process.env.APPLE_MUSIC_KEY_ID;
-  const teamId = (config.appleMusicTeamId as string) || process.env.NUXT_APPLE_MUSIC_TEAM_ID || process.env.APPLE_MUSIC_TEAM_ID;
-  const privateKey = (config.appleMusicPrivateKey as string) || process.env.NUXT_APPLE_MUSIC_PRIVATE_KEY || process.env.APPLE_MUSIC_PRIVATE_KEY;
   const userToken = (config.appleMusicUserToken as string) || process.env.NUXT_APPLE_MUSIC_USER_TOKEN || process.env.APPLE_MUSIC_USER_TOKEN;
 
-  return Boolean(
-    keyId &&
-    keyId.trim() &&
-    teamId &&
-    teamId.trim() &&
-    privateKey &&
-    privateKey.trim() &&
-    userToken &&
-    userToken.trim()
-  );
+  return Boolean(hasDevKeys && userToken && userToken.trim());
 }
 
 /**
@@ -158,7 +199,9 @@ export function isAppleMusicConfigured(): boolean {
  * Pure Apple Music data: returns null/empty if unconfigured or no tracks.
  */
 export async function getAppleMusicStatus(): Promise<AppleMusicNowPlayingResponse> {
-  const isConfigured = isAppleMusicConfigured();
+  const devToken = generateAppleMusicDeveloperToken();
+  const userToken = await getStoredAppleMusicUserToken();
+  const isConfigured = Boolean(devToken && userToken);
 
   if (!isConfigured) {
     return {
@@ -189,16 +232,12 @@ export async function getAppleMusicStatus(): Promise<AppleMusicNowPlayingRespons
     return memoryCacheData.data;
   }
 
-  const config = useRuntimeConfig();
-  const devToken = generateAppleMusicDeveloperToken();
-  const userToken = (config.appleMusicUserToken as string) || process.env.NUXT_APPLE_MUSIC_USER_TOKEN || process.env.APPLE_MUSIC_USER_TOKEN;
-
-  if (devToken && userToken && userToken.trim()) {
+  if (devToken && userToken) {
     try {
       const response = await axios.get("https://api.music.apple.com/v1/me/recent/played/tracks", {
         headers: {
           Authorization: `Bearer ${devToken}`,
-          "Music-User-Token": userToken.trim(),
+          "Music-User-Token": userToken,
         },
         params: {
           limit: 10,
