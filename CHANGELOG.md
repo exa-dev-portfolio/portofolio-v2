@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.8.2...v1.9.0) (2026-10-19)
+
+
+### Features
+
+* **settings:** persist Apple Music connection status on mount and improve connected UI state ([1b2704c](https://github.com/exa-dev-portfolio/portofolio-v2/commit/1b2704c9c4380e313743271742f7764e3a438053))
+
 ## [1.8.2](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.8.1...v1.8.2) (2026-10-19)
 
 
