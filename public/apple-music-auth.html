@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Otorisasi Apple Music</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background-color: #0b0f19;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 32px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+    .icon-badge {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #fa243c, #fa586a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      box-shadow: 0 10px 20px rgba(250, 36, 60, 0.3);
+    }
+    .icon-badge svg {
+      width: 32px;
+      height: 32px;
+      fill: #ffffff;
+    }
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    p {
+      font-size: 13px;
+      color: #94a3b8;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-top-color: #fa243c;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .btn {
+      display: inline-block;
+      width: 100%;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #fa243c, #fa586a);
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      filter: brightness(1.1);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: #e2e8f0;
+      margin-top: 10px;
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .status-badge.loading {
+      background: rgba(250, 36, 60, 0.15);
+      color: #fa586a;
+      border: 1px solid rgba(250, 36, 60, 0.3);
+    }
+    .status-badge.success {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .status-badge.error {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+  </style>
+
+  <!-- Official Apple MusicKit JS (Native CDN, runs inside isolated vanilla HTML DOM) -->
+  <script src="https://js-cdn.music.apple.com/musickit/v3/musickit.js" async></script>
+</head>
+<body>
+  <div class="card">
+    <div class="icon-badge">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+      </svg>
+    </div>
+
+    <div id="loading-state">
+      <span class="status-badge loading">Menghubungkan...</span>
+      <h1 id="title-text">Apple Music Authorization</h1>
+      <p id="desc-text">Mempersiapkan otorisasi Apple MusicKit. Jendela login Apple ID akan segera terbuka.</p>
+      <div id="spinner" class="spinner"></div>
+      <button id="auth-btn" class="btn btn-primary" style="display: none;" onclick="triggerAuthorize()">
+        Buka Otorisasi Apple ID
+      </button>
+    </div>
+
+    <div id="result-state" style="display: none;">
+      <span id="result-badge" class="status-badge"></span>
+      <h1 id="result-title"></h1>
+      <p id="result-desc"></p>
+      <button id="close-btn" class="btn btn-secondary" onclick="window.close()">Tutup Jendela</button>
+    </div>
+  </div>
+
+  <script>
+    let musicKitInstance = null;
+    let developerToken = null;
+
+    function updateStatus(title, desc) {
+      document.getElementById('title-text').innerText = title;
+      document.getElementById('desc-text').innerText = desc;
+    }
+
+    function showResult(isSuccess, title, desc) {
+      document.getElementById('loading-state').style.display = 'none';
+      const resultState = document.getElementById('result-state');
+      resultState.style.display = 'block';
+
+      const badge = document.getElementById('result-badge');
+      badge.className = 'status-badge ' + (isSuccess ? 'success' : 'error');
+      badge.innerText = isSuccess ? 'Berhasil' : 'Gagal';
+
+      document.getElementById('result-title').innerText = title;
+      document.getElementById('result-desc').innerText = desc;
+    }
+
+    async function initMusicKit() {
+      try {
+        updateStatus('Mengambil Token Pengembang...', 'Meminta developer token aman dari server...');
+        const res = await fetch('/api/music/developer-token');
+        const json = await res.json();
+        developerToken = json?.data?.developerToken;
+
+        if (!developerToken) {
+          throw new Error('Developer token tidak ditemukan. Pastikan kredensial developer di .env sudah lengkap.');
+        }
+
+        // Wait for MusicKit script to be ready
+        if (!window.MusicKit) {
+          updateStatus('Memuat Apple MusicKit SDK...', 'Menunggu skrip resmi Apple selesai dimuat...');
+          await new Promise((resolve) => {
+            document.addEventListener('musickitloaded', resolve, { once: true });
+            // Safety timeout in case musickitloaded already fired
+            setTimeout(resolve, 2000);
+          });
+        }
+
+        if (!window.MusicKit || typeof window.MusicKit.configure !== 'function') {
+          throw new Error('Gagal menginisialisasi Apple MusicKit SDK dari Apple CDN.');
+        }
+
+        updateStatus('Mengonfigurasi MusicKit...', 'Menyiapkan instance MusicKit resmi...');
+        await window.MusicKit.configure({
+          developerToken,
+          app: {
+            name: 'Portfolio',
+            build: '1.0.0',
+          },
+        });
+
+        musicKitInstance = window.MusicKit.getInstance();
+        if (!musicKitInstance) {
+          throw new Error('Gagal mendapatkan instance resmi MusicKit.');
+        }
+
+        // Show authorization trigger button or trigger immediately
+        document.getElementById('spinner').style.display = 'none';
+        document.getElementById('auth-btn').style.display = 'block';
+        updateStatus('Siap Masuk', 'Klik tombol di bawah untuk login dengan Apple ID Anda.');
+
+        // Auto trigger authorization
+        triggerAuthorize();
+      } catch (err) {
+        console.error('Init error:', err);
+        showResult(false, 'Inisialisasi Gagal', err.message || 'Gagal menyiapkan otorisasi Apple Music');
+        if (window.opener) {
+          window.opener.postMessage({ type: 'APPLE_MUSIC_AUTH_ERROR', error: err.message }, window.location.origin);
+        }
+      }
+    }
+
+    async function triggerAuthorize() {
+      if (!musicKitInstance) return;
+
+      try {
+        document.getElementById('spinner').style.display = 'block';
+        document.getElementById('auth-btn').style.display = 'none';
+        updateStatus('Menunggu Otorisasi Apple ID...', 'Silakan selesaikan login pada dialog popup Apple.');
+
+        const userToken = await musicKitInstance.authorize();
+
+        if (!userToken) {
+          throw new Error('Otorisasi dibatalkan oleh pengguna.');
+        }
+
+        updateStatus('Menyimpan Sesi...', 'Menyimpan token otorisasi ke portfolio...');
+        const saveRes = await fetch('/api/music/user-token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userToken }),
+        });
+
+        if (!saveRes.ok) {
+          const errData = await saveRes.json().catch(() => ({}));
+          throw new Error(errData?.message || 'Gagal menyimpan user token ke server.');
+        }
+
+        showResult(true, 'Terkoneksi!', 'Akun Apple Music Anda berhasil terhubung ke portfolio. Jendela ini akan tertutup otomatis...');
+
+        // Notify parent window
+        if (window.opener) {
+          window.opener.postMessage({ type: 'APPLE_MUSIC_AUTH_SUCCESS', userToken }, window.location.origin);
+        }
+
+        setTimeout(() => {
+          window.close();
+        }, 1500);
+      } catch (err) {
+        console.error('Authorize error:', err);
+        showResult(false, 'Otorisasi Gagal', err.message || 'Gagal mengotorisasi akun Apple Music.');
+        if (window.opener) {
+          window.opener.postMessage({ type: 'APPLE_MUSIC_AUTH_ERROR', error: err.message }, window.location.origin);
+        }
+      }
+    }
+
+    // Start on DOM ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initMusicKit);
+    } else {
+      initMusicKit();
+    }
+  </script>
+</body>
+</html>
