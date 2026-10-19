@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.6.0...v1.7.0) (2026-10-19)
+
+
+### Features
+
+* **music:** remove all fallback and demo dummy data, pure Apple Music API data only ([c49f405](https://github.com/exa-dev-portfolio/portofolio-v2/commit/c49f405c6b847a326c4c921a566f0640dfe90c88))
+
 # [1.6.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.5.0...v1.6.0) (2026-10-19)
 
 
