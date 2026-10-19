@@ -24,7 +24,6 @@ export interface FavoriteGenre {
 export interface AppleMusicNowPlayingResponse {
   is_playing: boolean;
   is_live: boolean;
-  is_demo: boolean;
   is_configured: boolean;
   track: MusicTrack | null;
   favorite_genres: FavoriteGenre[];

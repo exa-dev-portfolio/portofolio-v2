@@ -13,7 +13,6 @@ const isConfigured = computed(() => Boolean(musicData.value?.is_configured && mu
 const track = computed(() => musicData.value?.track);
 const genres = computed(() => musicData.value?.favorite_genres || []);
 const isLive = computed(() => musicData.value?.is_live ?? false);
-const isDemo = computed(() => musicData.value?.is_demo ?? false);
 
 // Audio Preview Player State
 const audioPlayer = ref<HTMLAudioElement | null>(null);
@@ -140,19 +139,12 @@ onBeforeUnmount(() => {
               :class="isAudioPlaying || isLive ? 'bg-[#fa243c]' : 'bg-slate-400'"
             ></span>
           </span>
-          <span>{{ isAudioPlaying ? 'PREVIEW PLAYING' : (isLive ? 'NOW PLAYING' : 'RECENT SOUNDTRACK') }}</span>
+          <span>{{ isAudioPlaying ? 'PREVIEW PLAYING' : (isLive ? 'NOW PLAYING' : 'RECENTLY PLAYED') }}</span>
         </div>
       </div>
 
-      <!-- Action: Manual Refresh & Demo Indicator -->
+      <!-- Action: Manual Refresh -->
       <div class="flex items-center gap-2">
-        <span
-          v-if="isDemo"
-          class="hidden sm:inline-block text-[10px] font-mono uppercase tracking-wider text-slate-500 bg-white/[0.03] px-2 py-0.5 rounded border border-white/5"
-          title="Mode demonstrasi - Hubungkan Apple Music API di .env untuk live sync"
-        >
-          Curated Vibe
-        </span>
         <button
           type="button"
           @click="refresh()"
@@ -312,7 +304,7 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- Favorite Genres & Music Taste Section -->
-    <div class="relative z-10 pt-1">
+    <div v-if="genres.length > 0" class="relative z-10 pt-1">
       <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-2">
           <Icon name="carbon:headphones" size="14" class="text-rose-400" />

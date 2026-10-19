@@ -731,7 +731,7 @@ const handleUnbindApple = async () => {
               <div><span class="text-rose-400">NUXT_APPLE_MUSIC_USER_TOKEN</span>=&lt;Music-User-Token&gt;</div>
             </div>
             <p class="text-[11px] text-slate-400">
-              *Jika kredensial belum diisi, website otomatis berjalan dalam mode <strong>Curated Demo</strong> tanpa melempar error.
+              *Jika kredensial belum diisi, widget Apple Music di halaman portfolio akan disembunyikan secara otomatis.
             </p>
           </div>
 
@@ -763,7 +763,7 @@ const handleUnbindApple = async () => {
                 class="text-[10px] font-mono px-2 py-0.5 rounded"
                 :class="appleMusicStatusResult.is_configured ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'"
               >
-                {{ appleMusicStatusResult.is_configured ? (appleMusicStatusResult.is_live ? 'Live Apple Music' : 'Configured (Active)') : 'Hidden (Not Configured)' }}
+                {{ appleMusicStatusResult.is_configured ? 'Connected & Active' : 'Hidden (Not Configured)' }}
               </span>
             </div>
 
