@@ -210,10 +210,6 @@ export default defineNuxtConfig({
     appleMusicStorefront: process.env.NUXT_APPLE_MUSIC_STOREFRONT || process.env.APPLE_MUSIC_STOREFRONT || "id",
 
     public: {
-      appleMusicKeyId:
-        process.env.NUXT_PUBLIC_APPLE_MUSIC_KEY_ID ||
-        process.env.NUXT_APPLE_MUSIC_KEY_ID ||
-        "",
       appleClientId:
         process.env.NUXT_PUBLIC_APPLE_CLIENT_ID ||
         process.env.NUXT_APPLE_CLIENT_ID ||
