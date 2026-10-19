@@ -19,8 +19,26 @@ function applyMusicKitPolyfills() {
   if (!win.process) {
     win.process = {};
   }
-  if (!win.process.versions) {
-    win.process.versions = { node: null };
+  // Setting win.process.versions = null prevents both:
+  // 1. `Cannot read properties of undefined (reading 'node')` at line 13
+  // 2. `detectNodeEnvironment()` returning true, which caused `reading 'from'`
+  win.process.versions = null;
+
+  if (!win.Buffer) {
+    win.Buffer = {
+      from: (str: any, enc?: string) => ({
+        toString: (outEnc?: string) => {
+          try {
+            if (outEnc === "base64" || enc === "binary") {
+              return win.btoa ? win.btoa(str) : String(str);
+            }
+            return win.atob ? win.atob(str) : String(str);
+          } catch {
+            return String(str);
+          }
+        },
+      }),
+    };
   }
 }
 
