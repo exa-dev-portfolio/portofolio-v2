@@ -216,6 +216,25 @@ const closeCVModal = () => {
   showCVModal.value = false;
 };
 
+// Apple Music Integration Status & Test
+const isTestingAppleMusic = ref(false);
+const appleMusicStatusResult = ref<any>(null);
+
+const testAppleMusicConnection = async () => {
+  isTestingAppleMusic.value = true;
+  try {
+    const res = await $fetch<any>('/api/music');
+    if (res?.data) {
+      appleMusicStatusResult.value = res.data;
+      toast.showSuccessToast('Success', 'Apple Music status synced successfully!');
+    }
+  } catch (err: any) {
+    toast.showErrorToast('Error', err?.message || 'Failed to fetch Apple Music status');
+  } finally {
+    isTestingAppleMusic.value = false;
+  }
+};
+
 const handleBindApple = async () => {
   const auth = await authorizeAppleForBinding();
   if (!auth) return;
@@ -671,6 +690,109 @@ const handleUnbindApple = async () => {
             <Icon v-else name="carbon:upload" size="20" />
             {{ isSaving ? "Uploading..." : "Upload CV" }}
           </button>
+        </div>
+      </div>
+
+      <!-- Apple Music (MusicKit) Integration -->
+      <div
+        class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden"
+      >
+        <!-- Header -->
+        <div class="px-6 py-4 border-b border-white/10 bg-white/5 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#fa243c] to-[#fa586a] flex items-center justify-center text-white">
+              <Icon name="carbon:music" size="18" />
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-white">Apple Music Integration</h2>
+              <p class="text-xs text-white/50">Showcase Now Playing & Favorite Genres on portfolio</p>
+            </div>
+          </div>
+          <span class="text-xs font-mono px-2.5 py-1 rounded-md bg-rose-500/10 border border-rose-500/20 text-rose-300">
+            MusicKit API
+          </span>
+        </div>
+
+        <!-- Content -->
+        <div class="p-6 space-y-5">
+          <!-- Guide Note -->
+          <div class="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08] text-xs space-y-2 text-slate-300 leading-relaxed">
+            <p class="font-semibold text-white flex items-center gap-2">
+              <Icon name="carbon:information" size="16" class="text-rose-400" />
+              Konfigurasi Kredensial Apple Developer Program
+            </p>
+            <p>
+              Untuk sinkronisasi live Apple Music di portfolio, isi variabel berikut di file <code class="text-rose-300 font-mono">.env</code>:
+            </p>
+            <div class="bg-black/40 rounded-lg p-3 font-mono text-[11px] text-slate-300 space-y-1">
+              <div><span class="text-rose-400">NUXT_APPLE_MUSIC_KEY_ID</span>=ABC123XYZ0</div>
+              <div><span class="text-rose-400">NUXT_APPLE_MUSIC_TEAM_ID</span>=DEF456UVW1</div>
+              <div><span class="text-rose-400">NUXT_APPLE_MUSIC_PRIVATE_KEY</span>=LS0tLS1CRUdJTiBQUkl...</div>
+              <div><span class="text-rose-400">NUXT_APPLE_MUSIC_USER_TOKEN</span>=&lt;Music-User-Token&gt;</div>
+            </div>
+            <p class="text-[11px] text-slate-400">
+              *Jika kredensial belum diisi, website otomatis berjalan dalam mode <strong>Curated Demo</strong> tanpa melempar error.
+            </p>
+          </div>
+
+          <!-- Connection Test Button -->
+          <button
+            type="button"
+            @click="testAppleMusicConnection"
+            :disabled="isTestingAppleMusic"
+            class="w-full px-6 py-3 rounded-lg bg-gradient-to-r from-[#fa243c] to-[#fa586a] hover:brightness-110 text-white font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+          >
+            <Icon
+              v-if="isTestingAppleMusic"
+              name="icon-park-outline:loading-four"
+              size="16"
+              class="animate-spin"
+            />
+            <Icon v-else name="carbon:renew" size="18" />
+            <span>{{ isTestingAppleMusic ? 'Testing Connection...' : 'Test Apple Music Status' }}</span>
+          </button>
+
+          <!-- Live Result Display -->
+          <div
+            v-if="appleMusicStatusResult"
+            class="p-4 rounded-xl bg-white/[0.04] border border-white/10 space-y-3"
+          >
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono uppercase tracking-wider text-slate-400">Detected Track</span>
+              <span
+                class="text-[10px] font-mono px-2 py-0.5 rounded"
+                :class="appleMusicStatusResult.is_live ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'"
+              >
+                {{ appleMusicStatusResult.is_live ? 'Live Apple Music' : 'Curated Demo' }}
+              </span>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <img
+                :src="appleMusicStatusResult.track?.album_art"
+                alt="Track art"
+                class="w-12 h-12 rounded-lg object-cover border border-white/10"
+              />
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-bold text-white truncate">{{ appleMusicStatusResult.track?.title }}</p>
+                <p class="text-xs text-slate-400 truncate">{{ appleMusicStatusResult.track?.artist }} • {{ appleMusicStatusResult.track?.album }}</p>
+              </div>
+            </div>
+
+            <!-- Detected Genres -->
+            <div class="pt-2 border-t border-white/10">
+              <p class="text-xs font-mono text-slate-400 mb-2">Detected Favorite Genres:</p>
+              <div class="flex flex-wrap gap-1.5">
+                <span
+                  v-for="g in appleMusicStatusResult.favorite_genres"
+                  :key="g.name"
+                  class="text-[11px] px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-200"
+                >
+                  {{ g.name }}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

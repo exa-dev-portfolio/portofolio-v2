@@ -202,7 +202,18 @@ export default defineNuxtConfig({
     googlePlayServiceAccountJson: process.env.NUXT_GOOGLE_PLAY_SERVICE_ACCOUNT_JSON || process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON,
     googlePlayTesterGroupEmail: process.env.NUXT_GOOGLE_PLAY_TESTER_GROUP_EMAIL || process.env.GOOGLE_PLAY_TESTER_GROUP_EMAIL,
 
+    // Apple Music API (MusicKit)
+    appleMusicKeyId: process.env.NUXT_APPLE_MUSIC_KEY_ID || process.env.APPLE_MUSIC_KEY_ID,
+    appleMusicTeamId: process.env.NUXT_APPLE_MUSIC_TEAM_ID || process.env.APPLE_MUSIC_TEAM_ID,
+    appleMusicPrivateKey: process.env.NUXT_APPLE_MUSIC_PRIVATE_KEY || process.env.APPLE_MUSIC_PRIVATE_KEY,
+    appleMusicUserToken: process.env.NUXT_APPLE_MUSIC_USER_TOKEN || process.env.APPLE_MUSIC_USER_TOKEN,
+    appleMusicStorefront: process.env.NUXT_APPLE_MUSIC_STOREFRONT || process.env.APPLE_MUSIC_STOREFRONT || "id",
+
     public: {
+      appleMusicKeyId:
+        process.env.NUXT_PUBLIC_APPLE_MUSIC_KEY_ID ||
+        process.env.NUXT_APPLE_MUSIC_KEY_ID ||
+        "",
       appleClientId:
         process.env.NUXT_PUBLIC_APPLE_CLIENT_ID ||
         process.env.NUXT_APPLE_CLIENT_ID ||

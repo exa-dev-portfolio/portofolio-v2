@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { UserSettingsModel } from "~/types/settings";
+import AppleMusicCard from "~/components/AppleMusicCard.vue";
 
 defineProps<{
   user?: UserSettingsModel | null;
@@ -213,6 +214,17 @@ const competencies = [
         </div>
 
       </div>
+
+      <!-- Bento Item: Apple Music Now Playing & Favorite Genres Card -->
+      <Motion
+        :initial="{ opacity: 0, y: 20 }"
+        :while-in-view="{ opacity: 1, y: 0 }"
+        :viewport="{ once: true, amount: 0.15 }"
+        :transition="{ duration: 0.5, ease: 'easeOut', delay: 0.2 }"
+        class="mt-8"
+      >
+        <AppleMusicCard />
+      </Motion>
 
     </div>
   </section>
