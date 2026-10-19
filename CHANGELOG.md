@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.8.0...v1.8.1) (2026-10-19)
+
+
+### Bug Fixes
+
+* **music:** prevent musickit js process.versions crash and add manual token input ([2bdd5e9](https://github.com/exa-dev-portfolio/portofolio-v2/commit/2bdd5e9cd4aebc50f0d0f6c91cc9129467304b6f))
+
 # [1.8.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.7.0...v1.8.0) (2026-10-19)
 
 
