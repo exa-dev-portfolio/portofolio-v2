@@ -1,3 +1,10 @@
+## [1.8.2](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.8.1...v1.8.2) (2026-10-19)
+
+
+### Bug Fixes
+
+* **music:** set process.versions to null and provide Buffer fallback to fix reading 'from' error ([716b7cf](https://github.com/exa-dev-portfolio/portofolio-v2/commit/716b7cf82a2efcc9b906e8f9e91da1309e0c352c))
+
 ## [1.8.1](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.8.0...v1.8.1) (2026-10-19)
 
 
