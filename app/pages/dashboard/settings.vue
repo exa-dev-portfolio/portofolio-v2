@@ -217,9 +217,16 @@ const closeCVModal = () => {
 };
 
 // Apple Music Integration & MusicKit
-const { connectAppleMusic, disconnectAppleMusic, isAuthorizing: isAppleMusicAuthorizing } = useMusicKit();
+const {
+  connectAppleMusic,
+  disconnectAppleMusic,
+  saveManualUserToken,
+  isAuthorizing: isAppleMusicAuthorizing,
+} = useMusicKit();
 const isTestingAppleMusic = ref(false);
 const appleMusicStatusResult = ref<any>(null);
+const manualMusicUserToken = ref("");
+const isSavingManualToken = ref(false);
 
 const handleConnectAppleMusic = async () => {
   try {
@@ -230,6 +237,24 @@ const handleConnectAppleMusic = async () => {
     }
   } catch (err: any) {
     toast.showErrorToast('Koneksi Gagal', err?.message || 'Gagal menghubungkan Apple Music');
+  }
+};
+
+const handleSaveManualToken = async () => {
+  if (!manualMusicUserToken.value.trim()) {
+    toast.showErrorToast('Error', 'Silakan masukkan Music User Token terlebih dahulu');
+    return;
+  }
+  isSavingManualToken.value = true;
+  try {
+    await saveManualUserToken(manualMusicUserToken.value);
+    toast.showSuccessToast('Berhasil', 'Music User Token berhasil disimpan!');
+    manualMusicUserToken.value = '';
+    await testAppleMusicConnection();
+  } catch (err: any) {
+    toast.showErrorToast('Gagal', err?.message || 'Gagal menyimpan Music User Token');
+  } finally {
+    isSavingManualToken.value = false;
   }
 };
 
@@ -806,6 +831,40 @@ const handleUnbindApple = async () => {
               <Icon v-else name="carbon:renew" size="16" />
               <span>Test Sync</span>
             </button>
+          </div>
+
+          <!-- Manual Token Input (Alternative / Fallback) -->
+          <div class="pt-4 border-t border-white/10 space-y-3">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-semibold text-white flex items-center gap-2">
+                <Icon name="carbon:password" size="14" class="text-rose-400" />
+                Atau Paste Music User Token Manual
+              </label>
+              <span class="text-[11px] text-white/40">Alternatif jika popup Apple ID diblokir browser</span>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2">
+              <input
+                v-model="manualMusicUserToken"
+                type="text"
+                placeholder="Paste Apple Music-User-Token di sini..."
+                class="flex-1 px-4 py-2.5 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-white/40 text-xs focus:outline-none focus:border-rose-500/50 focus:bg-white/15 transition-all font-mono"
+              />
+              <button
+                type="button"
+                @click="handleSaveManualToken"
+                :disabled="isSavingManualToken || !manualMusicUserToken.trim()"
+                class="px-4 py-2.5 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40"
+              >
+                <Icon
+                  v-if="isSavingManualToken"
+                  name="icon-park-outline:loading-four"
+                  size="14"
+                  class="animate-spin"
+                />
+                <Icon v-else name="carbon:save" size="14" />
+                <span>Simpan Token</span>
+              </button>
+            </div>
           </div>
 
           <!-- Live Result Display -->
