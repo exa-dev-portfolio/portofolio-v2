@@ -9,10 +9,11 @@ const { data: musicResponse, pending: isLoading, refresh } = await useFetch<Base
 });
 
 const musicData = computed(() => musicResponse.value?.data);
+const isConfigured = computed(() => Boolean(musicData.value?.is_configured && musicData.value?.track));
 const track = computed(() => musicData.value?.track);
 const genres = computed(() => musicData.value?.favorite_genres || []);
 const isLive = computed(() => musicData.value?.is_live ?? false);
-const isDemo = computed(() => musicData.value?.is_demo ?? true);
+const isDemo = computed(() => musicData.value?.is_demo ?? false);
 
 // Audio Preview Player State
 const audioPlayer = ref<HTMLAudioElement | null>(null);
@@ -87,7 +88,15 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="card-elevated rounded-3xl p-6 sm:p-7 relative overflow-hidden border border-white/10 shadow-2xl group transition-all duration-300 hover:border-pink-500/30">
+  <Motion
+    v-if="isConfigured && track"
+    :initial="{ opacity: 0, y: 20 }"
+    :while-in-view="{ opacity: 1, y: 0 }"
+    :viewport="{ once: true, amount: 0.15 }"
+    :transition="{ duration: 0.5, ease: 'easeOut', delay: 0.2 }"
+    class="mt-8"
+  >
+    <div class="card-elevated rounded-3xl p-6 sm:p-7 relative overflow-hidden border border-white/10 shadow-2xl group transition-all duration-300 hover:border-pink-500/30">
     <!-- Subtle ambient glow matching Apple Music gradient -->
     <div class="absolute -top-24 -right-24 w-60 h-60 rounded-full bg-gradient-to-br from-[#fa243c]/15 via-[#fa586a]/10 to-transparent blur-3xl pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
     <div class="absolute -bottom-24 -left-24 w-52 h-52 rounded-full bg-gradient-to-tr from-cyan-500/10 via-purple-500/10 to-transparent blur-3xl pointer-events-none"></div>
@@ -335,7 +344,8 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-  </div>
+    </div>
+  </Motion>
 </template>
 
 <style scoped>

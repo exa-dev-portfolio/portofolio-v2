@@ -758,40 +758,49 @@ const handleUnbindApple = async () => {
             class="p-4 rounded-xl bg-white/[0.04] border border-white/10 space-y-3"
           >
             <div class="flex items-center justify-between">
-              <span class="text-xs font-mono uppercase tracking-wider text-slate-400">Detected Track</span>
+              <span class="text-xs font-mono uppercase tracking-wider text-slate-400">Status Widget</span>
               <span
                 class="text-[10px] font-mono px-2 py-0.5 rounded"
-                :class="appleMusicStatusResult.is_live ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'"
+                :class="appleMusicStatusResult.is_configured ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'"
               >
-                {{ appleMusicStatusResult.is_live ? 'Live Apple Music' : 'Curated Demo' }}
+                {{ appleMusicStatusResult.is_configured ? (appleMusicStatusResult.is_live ? 'Live Apple Music' : 'Configured (Active)') : 'Hidden (Not Configured)' }}
               </span>
             </div>
 
-            <div class="flex items-center gap-3">
-              <img
-                :src="appleMusicStatusResult.track?.album_art"
-                alt="Track art"
-                class="w-12 h-12 rounded-lg object-cover border border-white/10"
-              />
-              <div class="min-w-0 flex-1">
-                <p class="text-sm font-bold text-white truncate">{{ appleMusicStatusResult.track?.title }}</p>
-                <p class="text-xs text-slate-400 truncate">{{ appleMusicStatusResult.track?.artist }} • {{ appleMusicStatusResult.track?.album }}</p>
-              </div>
+            <!-- If Not Configured -->
+            <div v-if="!appleMusicStatusResult.is_configured" class="p-3 rounded-lg bg-rose-500/5 border border-rose-500/20 text-xs text-rose-300">
+              <p class="font-semibold mb-1">Widget Apple Music Saat Ini Disembunyikan</p>
+              <p class="text-white/60 text-[11px]">Komponen Apple Music di halaman portfolio (About Section) tidak akan ditampilkan ke publik sebelum kredensial di file <code class="font-mono text-rose-300">.env</code> diisi lengkap.</p>
             </div>
 
-            <!-- Detected Genres -->
-            <div class="pt-2 border-t border-white/10">
-              <p class="text-xs font-mono text-slate-400 mb-2">Detected Favorite Genres:</p>
-              <div class="flex flex-wrap gap-1.5">
-                <span
-                  v-for="g in appleMusicStatusResult.favorite_genres"
-                  :key="g.name"
-                  class="text-[11px] px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-200"
-                >
-                  {{ g.name }}
-                </span>
+            <!-- If Configured & Has Track -->
+            <template v-else-if="appleMusicStatusResult.track">
+              <div class="flex items-center gap-3">
+                <img
+                  :src="appleMusicStatusResult.track?.album_art"
+                  alt="Track art"
+                  class="w-12 h-12 rounded-lg object-cover border border-white/10"
+                />
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-bold text-white truncate">{{ appleMusicStatusResult.track?.title }}</p>
+                  <p class="text-xs text-slate-400 truncate">{{ appleMusicStatusResult.track?.artist }} • {{ appleMusicStatusResult.track?.album }}</p>
+                </div>
               </div>
-            </div>
+
+              <!-- Detected Genres -->
+              <div v-if="appleMusicStatusResult.favorite_genres?.length" class="pt-2 border-t border-white/10">
+                <p class="text-xs font-mono text-slate-400 mb-2">Detected Favorite Genres:</p>
+                <div class="flex flex-wrap gap-1.5">
+                  <span
+                    v-for="g in appleMusicStatusResult.favorite_genres"
+                    :key="g.name"
+                    class="text-[11px] px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-200"
+                  >
+                    {{ g.name }}
+                  </span>
+                </div>
+              </div>
+            </template>
           </div>
         </div>
       </div>

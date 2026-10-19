@@ -221,10 +221,51 @@ function extractFavoriteGenres(tracks: MusicTrack[]): FavoriteGenre[] {
 }
 
 /**
- * Fetch Now Playing / Recent Played from Apple Music API
+ * Check whether Apple Music credentials are fully configured
  */
-export async function getAppleMusicStatus(): Promise<AppleMusicNowPlayingResponse> {
-  const cacheKey = "apple_music_status";
+export function isAppleMusicConfigured(): boolean {
+  const config = useRuntimeConfig();
+  const keyId = (config.appleMusicKeyId as string) || process.env.NUXT_APPLE_MUSIC_KEY_ID || process.env.APPLE_MUSIC_KEY_ID;
+  const teamId = (config.appleMusicTeamId as string) || process.env.NUXT_APPLE_MUSIC_TEAM_ID || process.env.APPLE_MUSIC_TEAM_ID;
+  const privateKey = (config.appleMusicPrivateKey as string) || process.env.NUXT_APPLE_MUSIC_PRIVATE_KEY || process.env.APPLE_MUSIC_PRIVATE_KEY;
+  const userToken = (config.appleMusicUserToken as string) || process.env.NUXT_APPLE_MUSIC_USER_TOKEN || process.env.APPLE_MUSIC_USER_TOKEN;
+
+  return Boolean(
+    keyId &&
+    keyId.trim() &&
+    teamId &&
+    teamId.trim() &&
+    privateKey &&
+    privateKey.trim() &&
+    userToken &&
+    userToken.trim()
+  );
+}
+
+/**
+ * Fetch Now Playing / Recent Played from Apple Music API
+ * If not configured and includeDemo is false, returns is_configured: false and track: null
+ */
+export async function getAppleMusicStatus(includeDemo = false): Promise<AppleMusicNowPlayingResponse> {
+  const isConfigured = isAppleMusicConfigured();
+
+  // If credentials are NOT configured and demo is NOT explicitly requested, hide music (unconfigured)
+  if (!isConfigured && !includeDemo) {
+    return {
+      is_playing: false,
+      is_live: false,
+      is_demo: false,
+      is_configured: false,
+      has_credentials: false,
+      track: null,
+      favorite_genres: [],
+      source: "apple-music",
+      status_message: "Apple Music not configured",
+      updated_at: new Date().toISOString(),
+    };
+  }
+
+  const cacheKey = includeDemo ? "apple_music_status_demo" : "apple_music_status";
 
   // 1. Try Redis Cache
   try {
@@ -267,6 +308,7 @@ export async function getAppleMusicStatus(): Promise<AppleMusicNowPlayingRespons
           is_playing: true,
           is_live: true,
           is_demo: false,
+          is_configured: true,
           has_credentials: true,
           track: currentTrack,
           favorite_genres: favoriteGenres,
@@ -289,12 +331,13 @@ export async function getAppleMusicStatus(): Promise<AppleMusicNowPlayingRespons
     }
   }
 
-  // Fallback demo mode when credentials are missing or call fails
+  // Fallback demo mode (when includeDemo is true or credentials were provided but call failed)
   const randomTrack = CURATED_DEMO_TRACKS[Math.floor(Math.random() * CURATED_DEMO_TRACKS.length)];
   const result: AppleMusicNowPlayingResponse = {
     is_playing: true,
     is_live: false,
     is_demo: true,
+    is_configured: isConfigured,
     has_credentials: Boolean(devToken && userToken),
     track: randomTrack,
     favorite_genres: DEFAULT_FAVORITE_GENRES,

@@ -25,7 +25,8 @@ export interface AppleMusicNowPlayingResponse {
   is_playing: boolean;
   is_live: boolean;
   is_demo: boolean;
-  track: MusicTrack;
+  is_configured: boolean;
+  track: MusicTrack | null;
   favorite_genres: FavoriteGenre[];
   source: 'apple-music';
   status_message: string;
