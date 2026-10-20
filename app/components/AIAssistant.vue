@@ -133,30 +133,28 @@ defineExpose({
     >
       <div
         v-show="isOpen"
-        class="w-[calc(100vw-2rem)] sm:w-[380px] bg-[#08120c] border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+        class="w-[calc(100vw-2rem)] sm:w-[380px] bg-[#141417] border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
         style="max-height: calc(100vh - 7rem); height: min(560px, calc(100vh - 7rem))"
       >
         <!-- Header -->
-        <div class="px-5 py-3.5 bg-[#0a150f] border-b border-white/10 flex items-center justify-between">
+        <div class="px-5 py-3.5 bg-[#0f0f12] border-b border-white/10 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <div class="relative w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 p-[1px] shadow-sm">
-              <div class="w-full h-full bg-[#050807] rounded-[11px] flex items-center justify-center">
-                <Icon name="carbon:bot" size="18" class="text-emerald-400" />
-              </div>
+            <div class="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+              <Icon name="carbon:bot" size="18" class="text-zinc-200" />
             </div>
             <div>
               <p class="text-sm font-heading font-bold text-white flex items-center gap-1.5">
-                Portfolio Copilot
+                AI Copilot
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
               </p>
-              <p class="text-[10px] font-mono text-slate-400">Powered by Gemini AI</p>
+              <p class="text-[10px] font-mono text-zinc-500">Powered by Gemini AI</p>
             </div>
           </div>
 
           <div class="flex items-center gap-1">
             <button
               @click="toggleChat"
-              class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+              class="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
               aria-label="Close AI Assistant"
             >
               <Icon name="carbon:close" size="16" />
@@ -167,7 +165,7 @@ defineExpose({
         <!-- Messages Area -->
         <div
           ref="messagesContainer"
-          class="flex-1 overflow-y-auto p-4 space-y-3.5 bg-[#050807]"
+          class="flex-1 overflow-y-auto p-4 space-y-3.5 bg-[#0d0d0f]"
         >
           <div
             v-for="message in messages"
@@ -179,17 +177,17 @@ defineExpose({
           >
             <!-- Assistant Bubble -->
             <div v-if="message.type === 'assistant'" class="flex gap-2.5 max-w-[88%]">
-              <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                <Icon name="carbon:bot" size="14" class="text-emerald-400" />
+              <div class="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0 mt-0.5">
+                <Icon name="carbon:bot" size="14" class="text-zinc-300" />
               </div>
               <div
                 v-if="message.isHtml"
-                class="p-3 rounded-2xl rounded-tl-none bg-white/[0.04] border border-white/10 text-slate-200 text-xs sm:text-sm leading-relaxed prose prose-invert max-w-none"
+                class="p-3 rounded-2xl rounded-tl-none bg-white/[0.04] border border-white/10 text-zinc-200 text-xs sm:text-sm leading-relaxed prose prose-invert max-w-none"
                 v-html="message.content"
               ></div>
               <div
                 v-else
-                class="p-3 rounded-2xl rounded-tl-none bg-white/[0.04] border border-white/10 text-slate-200 text-xs sm:text-sm leading-relaxed"
+                class="p-3 rounded-2xl rounded-tl-none bg-white/[0.04] border border-white/10 text-zinc-200 text-xs sm:text-sm leading-relaxed"
               >
                 {{ message.content }}
               </div>
@@ -197,7 +195,7 @@ defineExpose({
 
             <!-- User Bubble -->
             <div v-else class="flex gap-2.5 max-w-[85%] justify-end">
-              <div class="p-3 rounded-2xl rounded-tr-none bg-emerald-600 text-white text-xs sm:text-sm leading-relaxed font-medium shadow-sm">
+              <div class="p-3 rounded-2xl rounded-tr-none bg-white text-black text-xs sm:text-sm leading-relaxed font-medium shadow-sm">
                 {{ message.content }}
               </div>
             </div>
@@ -205,26 +203,26 @@ defineExpose({
 
           <!-- Loading Dots Indicator -->
           <div v-if="isLoading" class="flex gap-2.5 items-center">
-            <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
-              <Icon name="carbon:bot" size="14" class="text-emerald-400" />
+            <div class="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+              <Icon name="carbon:bot" size="14" class="text-zinc-300" />
             </div>
             <div class="p-3 rounded-2xl rounded-tl-none bg-white/[0.04] border border-white/10 flex items-center gap-1.5">
-              <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce" style="animation-delay: 0s"></div>
-              <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce" style="animation-delay: 0.2s"></div>
-              <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce" style="animation-delay: 0.4s"></div>
+              <div class="w-1.5 h-1.5 rounded-full bg-zinc-300 animate-bounce" style="animation-delay: 0s"></div>
+              <div class="w-1.5 h-1.5 rounded-full bg-zinc-300 animate-bounce" style="animation-delay: 0.2s"></div>
+              <div class="w-1.5 h-1.5 rounded-full bg-zinc-300 animate-bounce" style="animation-delay: 0.4s"></div>
             </div>
           </div>
         </div>
 
         <!-- Predefined Quick Question Chips -->
-        <div v-if="messages.length <= 1 && !isLoading" class="p-3 border-t border-white/10 bg-[#08110b] space-y-1.5">
-          <p class="text-[10px] font-mono uppercase text-slate-400 px-1">Suggested prompts:</p>
+        <div v-if="messages.length <= 1 && !isLoading" class="p-3 border-t border-white/10 bg-[#0f0f12] space-y-1.5">
+          <p class="text-[10px] font-mono uppercase text-zinc-500 px-1">Suggested prompts:</p>
           <div class="flex flex-col gap-1.5">
             <button
               v-for="(q, idx) in predefinedQuestions"
               :key="idx"
               @click="askQuestion(q)"
-              class="text-left px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/10 hover:border-emerald-500/40 hover:bg-emerald-500/10 text-xs text-slate-300 hover:text-white transition-colors cursor-pointer"
+              class="text-left px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/10 hover:border-white/20 hover:bg-white/[0.06] text-xs text-zinc-300 hover:text-white transition-colors cursor-pointer"
             >
               {{ q }}
             </button>
@@ -232,18 +230,18 @@ defineExpose({
         </div>
 
         <!-- Input Bar -->
-        <div class="p-3 border-t border-white/10 bg-[#08110b]">
+        <div class="p-3 border-t border-white/10 bg-[#0f0f12]">
           <form @submit.prevent="sendMessage" class="flex gap-2">
             <input
               v-model="userInput"
               type="text"
               placeholder="Ask me anything..."
-              class="flex-1 px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs sm:text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 transition-colors"
+              class="flex-1 px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs sm:text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-white/30 transition-colors"
             />
             <button
               type="submit"
               :disabled="isLoading || !userInput.trim()"
-              class="btn-primary-gradient px-4 py-2.5 rounded-xl text-white disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer"
+              class="px-4 py-2.5 rounded-xl bg-white text-black font-semibold disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer hover:bg-zinc-200 transition-colors"
               aria-label="Send message"
             >
               <Icon name="carbon:send-alt" size="16" />
@@ -257,12 +255,10 @@ defineExpose({
     <button
       @click="toggleChat"
       :aria-label="isOpen ? 'Close AI Assistant' : 'Open AI Assistant'"
-      class="group relative w-12 h-12 sm:w-13 sm:h-13 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 p-[1px] shadow-lg shadow-emerald-500/25 hover:scale-105 transition-transform duration-200 cursor-pointer"
+      class="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center shadow-xl hover:bg-zinc-200 transition-all duration-200 cursor-pointer"
     >
-      <div class="relative w-full h-full bg-[#050807] rounded-[15px] flex items-center justify-center text-white">
-        <Icon v-if="!isOpen" name="carbon:bot" size="24" class="text-emerald-400 group-hover:scale-105 transition-transform" />
-        <Icon v-else name="carbon:close" size="22" class="text-slate-200" />
-      </div>
+      <Icon v-if="!isOpen" name="carbon:bot" size="22" />
+      <Icon v-else name="carbon:close" size="20" />
     </button>
 
   </div>

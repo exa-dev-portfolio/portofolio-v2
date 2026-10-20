@@ -2,13 +2,13 @@
 // ========== IMPORTS ==========
 import { computed, onMounted, ref, nextTick } from "vue";
 import type { Skill, SkillsResponse } from "~/types/skill";
-import FooterSection from "~/components/FooterSection.vue";
 import ScrollTechMesh from "~/components/3d/ScrollTechMesh.client.vue";
-import WorkstationStage from "~/components/cyberdeck/WorkstationStage.vue";
-import ProjectFilmstrip from "~/components/cyberdeck/ProjectFilmstrip.vue";
-import SystemTopology from "~/components/cyberdeck/SystemTopology.vue";
-import FlightLog from "~/components/cyberdeck/FlightLog.vue";
-import TransmissionConsole from "~/components/cyberdeck/TransmissionConsole.vue";
+import NordicHero from "~/components/nordic/NordicHero.vue";
+import NordicProjects from "~/components/nordic/NordicProjects.vue";
+import NordicStack from "~/components/nordic/NordicStack.vue";
+import NordicExperience from "~/components/nordic/NordicExperience.vue";
+import NordicContact from "~/components/nordic/NordicContact.vue";
+import NordicFooter from "~/components/nordic/NordicFooter.vue";
 import type { JourneysResponse } from "~/types/journey";
 import type { ProjectsResponse } from "~/types/project";
 import type { UserSettingsModel } from "~/types/settings";
@@ -356,59 +356,49 @@ const totalExperienceYears = computed(() => {
   // convert ke tahun (1 angka desimal)
   return parseInt((totalMonths / 12).toFixed(0));
 });
-
-// Cyberdeck Workstation Mode Sync
-const activeMode = useState<string>('cyberdeck-active-mode', () => 'workstation');
-const switchMode = (mode: string) => {
-  activeMode.value = mode;
-  const el = document.getElementById(mode);
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth' });
-  }
-};
 </script>
 
 <template>
-  <div class="relative">
+  <div class="relative max-w-5xl mx-auto px-4 sm:px-6 space-y-24 sm:space-y-32">
     <!-- 3D Scroll-Driven WebGL Minimalist Tech Mesh Background -->
     <ClientOnly>
       <ScrollTechMesh />
     </ClientOnly>
 
-    <!-- Module 01: Workstation Command Stage -->
-    <div id="workstation" class="relative z-10">
-      <WorkstationStage
+    <!-- 1. Hero / Introduction -->
+    <div id="about" class="relative z-10 pt-2 sm:pt-4">
+      <NordicHero
         :user="user"
         :project-count="projects.length"
         :experience-years="totalExperienceYears"
-        @navigate="switchMode"
       />
     </div>
 
-    <!-- Module 02: Production Architecture Filmstrip -->
+    <!-- 2. Selected Projects Showcase -->
     <div id="projects" class="relative z-10">
-      <ProjectFilmstrip :projects="projects" />
+      <NordicProjects :projects="projects" />
     </div>
 
-    <!-- Module 03: System Topology Matrix -->
-    <div id="topology" class="relative z-10">
-      <SystemTopology :skills="skills" />
+    <!-- 3. Technical Stack & Tooling -->
+    <div id="stack" class="relative z-10">
+      <NordicStack :skills="skills" />
     </div>
 
-    <!-- Module 04: Flight Log & Mission Debrief -->
-    <div id="flightlog" class="relative z-10">
-      <FlightLog :experiences="experiences" />
+    <!-- 4. Work Experience & Career -->
+    <div id="experience" class="relative z-10">
+      <NordicExperience :experiences="experiences" />
     </div>
 
-    <!-- Module 05: Direct Transmission Terminal -->
-    <div id="transmit" class="relative z-10">
-      <TransmissionConsole :user="user" />
+    <!-- 5. Minimalist Contact Section -->
+    <div id="contact" class="relative z-10">
+      <NordicContact :user="user" />
     </div>
 
-    <!-- Cyberdeck Footer & Flame Wave -->
-    <div class="relative z-10 pt-4">
-      <FooterSection />
+    <!-- 6. Minimalist Footer -->
+    <div class="relative z-10">
+      <NordicFooter />
     </div>
   </div>
 </template>
+
 
