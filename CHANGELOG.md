@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.9.0...v1.10.0) (2026-10-20)
+
+
+### Features
+
+* **ui:** redesign total layout to Bento Grid 2.0 and switch theme to Cyber Emerald & Mint ([328944d](https://github.com/exa-dev-portfolio/portofolio-v2/commit/328944d8e18938e1838cbb62aebf7a94fcd252c1))
+
 # [1.9.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.8.2...v1.9.0) (2026-10-19)
 
 
