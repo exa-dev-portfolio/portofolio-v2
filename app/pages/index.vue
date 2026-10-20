@@ -4,6 +4,11 @@ import { computed, onMounted, ref, nextTick } from "vue";
 import type { Skill, SkillsResponse } from "~/types/skill";
 import FooterSection from "~/components/FooterSection.vue";
 import ScrollTechMesh from "~/components/3d/ScrollTechMesh.client.vue";
+import WorkstationStage from "~/components/cyberdeck/WorkstationStage.vue";
+import ProjectFilmstrip from "~/components/cyberdeck/ProjectFilmstrip.vue";
+import SystemTopology from "~/components/cyberdeck/SystemTopology.vue";
+import FlightLog from "~/components/cyberdeck/FlightLog.vue";
+import TransmissionConsole from "~/components/cyberdeck/TransmissionConsole.vue";
 import type { JourneysResponse } from "~/types/journey";
 import type { ProjectsResponse } from "~/types/project";
 import type { UserSettingsModel } from "~/types/settings";
@@ -351,6 +356,16 @@ const totalExperienceYears = computed(() => {
   // convert ke tahun (1 angka desimal)
   return parseInt((totalMonths / 12).toFixed(0));
 });
+
+// Cyberdeck Workstation Mode Sync
+const activeMode = useState<string>('cyberdeck-active-mode', () => 'workstation');
+const switchMode = (mode: string) => {
+  activeMode.value = mode;
+  const el = document.getElementById(mode);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth' });
+  }
+};
 </script>
 
 <template>
@@ -360,76 +375,40 @@ const totalExperienceYears = computed(() => {
       <ScrollTechMesh />
     </ClientOnly>
 
-    <!-- Hero Section -->
-    <div class="relative overflow-hidden z-10">
-      <HeroSection :user="user" />
-    </div>
-
-    <!-- Section Divider Line -->
-    <div class="container mx-auto px-6 relative z-10">
-      <div class="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
-    </div>
-
-    <!-- About Section -->
-    <div class="relative overflow-hidden z-10">
-      <AboutSection
+    <!-- Module 01: Workstation Command Stage -->
+    <div id="workstation" class="relative z-10">
+      <WorkstationStage
         :user="user"
-        :count_projects="projects.length"
-        :count_experience="totalExperienceYears"
+        :project-count="projects.length"
+        :experience-years="totalExperienceYears"
+        @navigate="switchMode"
       />
     </div>
 
-    <!-- Section Divider Line -->
-    <div class="container mx-auto px-6 relative z-10">
-      <div class="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+    <!-- Module 02: Production Architecture Filmstrip -->
+    <div id="projects" class="relative z-10">
+      <ProjectFilmstrip :projects="projects" />
     </div>
 
-    <!-- Skills Section -->
-    <div class="relative overflow-hidden z-10">
-      <SkillsSection :skills="skills" />
+    <!-- Module 03: System Topology Matrix -->
+    <div id="topology" class="relative z-10">
+      <SystemTopology :skills="skills" />
     </div>
 
-    <!-- Section Divider Line -->
-    <div class="container mx-auto px-6 relative z-10">
-      <div class="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+    <!-- Module 04: Flight Log & Mission Debrief -->
+    <div id="flightlog" class="relative z-10">
+      <FlightLog :experiences="experiences" />
     </div>
 
-    <!-- Journey Section -->
-    <div class="relative overflow-hidden z-10">
-      <JourneySection :experiences="experiences" />
+    <!-- Module 05: Direct Transmission Terminal -->
+    <div id="transmit" class="relative z-10">
+      <TransmissionConsole :user="user" />
     </div>
 
-    <!-- Section Divider Line -->
-    <div class="container mx-auto px-6 relative z-10">
-      <div class="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
-    </div>
-
-    <!-- Projects Section -->
-    <div class="relative overflow-hidden z-10">
-      <ProjectsSection :projects="projects" />
-    </div>
-
-    <!-- Section Divider Line -->
-    <div class="container mx-auto px-6 relative z-10">
-      <div class="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
-    </div>
-
-    <!-- Contact Section -->
-    <div class="relative overflow-hidden z-10">
-      <ContactSection :user="user" />
-    </div>
-
-    <!-- Section Divider Line -->
-    <div class="container mx-auto px-6 relative z-10">
-      <div class="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
-    </div>
-
-    <!-- Footer Section -->
-    <div class="relative overflow-hidden z-10">
+    <!-- Cyberdeck Footer & Flame Wave -->
+    <div class="relative z-10 pt-4">
       <FooterSection />
     </div>
-
-    <!-- AI Assistant Widget -->
-    <AIAssistant />
   </div>
 </template>
+

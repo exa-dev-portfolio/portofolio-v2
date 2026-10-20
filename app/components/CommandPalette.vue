@@ -41,11 +41,12 @@ const navigateTo = (hash: string) => {
 
 const commands: CommandItem[] = [
   // Navigation
-  { id: 'nav-about', title: 'About Me', subtitle: 'Philosophy & background', category: 'Navigation', icon: 'carbon:user-avatar', action: () => navigateTo('#about') },
-  { id: 'nav-stack', title: 'Tech Stack & Skills', subtitle: 'Frameworks, languages, cloud tools', category: 'Navigation', icon: 'carbon:code', action: () => navigateTo('#stack') },
-  { id: 'nav-work', title: 'Professional Journey', subtitle: 'Career timeline & experience', category: 'Navigation', icon: 'carbon:milestone', action: () => navigateTo('#work') },
-  { id: 'nav-project', title: 'Featured Projects', subtitle: 'Full-stack & cloud architecture cases', category: 'Navigation', icon: 'carbon:application-web', action: () => navigateTo('#project') },
-  { id: 'nav-contact', title: 'Contact Me', subtitle: 'Send an inquiry or hire', category: 'Navigation', icon: 'carbon:email', action: () => navigateTo('#contact') },
+  { id: 'nav-workstation', title: 'Workstation Stage', subtitle: 'Interactive CLI & telemetry radar', category: 'Navigation', icon: 'material-symbols-light:terminal', action: () => navigateTo('#workstation') },
+  { id: 'nav-projects', title: 'Projects Filmstrip', subtitle: 'Curated production deployments & blueprints', category: 'Navigation', icon: 'carbon:application-web', action: () => navigateTo('#projects') },
+  { id: 'nav-topology', title: 'System Topology', subtitle: 'Multi-tier stack & node inspector', category: 'Navigation', icon: 'carbon:network-4', action: () => navigateTo('#topology') },
+  { id: 'nav-flightlog', title: 'Flight Log', subtitle: 'Mission sorties & engineering history', category: 'Navigation', icon: 'carbon:milestone', action: () => navigateTo('#flightlog') },
+  { id: 'nav-transmit', title: 'Transmit Comms', subtitle: 'Encrypted inquiry & direct gateway', category: 'Navigation', icon: 'carbon:send-alt', action: () => navigateTo('#transmit') },
+
   
   // Quick Actions
   { id: 'act-resume', title: 'Download Resume / CV', subtitle: 'PDF format', category: 'Quick Actions', icon: 'carbon:document-download', action: () => { if (props.cvUrl) window.open(props.cvUrl, '_blank') } },

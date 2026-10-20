@@ -111,6 +111,11 @@ const askQuestion = (question: string) => {
 const toggleChat = () => {
   isOpen.value = !isOpen.value
 }
+
+defineExpose({
+  open: () => { isOpen.value = true },
+  toggle: toggleChat
+})
 </script>
 
 <template>
