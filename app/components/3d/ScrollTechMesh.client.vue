@@ -7,34 +7,20 @@ const canvasRef = ref<HTMLCanvasElement | null>(null);
 let renderer: THREE.WebGLRenderer | null = null;
 let scene: THREE.Scene | null = null;
 let camera: THREE.PerspectiveCamera | null = null;
-let networkGroup: THREE.Group | null = null;
+let processorGroup: THREE.Group | null = null;
 
-// Interconnected Infrastructure Nodes
-interface TopologyNode {
-  mesh: THREE.Group;
-  lightMesh: THREE.Mesh;
-  baseY: number;
-  pulsePhase: number;
-  position: THREE.Vector3;
-}
-const nodes: TopologyNode[] = [];
-
-// Interconnected Cables
-interface NetworkCable {
-  curve: THREE.CatmullRomCurve3;
-  tubeMesh: THREE.Mesh;
-  glowMesh: THREE.Line;
-  dataPackets: {
-    mesh: THREE.Mesh;
-    speed: number;
-    offset: number;
-    color: number;
-  }[];
-}
-const cables: NetworkCable[] = [];
-
-// Ambient Background Dust
+// Core Components for Animation
+const logicCores: THREE.Mesh[] = [];
+let laserScanBar: THREE.Mesh | null = null;
+let hudBrackets: THREE.LineSegments | null = null;
 let dustParticles: THREE.Points | null = null;
+
+// Data Bus Highways with traveling electron pulses
+interface CircuitBus {
+  points: THREE.Vector3[];
+  pulses: { mesh: THREE.Mesh; progress: number; speed: number }[];
+}
+const circuitBuses: CircuitBus[] = [];
 
 let animationFrameId: number | null = null;
 let scrollProgress = 0;
@@ -42,7 +28,7 @@ let targetScrollProgress = 0;
 let mouseX = 0;
 let mouseY = 0;
 let isMobile = false;
-let shockwaveScale = 1.0;
+let overclockEnergy = 0;
 
 function easeInOutCubic(x: number): number {
   return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
@@ -60,7 +46,8 @@ function handleMouseMove(e: MouseEvent) {
 }
 
 function handleClick() {
-  shockwaveScale = 1.25;
+  // Trigger overclock energy burst
+  overclockEnergy = 1.0;
 }
 
 function handleResize() {
@@ -87,49 +74,49 @@ function interpolateScroll(p: number) {
   if (isMobile) {
     targetX = 0;
     targetY = p < 0.2 ? 0.6 : -0.4;
-    targetZ = -3.2;
-    targetScale = 0.65;
-    targetRotY = p * 0.8;
-    targetRotX = 0.2;
+    targetZ = -3.4;
+    targetScale = 0.68;
+    targetRotY = -0.4 + p * 0.9;
+    targetRotX = 0.55;
     return { x: targetX, y: targetY, z: targetZ, scale: targetScale, rotY: targetRotY, rotX: targetRotX };
   }
 
   if (p < 0.25) {
-    // Phase 1: Hero (Framed on the Right Column)
+    // Phase 1: Hero (Right Column, dramatic isometric inspection tilt)
     const t = p / 0.25;
-    targetX = 2.5 + (-2.2 - 2.5) * easeInOutCubic(t);
+    targetX = 2.6 + (-2.3 - 2.6) * easeInOutCubic(t);
     targetY = 0.1 + (0.3 - 0.1) * t;
-    targetZ = 0.2 + (0.8 - 0.2) * easeInOutCubic(t);
-    targetScale = 1.05 + (1.15 - 1.05) * t;
-    targetRotY = t * 0.5;
-    targetRotX = 0.15 + t * 0.1;
+    targetZ = 0.3 + (0.9 - 0.3) * easeInOutCubic(t);
+    targetScale = 1.12 + (1.20 - 1.12) * t;
+    targetRotY = -0.55 + 0.4 * t;
+    targetRotX = 0.65 - 0.1 * t;
   } else if (p < 0.50) {
-    // Phase 2: Projects Showcase (Centered / Unfolding Cluster)
+    // Phase 2: Projects Showcase (Centered aerial view of compute engine)
     const t = (p - 0.25) / 0.25;
-    targetX = -2.2 + (0.2 - -2.2) * easeInOutCubic(t);
+    targetX = -2.3 + (0.1 - -2.3) * easeInOutCubic(t);
     targetY = 0.3 + (-0.2 - 0.3) * t;
-    targetZ = 0.8 + (-0.5 - 0.8) * easeInOutCubic(t);
-    targetScale = 1.15 + (0.95 - 1.15) * t;
-    targetRotY = 0.5 + (-0.2 - 0.5) * t;
-    targetRotX = 0.25 - t * 0.1;
+    targetZ = 0.9 + (-0.4 - 0.9) * easeInOutCubic(t);
+    targetScale = 1.20 + (1.00 - 1.20) * t;
+    targetRotY = -0.15 + (-0.6 - -0.15) * t;
+    targetRotX = 0.55 + 0.2 * t;
   } else if (p < 0.75) {
-    // Phase 3: Technical Stack (Right Perspective Matrix)
+    // Phase 3: Technical Stack (High-angle inspection of circuits & buses)
     const t = (p - 0.50) / 0.25;
-    targetX = 0.2 + (2.2 - 0.2) * easeInOutCubic(t);
+    targetX = 0.1 + (2.3 - 0.1) * easeInOutCubic(t);
     targetY = -0.2 + (0.1 - -0.2) * t;
-    targetZ = -0.5 + (-1.2 - -0.5) * easeInOutCubic(t);
-    targetScale = 0.95 + (1.08 - 0.95) * t;
-    targetRotY = -0.2 + (0.4 - -0.2) * t;
-    targetRotX = 0.15;
+    targetZ = -0.4 + (-1.2 - -0.4) * easeInOutCubic(t);
+    targetScale = 1.00 + (1.15 - 1.00) * t;
+    targetRotY = -0.75 + (0.5 - -0.75) * t;
+    targetRotX = 0.75 - 0.15 * t;
   } else {
     // Phase 4: Contact & Horizon
     const t = (p - 0.75) / 0.25;
-    targetX = 2.2 + (1.5 - 2.2) * easeInOutCubic(t);
+    targetX = 2.3 + (1.6 - 2.3) * easeInOutCubic(t);
     targetY = 0.1 + (-0.5 - 0.1) * t;
-    targetZ = -1.2 + (-3.2 - -1.2) * easeInOutCubic(t);
-    targetScale = 1.08 + (1.35 - 1.08) * t;
-    targetRotY = 0.4 + (0.8 - 0.4) * t;
-    targetRotX = 0.2;
+    targetZ = -1.2 + (-3.4 - -1.2) * easeInOutCubic(t);
+    targetScale = 1.15 + (1.40 - 1.15) * t;
+    targetRotY = 0.5 + (0.9 - 0.5) * t;
+    targetRotX = 0.6;
   }
 
   return { x: targetX, y: targetY, z: targetZ, scale: targetScale, rotY: targetRotY, rotX: targetRotX };
@@ -142,12 +129,12 @@ onMounted(() => {
   const height = window.innerHeight;
   isMobile = width < 768;
 
-  // Scene setup with background fog matching Nordic theme (#09090b)
+  // Scene setup with atmospheric dark fog (#09090b)
   scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x09090b, 0.042);
+  scene.fog = new THREE.FogExp2(0x09090b, 0.045);
 
   camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-  camera.position.set(0, 0, 8.2);
+  camera.position.set(0, 0, 8.5);
 
   renderer = new THREE.WebGLRenderer({
     canvas: canvasRef.value,
@@ -158,165 +145,267 @@ onMounted(() => {
   renderer.setSize(width, height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-  // Studio Lighting
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+  // Studio Lighting Suite tailored for metallic silicon & PCB reflections
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
   scene.add(ambientLight);
 
-  const mainLight = new THREE.PointLight(0xffffff, 3.0, 40);
-  mainLight.position.set(6, 6, 6);
-  scene.add(mainLight);
+  const keyLight = new THREE.DirectionalLight(0xffffff, 3.2);
+  keyLight.position.set(5, 8, 6);
+  scene.add(keyLight);
 
-  const fillLight = new THREE.PointLight(0xd4d4d8, 2.2, 35);
-  fillLight.position.set(-6, -4, 4);
-  scene.add(fillLight);
+  const rimLight = new THREE.PointLight(0xd4d4d8, 2.5, 30);
+  rimLight.position.set(-6, -4, 5);
+  scene.add(rimLight);
 
-  const backGlow = new THREE.PointLight(0x71717a, 1.8, 30);
-  backGlow.position.set(0, -5, -4);
-  scene.add(backGlow);
+  const bottomCyberGlow = new THREE.PointLight(0x71717a, 2.0, 25);
+  bottomCyberGlow.position.set(0, -5, -4);
+  scene.add(bottomCyberGlow);
 
-  // Group container for all 3D topology elements
-  networkGroup = new THREE.Group();
-  scene.add(networkGroup);
+  // Group container for the entire Silicon Processor Assembly
+  processorGroup = new THREE.Group();
+  scene.add(processorGroup);
 
-  // 1. Definition of Network Topology Nodes (Microservices, DBs, Gateway)
-  const nodeDefinitions = [
-    { name: 'Gateway / Ingress', pos: new THREE.Vector3(0, 1.5, 0.2), color: 0xffffff, scale: 1.15 },
-    { name: 'Go Microservice A', pos: new THREE.Vector3(-1.8, 0.5, 0.9), color: 0xd4d4d8, scale: 1.0 },
-    { name: 'API Cluster B', pos: new THREE.Vector3(1.9, 0.4, -0.3), color: 0xd4d4d8, scale: 1.0 },
-    { name: 'PostgreSQL Primary', pos: new THREE.Vector3(-1.3, -1.3, -0.5), color: 0xa1a1aa, scale: 1.05 },
-    { name: 'Redis Cache Ring', pos: new THREE.Vector3(1.4, -1.4, 0.6), color: 0xffffff, scale: 0.95 },
-    { name: 'Event Stream / Queue', pos: new THREE.Vector3(0.1, -1.9, -0.9), color: 0x71717a, scale: 1.0 },
-    { name: 'Cloud Mesh Satellite', pos: new THREE.Vector3(0.8, 2.0, -0.8), color: 0xa1a1aa, scale: 0.9 },
+  // ==========================================
+  // 1. MULTI-LAYER DARK SUBSTRATE PCB BOARD
+  // ==========================================
+  const pcbWidth = 4.2;
+  const pcbDepth = 4.2;
+  const pcbHeight = 0.14;
+
+  const pcbGeom = new THREE.BoxGeometry(pcbWidth, pcbHeight, pcbDepth);
+  const pcbMat = new THREE.MeshStandardMaterial({
+    color: 0x101014,
+    roughness: 0.45,
+    metalness: 0.85,
+    emissive: 0x08080a,
+  });
+  const pcbMesh = new THREE.Mesh(pcbGeom, pcbMat);
+  processorGroup.add(pcbMesh);
+
+  // Gold / Silver Solder Pin Grid along PCB Edges
+  const pinCountPerEdge = 24;
+  const pinGeom = new THREE.BoxGeometry(0.06, 0.04, 0.14);
+  const pinMat = new THREE.MeshStandardMaterial({
+    color: 0xe4e4e7,
+    roughness: 0.2,
+    metalness: 0.95,
+  });
+
+  for (let i = 0; i < pinCountPerEdge; i++) {
+    const offset = -pcbWidth / 2 + 0.3 + (i * ((pcbWidth - 0.6) / (pinCountPerEdge - 1)));
+    
+    // Top & Bottom Edge Pins
+    const pinTop = new THREE.Mesh(pinGeom, pinMat);
+    pinTop.position.set(offset, pcbHeight / 2 + 0.01, -pcbDepth / 2 + 0.08);
+    processorGroup.add(pinTop);
+
+    const pinBottom = new THREE.Mesh(pinGeom, pinMat);
+    pinBottom.position.set(offset, pcbHeight / 2 + 0.01, pcbDepth / 2 - 0.08);
+    processorGroup.add(pinBottom);
+
+    // Left & Right Edge Pins
+    const pinLeft = new THREE.Mesh(pinGeom, pinMat);
+    pinLeft.rotation.y = Math.PI / 2;
+    pinLeft.position.set(-pcbWidth / 2 + 0.08, pcbHeight / 2 + 0.01, offset);
+    processorGroup.add(pinLeft);
+
+    const pinRight = new THREE.Mesh(pinGeom, pinMat);
+    pinRight.rotation.y = Math.PI / 2;
+    pinRight.position.set(pcbWidth / 2 - 0.08, pcbHeight / 2 + 0.01, offset);
+    processorGroup.add(pinRight);
+  }
+
+  // ==========================================
+  // 2. CENTRAL HEAT SPREADER & SILICON DIE
+  // ==========================================
+  const dieFrameGeom = new THREE.BoxGeometry(2.3, 0.18, 2.3);
+  const dieFrameMat = new THREE.MeshStandardMaterial({
+    color: 0x1c1c22,
+    roughness: 0.18,
+    metalness: 0.95,
+    emissive: 0x141418,
+  });
+  const dieFrame = new THREE.Mesh(dieFrameGeom, dieFrameMat);
+  dieFrame.position.y = pcbHeight / 2 + 0.09;
+  processorGroup.add(dieFrame);
+
+  // Beveled Metallic Retainer Ring (Socket Mount)
+  const socketGeom = new THREE.BoxGeometry(2.5, 0.08, 2.5);
+  const socketWireGeom = new THREE.EdgesGeometry(socketGeom);
+  const socketWireMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.4 });
+  const socketWire = new THREE.LineSegments(socketWireGeom, socketWireMat);
+  socketWire.position.y = pcbHeight / 2 + 0.04;
+  processorGroup.add(socketWire);
+
+  // 4 Silicon Logic Cores (Compute Core Engine Grid)
+  logicCores.length = 0;
+  const coreOffsets = [
+    { x: -0.52, z: -0.52, name: 'Compute Core 0' },
+    { x: 0.52, z: -0.52, name: 'Compute Core 1' },
+    { x: -0.52, z: 0.52, name: 'Neural Engine' },
+    { x: 0.52, z: 0.52, name: 'Vector Cache' },
   ];
 
-  nodes.length = 0;
-  nodeDefinitions.forEach((def, idx) => {
-    const nodeObj = new THREE.Group();
-    nodeObj.position.copy(def.pos);
-
-    // Node Server Chassis (Faceted Hexagonal / Octagonal Hub)
-    const chassisGeom = new THREE.CylinderGeometry(0.24 * def.scale, 0.28 * def.scale, 0.18 * def.scale, 8);
-    const chassisMat = new THREE.MeshStandardMaterial({
-      color: 0x18181b,
-      metalness: 0.9,
+  const coreGeom = new THREE.BoxGeometry(0.88, 0.06, 0.88);
+  coreOffsets.forEach((cfg) => {
+    const coreMat = new THREE.MeshStandardMaterial({
+      color: 0x27272a,
       roughness: 0.25,
-      emissive: 0x101014,
+      metalness: 0.9,
+      emissive: 0x3f3f46,
+      emissiveIntensity: 0.5,
     });
-    const chassisMesh = new THREE.Mesh(chassisGeom, chassisMat);
-    chassisMesh.rotation.x = Math.PI / 6;
-    nodeObj.add(chassisMesh);
+    const coreMesh = new THREE.Mesh(coreGeom, coreMat);
+    coreMesh.position.set(cfg.x, pcbHeight / 2 + 0.20, cfg.z);
+    processorGroup?.add(coreMesh);
+    logicCores.push(coreMesh);
 
-    // Glowing Status Collar / Rim
-    const collarGeom = new THREE.TorusGeometry(0.32 * def.scale, 0.018, 8, 32);
-    const collarMat = new THREE.MeshBasicMaterial({
-      color: def.color,
-      transparent: true,
-      opacity: 0.75,
-    });
-    const collarMesh = new THREE.Mesh(collarGeom, collarMat);
-    collarMesh.rotation.x = Math.PI / 2;
-    nodeObj.add(collarMesh);
-
-    // Pulsing LED Core (Network Heartbeat)
-    const ledGeom = new THREE.SphereGeometry(0.08 * def.scale, 12, 12);
-    const ledMat = new THREE.MeshBasicMaterial({
-      color: def.color,
-    });
-    const ledMesh = new THREE.Mesh(ledGeom, ledMat);
-    ledMesh.position.y = 0.12 * def.scale;
-    nodeObj.add(ledMesh);
-
-    networkGroup?.add(nodeObj);
-    nodes.push({
-      mesh: nodeObj,
-      lightMesh: ledMesh,
-      baseY: def.pos.y,
-      pulsePhase: idx * 0.8,
-      position: def.pos,
-    });
+    // Micro Core Surface Grid
+    const gridHelper = new THREE.GridHelper(0.85, 8, 0xffffff, 0x52525b);
+    gridHelper.position.set(cfg.x, pcbHeight / 2 + 0.232, cfg.z);
+    processorGroup?.add(gridHelper);
   });
 
-  // 2. Interconnected Cables (Physical Catmull-Rom 3D Fiber Tubes)
-  const connections = [
-    { from: 0, to: 1, sag: 0.35, color: 0xffffff }, // Gateway -> Go Microservice A
-    { from: 0, to: 2, sag: 0.42, color: 0xd4d4d8 }, // Gateway -> API Cluster B
-    { from: 1, to: 3, sag: 0.50, color: 0xffffff }, // Microservice A -> PostgreSQL
-    { from: 1, to: 4, sag: 0.38, color: 0xd4d4d8 }, // Microservice A -> Redis
-    { from: 2, to: 5, sag: 0.45, color: 0xa1a1aa }, // API Cluster B -> Event Stream
-    { from: 5, to: 3, sag: 0.32, color: 0x71717a }, // Event Stream -> PostgreSQL
-    { from: 6, to: 0, sag: 0.28, color: 0xffffff }, // Cloud Satellite -> Gateway
-    { from: 6, to: 2, sag: 0.40, color: 0xd4d4d8 }, // Cloud Satellite -> API B
-    { from: 1, to: 2, sag: 0.65, color: 0xffffff }, // Cross-Cluster Pod Link (A <-> B)
-    { from: 3, to: 4, sag: 0.45, color: 0xa1a1aa }, // DB <-> Redis Sync
+  // ==========================================
+  // 3. HBM MEMORY MODULES & SMD CAPACITORS
+  // ==========================================
+  // 4 High-Bandwidth Memory (HBM) Stacks
+  const hbmGeom = new THREE.BoxGeometry(0.72, 0.12, 0.44);
+  const hbmMat = new THREE.MeshStandardMaterial({
+    color: 0x18181b,
+    roughness: 0.35,
+    metalness: 0.85,
+    emissive: 0x09090b,
+  });
+
+  const hbmPositions = [
+    { x: 0, z: -1.55, rot: 0 },
+    { x: 0, z: 1.55, rot: 0 },
+    { x: -1.55, z: 0, rot: Math.PI / 2 },
+    { x: 1.55, z: 0, rot: Math.PI / 2 },
   ];
 
-  cables.length = 0;
-  connections.forEach((conn, cIdx) => {
-    const p1 = nodes[conn.from].position;
-    const p2 = nodes[conn.to].position;
+  hbmPositions.forEach((hPos) => {
+    const hbm = new THREE.Mesh(hbmGeom, hbmMat);
+    hbm.position.set(hPos.x, pcbHeight / 2 + 0.06, hPos.z);
+    hbm.rotation.y = hPos.rot;
+    processorGroup?.add(hbm);
 
-    // Realistic Cable Sag (catenary physics midpoint)
-    const mid = new THREE.Vector3().lerpVectors(p1, p2, 0.5);
-    mid.y -= conn.sag;
-    mid.z += (cIdx % 2 === 0 ? 0.2 : -0.25);
+    // Solder pads below HBM
+    const hbmWire = new THREE.LineSegments(
+      new THREE.EdgesGeometry(hbmGeom),
+      new THREE.LineBasicMaterial({ color: 0xd4d4d8, transparent: true, opacity: 0.35 })
+    );
+    hbmWire.position.copy(hbm.position);
+    hbmWire.rotation.copy(hbm.rotation);
+    processorGroup?.add(hbmWire);
+  });
 
-    const curve = new THREE.CatmullRomCurve3([p1, mid, p2]);
+  // SMD Capacitor Arrays (Miniature surface-mount components)
+  const capGeom = new THREE.BoxGeometry(0.08, 0.06, 0.14);
+  const capMat = new THREE.MeshStandardMaterial({
+    color: 0x71717a,
+    roughness: 0.3,
+    metalness: 0.9,
+  });
 
-    // Outer Physical Cable Tube (Dark Titanium Shielding)
-    const tubeGeom = new THREE.TubeGeometry(curve, 48, 0.038, 8, false);
-    const tubeMat = new THREE.MeshStandardMaterial({
-      color: 0x141417,
-      roughness: 0.35,
-      metalness: 0.85,
-      emissive: 0x09090b,
-    });
-    const tubeMesh = new THREE.Mesh(tubeGeom, tubeMat);
-    networkGroup?.add(tubeMesh);
+  // Banks of capacitors near HBM corners
+  const capCoords = [
+    [-1.5, -1.3], [-1.3, -1.5], [-1.5, -1.5],
+    [1.5, -1.3], [1.3, -1.5], [1.5, -1.5],
+    [-1.5, 1.3], [-1.3, 1.5], [-1.5, 1.5],
+    [1.5, 1.3], [1.3, 1.5], [1.5, 1.5],
+  ];
 
-    // Glowing Optical Centerline (Fiber-Optic Core)
-    const points = curve.getPoints(48);
-    const lineGeom = new THREE.BufferGeometry().setFromPoints(points);
-    const lineMat = new THREE.LineBasicMaterial({
-      color: conn.color,
+  capCoords.forEach(([cx, cz]) => {
+    const cap = new THREE.Mesh(capGeom, capMat);
+    cap.position.set(cx, pcbHeight / 2 + 0.03, cz);
+    processorGroup?.add(cap);
+  });
+
+  // ==========================================
+  // 4. CIRCUIT BUS HIGHWAYS & DATA PHOTONS
+  // ==========================================
+  circuitBuses.length = 0;
+  const rawBusRoutes = [
+    // Top routes from die to pins
+    [new THREE.Vector3(-0.6, 0.08, -1.15), new THREE.Vector3(-0.6, 0.08, -1.4), new THREE.Vector3(-0.9, 0.08, -1.7), new THREE.Vector3(-0.9, 0.08, -2.0)],
+    [new THREE.Vector3(0.6, 0.08, -1.15), new THREE.Vector3(0.6, 0.08, -1.4), new THREE.Vector3(0.9, 0.08, -1.7), new THREE.Vector3(0.9, 0.08, -2.0)],
+    // Bottom routes
+    [new THREE.Vector3(-0.6, 0.08, 1.15), new THREE.Vector3(-0.6, 0.08, 1.4), new THREE.Vector3(-0.9, 0.08, 1.7), new THREE.Vector3(-0.9, 0.08, 2.0)],
+    [new THREE.Vector3(0.6, 0.08, 1.15), new THREE.Vector3(0.6, 0.08, 1.4), new THREE.Vector3(0.9, 0.08, 1.7), new THREE.Vector3(0.9, 0.08, 2.0)],
+    // Left routes
+    [new THREE.Vector3(-1.15, 0.08, -0.6), new THREE.Vector3(-1.4, 0.08, -0.6), new THREE.Vector3(-1.7, 0.08, -0.9), new THREE.Vector3(-2.0, 0.08, -0.9)],
+    [new THREE.Vector3(-1.15, 0.08, 0.6), new THREE.Vector3(-1.4, 0.08, 0.6), new THREE.Vector3(-1.7, 0.08, 0.9), new THREE.Vector3(-2.0, 0.08, 0.9)],
+    // Right routes
+    [new THREE.Vector3(1.15, 0.08, -0.6), new THREE.Vector3(1.4, 0.08, -0.6), new THREE.Vector3(1.7, 0.08, -0.9), new THREE.Vector3(2.0, 0.08, -0.9)],
+    [new THREE.Vector3(1.15, 0.08, 0.6), new THREE.Vector3(1.4, 0.08, 0.6), new THREE.Vector3(1.7, 0.08, 0.9), new THREE.Vector3(2.0, 0.08, 0.9)],
+  ];
+
+  const photonGeom = new THREE.SphereGeometry(0.038, 8, 8);
+  const photonMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+  rawBusRoutes.forEach((pts) => {
+    const curvePoints: THREE.Vector3[] = [];
+    // Convert to relative y on PCB surface
+    pts.forEach(p => curvePoints.push(new THREE.Vector3(p.x, pcbHeight / 2 + 0.015, p.z)));
+
+    const busLineGeom = new THREE.BufferGeometry().setFromPoints(curvePoints);
+    const busLineMat = new THREE.LineBasicMaterial({
+      color: 0xffffff,
       transparent: true,
-      opacity: 0.35,
+      opacity: 0.45,
     });
-    const glowLine = new THREE.Line(lineGeom, lineMat);
-    networkGroup?.add(glowLine);
+    const busLine = new THREE.Line(busLineGeom, busLineMat);
+    processorGroup?.add(busLine);
 
-    // Flowing Data Packets (Glowing Light Pulses Traveling the Cable)
-    const packetCount = isMobile ? 1 : 2;
-    const packets = [];
-    for (let p = 0; p < packetCount; p++) {
-      const packetGeom = new THREE.SphereGeometry(0.052, 8, 8);
-      const packetMat = new THREE.MeshBasicMaterial({
-        color: conn.color,
-      });
-      const packetMesh = new THREE.Mesh(packetGeom, packetMat);
-      networkGroup?.add(packetMesh);
-      packets.push({
-        mesh: packetMesh,
-        speed: 0.45 + (cIdx % 3) * 0.15,
-        offset: p * 0.5 + (cIdx * 0.18),
-        color: conn.color,
-      });
-    }
+    // Traveling Data Photon along trace
+    const pulseMesh = new THREE.Mesh(photonGeom, photonMat);
+    processorGroup?.add(pulseMesh);
 
-    cables.push({
-      curve,
-      tubeMesh,
-      glowMesh: glowLine,
-      dataPackets: packets,
+    circuitBuses.push({
+      points: curvePoints,
+      pulses: [
+        { mesh: pulseMesh, progress: Math.random(), speed: 0.35 + Math.random() * 0.25 },
+      ],
     });
   });
 
-  // 3. Ambient Ambient Data Dust Field
-  const particleCount = isMobile ? 100 : 220;
+  // ==========================================
+  // 5. HOLOGRAPHIC SCANNER & HUD BRACKETS
+  // ==========================================
+  // Sweeping Laser Scan Plane over Die
+  const scanGeom = new THREE.PlaneGeometry(2.4, 0.06);
+  const scanMat = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.85,
+    side: THREE.DoubleSide,
+  });
+  laserScanBar = new THREE.Mesh(scanGeom, scanMat);
+  laserScanBar.rotation.x = Math.PI / 2;
+  laserScanBar.position.y = pcbHeight / 2 + 0.28;
+  processorGroup.add(laserScanBar);
+
+  // Floating Cyber HUD Corner Brackets
+  const hudBoxGeom = new THREE.BoxGeometry(2.6, 0.4, 2.6);
+  const hudEdges = new THREE.EdgesGeometry(hudBoxGeom);
+  const hudMat = new THREE.LineBasicMaterial({
+    color: 0xd4d4d8,
+    transparent: true,
+    opacity: 0.25,
+  });
+  hudBrackets = new THREE.LineSegments(hudEdges, hudMat);
+  hudBrackets.position.y = pcbHeight / 2 + 0.35;
+  processorGroup.add(hudBrackets);
+
+  // Ambient Silicon Micro-Data Particles
+  const particleCount = isMobile ? 120 : 250;
   const particleGeom = new THREE.BufferGeometry();
   const positions = new Float32Array(particleCount * 3);
   for (let i = 0; i < particleCount * 3; i += 3) {
-    positions[i] = (Math.random() - 0.5) * 22;
-    positions[i + 1] = (Math.random() - 0.5) * 18;
+    positions[i] = (Math.random() - 0.5) * 20;
+    positions[i + 1] = (Math.random() - 0.5) * 16;
     positions[i + 2] = (Math.random() - 0.5) * 14;
   }
   particleGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
@@ -324,13 +413,13 @@ onMounted(() => {
     color: 0xd4d4d8,
     size: 0.035,
     transparent: true,
-    opacity: 0.45,
+    opacity: 0.5,
   });
   dustParticles = new THREE.Points(particleGeom, dustMat);
   scene.add(dustParticles);
 
-  // Initial position in Hero Section
-  networkGroup.position.set(isMobile ? 0 : 2.5, isMobile ? 0.6 : 0.1, isMobile ? -3.2 : 0.2);
+  // Initial Position in Hero Section
+  processorGroup.position.set(isMobile ? 0 : 2.6, isMobile ? 0.6 : 0.1, isMobile ? -3.4 : 0.3);
 
   // Event Listeners
   window.addEventListener('scroll', updateScrollProgress, { passive: true });
@@ -344,7 +433,7 @@ onMounted(() => {
 
   function animate() {
     animationFrameId = requestAnimationFrame(animate);
-    if (!networkGroup || !scene || !camera || !renderer) return;
+    if (!processorGroup || !scene || !camera || !renderer) return;
 
     const elapsedTime = clock.getElapsedTime();
 
@@ -353,49 +442,68 @@ onMounted(() => {
     const wp = interpolateScroll(scrollProgress);
 
     // Apply target position with subtle mouse parallax
-    const pX = isMobile ? wp.x : wp.x + mouseX * 0.32;
-    const pY = isMobile ? wp.y : wp.y + mouseY * 0.22;
+    const pX = isMobile ? wp.x : wp.x + mouseX * 0.35;
+    const pY = isMobile ? wp.y : wp.y + mouseY * 0.25;
 
-    networkGroup.position.x += (pX - networkGroup.position.x) * 0.08;
-    networkGroup.position.y += (pY - networkGroup.position.y) * 0.08;
-    networkGroup.position.z += (wp.z - networkGroup.position.z) * 0.08;
+    processorGroup.position.x += (pX - processorGroup.position.x) * 0.08;
+    processorGroup.position.y += (pY - processorGroup.position.y) * 0.08;
+    processorGroup.position.z += (wp.z - processorGroup.position.z) * 0.08;
 
-    // Shockwave pulse decay
-    shockwaveScale += (1.0 - shockwaveScale) * 0.08;
-    const currentScale = networkGroup.scale.x;
-    const baseTargetScale = wp.scale * shockwaveScale;
-    const nextScale = currentScale + (baseTargetScale - currentScale) * 0.08;
-    networkGroup.scale.set(nextScale, nextScale, nextScale);
+    // Overclock Energy Burst Decay
+    overclockEnergy += (0 - overclockEnergy) * 0.05;
+    const baseScale = wp.scale * (1.0 + overclockEnergy * 0.15);
+    const currScale = processorGroup.scale.x;
+    const nextScale = currScale + (baseScale - currScale) * 0.08;
+    processorGroup.scale.set(nextScale, nextScale, nextScale);
 
-    // Continuous Cluster Rotation
-    const baseRotY = elapsedTime * 0.12 + wp.rotY;
-    const baseRotX = wp.rotX + (isMobile ? 0 : mouseY * 0.12);
-    networkGroup.rotation.y = baseRotY;
-    networkGroup.rotation.x = baseRotX;
+    // Isometric Rotation with Smooth Gimbal Tilt
+    const rotY = wp.rotY + (isMobile ? 0 : mouseX * 0.22);
+    const rotX = wp.rotX + (isMobile ? 0 : -mouseY * 0.18);
+    processorGroup.rotation.y += (rotY - processorGroup.rotation.y) * 0.08;
+    processorGroup.rotation.x += (rotX - processorGroup.rotation.x) * 0.08;
 
-    // Pulse Node LEDs & Micro-float
-    nodes.forEach((node) => {
-      const pulse = 0.8 + Math.sin(elapsedTime * 3.5 + node.pulsePhase) * 0.4;
-      node.lightMesh.scale.set(pulse, pulse, pulse);
-      node.mesh.position.y = node.baseY + Math.sin(elapsedTime * 1.5 + node.pulsePhase) * 0.04;
+    // 1. Logic Cores Pulsing Computation Glow
+    logicCores.forEach((core, cIdx) => {
+      const pulseRate = 3.5 + cIdx * 0.6;
+      const baseEmission = 0.45 + Math.sin(elapsedTime * pulseRate) * 0.25;
+      const totalEmission = baseEmission + overclockEnergy * 1.5;
+      (core.material as THREE.MeshStandardMaterial).emissiveIntensity = totalEmission;
     });
 
-    // Animate Flowing Data Packets on each cable
-    cables.forEach((cable) => {
-      cable.dataPackets.forEach((pkt) => {
-        const t = (elapsedTime * pkt.speed + pkt.offset) % 1.0;
-        const pt = cable.curve.getPointAt(t);
-        pkt.mesh.position.copy(pt);
+    // 2. Holographic Laser Scanner Sweep across Die
+    if (laserScanBar) {
+      const scanPos = Math.sin(elapsedTime * 1.8) * 1.05;
+      laserScanBar.position.z = scanPos;
+      // Pulse scanline opacity
+      (laserScanBar.material as THREE.MeshBasicMaterial).opacity = 0.55 + Math.cos(elapsedTime * 3.6) * 0.35;
+    }
 
-        // Flash packet scale as it approaches midpoint
-        const pulseScale = 0.9 + Math.sin(t * Math.PI) * 0.45;
-        pkt.mesh.scale.set(pulseScale, pulseScale, pulseScale);
+    // 3. Floating HUD Brackets Micro-Float
+    if (hudBrackets) {
+      hudBrackets.position.y = (pcbHeight / 2 + 0.35) + Math.sin(elapsedTime * 2.2) * 0.04;
+    }
+
+    // 4. Data Photons Racing Along Circuit Bus Traces
+    circuitBuses.forEach((bus) => {
+      bus.pulses.forEach((pulse) => {
+        pulse.progress = (pulse.progress + pulse.speed * 0.016) % 1.0;
+        
+        // Piecewise linear interpolation along the route points
+        const numSegments = bus.points.length - 1;
+        const segmentIndex = Math.min(Math.floor(pulse.progress * numSegments), numSegments - 1);
+        const segmentT = (pulse.progress * numSegments) - segmentIndex;
+        
+        const p1 = bus.points[segmentIndex];
+        const p2 = bus.points[segmentIndex + 1];
+        if (p1 && p2) {
+          pulse.mesh.position.lerpVectors(p1, p2, segmentT);
+        }
       });
     });
 
-    // Ambient space dust drift
+    // 5. Space Dust Drift
     if (dustParticles) {
-      dustParticles.rotation.y = elapsedTime * 0.015 + scrollProgress * 0.6;
+      dustParticles.rotation.y = elapsedTime * 0.018 + scrollProgress * 0.6;
       dustParticles.rotation.x = Math.sin(elapsedTime * 0.2) * 0.04;
     }
 
@@ -417,9 +525,9 @@ onUnmounted(() => {
     cancelAnimationFrame(animationFrameId);
   }
 
-  // Memory cleanup: dispose all WebGL geometries, materials, and renderer
-  if (networkGroup) {
-    networkGroup.traverse((child) => {
+  // Complete cleanup: dispose all WebGL geometries, materials, and renderer
+  if (processorGroup) {
+    processorGroup.traverse((child) => {
       if ((child as THREE.Mesh).isMesh || (child as THREE.Points).isPoints || (child as THREE.Line).isLine) {
         const mesh = child as THREE.Mesh;
         if (mesh.geometry) mesh.geometry.dispose();
