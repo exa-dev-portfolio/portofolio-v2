@@ -371,6 +371,7 @@ const totalExperienceYears = computed(() => {
         :user="user"
         :project-count="projects.length"
         :experience-years="totalExperienceYears"
+        :skills-count="skills.length"
       />
     </div>
 

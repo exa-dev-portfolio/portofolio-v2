@@ -7,6 +7,7 @@ const props = defineProps<{
   user?: UserSettingsModel
   projectCount?: number
   experienceYears?: number
+  skillsCount?: number
 }>()
 
 // Live Digital Clock for Jakarta (WIB / UTC+7)
@@ -107,7 +108,7 @@ const competencies = [
           @click="scrollTo('stack')"
           class="px-4 py-2.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-zinc-300 hover:text-white font-medium text-xs sm:text-sm transition-colors cursor-pointer"
         >
-          Tech Stack (29)
+          Tech Stack ({{ skillsCount || 0 }})
         </button>
 
         <button
@@ -202,7 +203,7 @@ const competencies = [
           </div>
 
           <div class="p-2.5 rounded-xl bg-black/40 border border-white/5 text-center">
-            <span class="text-lg font-bold text-white block tracking-tight">29</span>
+            <span class="text-lg font-bold text-white block tracking-tight">{{ skillsCount || 0 }}</span>
             <span class="text-[10px] text-zinc-400 block font-medium">Verified Tools</span>
           </div>
         </div>
