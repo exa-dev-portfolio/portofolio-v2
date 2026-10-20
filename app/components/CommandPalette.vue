@@ -129,11 +129,11 @@ defineExpose({
         @click.self="isOpen = false"
       >
         <!-- Command Dialog -->
-        <div class="w-full max-w-xl bg-[#0c1222] border border-white/15 rounded-2xl shadow-2xl overflow-hidden shadow-black/80">
+        <div class="w-full max-w-xl bg-[#08120c] border border-white/15 rounded-2xl shadow-2xl overflow-hidden shadow-black/80">
           
           <!-- Search Header -->
-          <div class="relative flex items-center px-4 py-3.5 border-b border-white/10 bg-[#090e1a]">
-            <Icon name="carbon:search" size="20" class="text-blue-400 shrink-0 mr-3" />
+          <div class="relative flex items-center px-4 py-3.5 border-b border-white/10 bg-[#050907]">
+            <Icon name="carbon:search" size="20" class="text-emerald-400 shrink-0 mr-3" />
             <input
               ref="searchInput"
               v-model="searchQuery"
@@ -154,12 +154,12 @@ defineExpose({
               @click="item.action(); isOpen = false"
               @mouseenter="selectedIndex = index"
               class="px-3.5 py-2.5 rounded-xl flex items-center justify-between cursor-pointer transition-colors"
-              :class="selectedIndex === index ? 'bg-blue-600/20 text-white border border-blue-500/30' : 'text-slate-300 hover:bg-white/[0.04] border border-transparent'"
+              :class="selectedIndex === index ? 'bg-emerald-500/15 text-white border border-emerald-500/30' : 'text-slate-300 hover:bg-white/[0.04] border border-transparent'"
             >
               <div class="flex items-center gap-3 min-w-0">
                 <div 
                   class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border"
-                  :class="selectedIndex === index ? 'bg-blue-500/20 border-blue-500/40 text-blue-300' : 'bg-white/[0.03] border-white/[0.06] text-slate-400'"
+                  :class="selectedIndex === index ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300' : 'bg-white/[0.03] border-white/[0.06] text-slate-400'"
                 >
                   <Icon :name="item.icon" size="18" />
                 </div>
@@ -183,7 +183,7 @@ defineExpose({
           </div>
 
           <!-- Dialog Footer Help Bar -->
-          <div class="px-4 py-2.5 bg-[#080d19] border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-slate-500">
+          <div class="px-4 py-2.5 bg-[#050907] border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-slate-500">
             <div class="flex items-center gap-3">
               <span><kbd class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-slate-400">↑</kbd> <kbd class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-slate-400">↓</kbd> Navigate</span>
               <span><kbd class="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-slate-400">↵</kbd> Select</span>

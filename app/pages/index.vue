@@ -217,11 +217,11 @@ useHead({
     // Additional SEO
     {
       name: "theme-color",
-      content: "#1e7fff",
+      content: "#10b981",
     },
     {
       name: "msapplication-TileColor",
-      content: "#1e7fff",
+      content: "#10b981",
     },
     {
       name: "apple-mobile-web-app-capable",

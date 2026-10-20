@@ -72,7 +72,7 @@ const getCategoryCount = (cat: string) => {
         :transition="{ duration: 0.45, ease: 'easeOut' }"
         class="text-center max-w-3xl mx-auto mb-10 sm:mb-12"
       >
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-mono mb-4">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono mb-4">
           <Icon name="carbon:code" size="14" />
           <span>TECH ECOSYSTEM</span>
         </div>
@@ -92,13 +92,13 @@ const getCategoryCount = (cat: string) => {
           @click="selectedCategory = cat"
           class="px-3.5 py-1.5 rounded-full text-xs font-medium tracking-wide transition-all duration-200 flex items-center gap-1.5 cursor-pointer"
           :class="selectedCategory === cat
-            ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm shadow-cyan-500/10'
+            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm shadow-emerald-500/10 font-medium'
             : 'bg-white/[0.03] text-slate-400 hover:text-white hover:bg-white/[0.06] border border-white/[0.06]'"
         >
           <span>{{ cat }}</span>
           <span
             class="text-[10px] px-1.5 py-0.2 rounded-full font-mono"
-            :class="selectedCategory === cat ? 'bg-cyan-500/30 text-cyan-200' : 'bg-white/10 text-slate-500'"
+            :class="selectedCategory === cat ? 'bg-emerald-500/30 text-emerald-200' : 'bg-white/10 text-slate-500'"
           >
             {{ getCategoryCount(cat) }}
           </span>
@@ -113,7 +113,7 @@ const getCategoryCount = (cat: string) => {
             v-model="searchQuery"
             type="text"
             placeholder="Search technologies (e.g. Vue, Go, Docker)..."
-            class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/50 focus:bg-white/[0.07] transition-all"
+            class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 focus:bg-emerald-950/20 transition-all"
           />
           <button
             v-if="searchQuery"
@@ -139,28 +139,28 @@ const getCategoryCount = (cat: string) => {
           @mousemove="onMouseMove"
           class="spotlight-card group rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center gap-3 cursor-pointer"
           :style="{
-            '--skill-color': skill.color || '#3b82f6',
+            '--skill-color': skill.color || '#10b981',
           }"
         >
           <!-- Subtle top color accent on hover -->
           <div 
             class="absolute top-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-            :style="{ backgroundColor: skill.color || '#38bdf8' }"
+            :style="{ backgroundColor: skill.color || '#10b981' }"
           ></div>
 
           <!-- Skill Icon Container with Halo -->
           <div
             class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-200 shadow-sm"
             :style="{
-              backgroundColor: `${skill.color || '#38bdf8'}14`,
-              border: `1px solid ${skill.color || '#38bdf8'}25`
+              backgroundColor: `${skill.color || '#10b981'}14`,
+              border: `1px solid ${skill.color || '#10b981'}25`
             }"
           >
             <Icon
               :name="skill.icon || 'carbon:code'"
               size="28"
               class="sm:size-8"
-              :style="{ color: skill.color || '#38bdf8' }"
+              :style="{ color: skill.color || '#10b981' }"
             />
           </div>
 
@@ -170,7 +170,7 @@ const getCategoryCount = (cat: string) => {
           </span>
 
           <!-- Subtle category pill badge on hover -->
-          <span class="text-[9px] font-mono text-slate-500 group-hover:text-cyan-400 transition-colors">
+          <span class="text-[9px] font-mono text-slate-500 group-hover:text-emerald-400 transition-colors">
             {{ resolveSkillCategory(skill) }}
           </span>
         </div>

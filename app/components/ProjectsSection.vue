@@ -28,15 +28,15 @@ interface Project {
 const getAppTypeBadge = (type?: string) => {
   switch (type) {
     case 'mobile':
-      return { label: 'Mobile App', icon: 'carbon:mobile', bgClass: 'bg-emerald-500/15 border border-emerald-500/30', textClass: 'text-emerald-400' }
+      return { label: 'Mobile App', icon: 'carbon:mobile', bgClass: 'bg-emerald-400/15 border border-emerald-400/30', textClass: 'text-emerald-300' }
     case 'web':
-      return { label: 'Web App', icon: 'carbon:application-web', bgClass: 'bg-blue-500/15 border border-blue-500/30', textClass: 'text-blue-400' }
+      return { label: 'Web App', icon: 'carbon:application-web', bgClass: 'bg-teal-500/15 border border-teal-500/30', textClass: 'text-teal-300' }
     case 'backend':
-      return { label: 'Backend / API', icon: 'carbon:server-proxy', bgClass: 'bg-indigo-500/15 border border-indigo-500/30', textClass: 'text-indigo-400' }
+      return { label: 'Backend / API', icon: 'carbon:server-proxy', bgClass: 'bg-emerald-500/15 border border-emerald-500/30', textClass: 'text-emerald-400' }
     case 'pos':
       return { label: 'POS / Kiosk', icon: 'carbon:store', bgClass: 'bg-amber-500/15 border border-amber-500/30', textClass: 'text-amber-400' }
     default:
-      return { label: 'Service / Tool', icon: 'carbon:cube', bgClass: 'bg-purple-500/15 border border-purple-500/30', textClass: 'text-purple-400' }
+      return { label: 'Service / Tool', icon: 'carbon:cube', bgClass: 'bg-teal-600/15 border border-teal-600/30', textClass: 'text-teal-400' }
   }
 }
 
@@ -122,7 +122,7 @@ const copyToClipboard = (text?: string) => {
         :transition="{ duration: 0.45, ease: 'easeOut' }"
         class="text-center max-w-3xl mx-auto mb-10 sm:mb-12"
       >
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-mono mb-4">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono mb-4">
           <Icon name="carbon:application-web" size="14" />
           <span>PORTFOLIO SHOWCASE</span>
         </div>
@@ -149,11 +149,11 @@ const copyToClipboard = (text?: string) => {
           }"
           @click="openProjectModal(project)"
           @mousemove="onMouseMove"
-          class="spotlight-card group rounded-3xl overflow-hidden cursor-pointer flex flex-col justify-between"
+          class="spotlight-card group rounded-3xl overflow-hidden cursor-pointer flex flex-col justify-between border border-white/[0.08] hover:border-emerald-500/40"
         >
           <!-- Browser Mockup Window Frame -->
           <div>
-            <div class="px-4 py-2.5 bg-[#0a0f1d] border-b border-white/[0.08] flex items-center justify-between">
+            <div class="px-4 py-2.5 bg-[#08120c] border-b border-white/[0.08] flex items-center justify-between">
               <!-- Window dots -->
               <div class="flex items-center gap-1.5">
                 <div class="w-2.5 h-2.5 rounded-full bg-[#ff5f56]/80"></div>
@@ -177,16 +177,16 @@ const copyToClipboard = (text?: string) => {
               </span>
               <span
                 v-else-if="project.is_organization"
-                class="inline-flex items-center gap-1 text-[10px] font-mono text-purple-400"
+                class="inline-flex items-center gap-1 text-[10px] font-mono text-teal-400"
               >
-                <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+                <span class="w-1.5 h-1.5 rounded-full bg-teal-400"></span>
                 <span>ECOSYSTEM</span>
               </span>
               <span v-else class="text-[10px] font-mono text-slate-500">CASE</span>
             </div>
 
             <!-- Project Banner Image -->
-            <div class="relative w-full aspect-[16/9] overflow-hidden bg-slate-950 flex items-center justify-center">
+            <div class="relative w-full aspect-[16/9] overflow-hidden bg-[#060c08] flex items-center justify-center">
               <NuxtImg
                 :src="project.image || '/images/project-preview.webp'"
                 :alt="project.title"
@@ -195,14 +195,14 @@ const copyToClipboard = (text?: string) => {
                 width="600"
                 height="340"
               />
-              <div class="absolute inset-0 bg-gradient-to-t from-[#0d1424] via-[#0d1424]/10 to-transparent pointer-events-none"></div>
+              <div class="absolute inset-0 bg-gradient-to-t from-[#08120c] via-[#08120c]/10 to-transparent pointer-events-none"></div>
 
               <!-- Org / Multi-App Badge overlay -->
               <div
                 v-if="project.is_organization"
-                class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#090e1a]/90 backdrop-blur-md border border-purple-500/40 text-[11px] font-mono font-medium text-purple-300 shadow-lg flex items-center gap-1.5"
+                class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#060d08]/90 backdrop-blur-md border border-teal-500/40 text-[11px] font-mono font-medium text-teal-300 shadow-lg flex items-center gap-1.5"
               >
-                <Icon name="carbon:enterprise" size="13" class="text-purple-400" />
+                <Icon name="carbon:enterprise" size="13" class="text-teal-400" />
                 <span>Suite &middot; {{ project.sub_apps?.length || 0 }} Apps</span>
               </div>
 
@@ -217,11 +217,11 @@ const copyToClipboard = (text?: string) => {
           <div class="p-5 sm:p-6 flex-1 flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between gap-2 mb-1.5">
-                <h3 class="text-xl font-heading font-bold text-white group-hover:text-blue-400 transition-colors truncate flex items-center gap-2">
+                <h3 class="text-xl font-heading font-bold text-white group-hover:text-emerald-300 transition-colors truncate flex items-center gap-2">
                   <span>{{ project.title }}</span>
                   <span
                     v-if="project.is_organization"
-                    class="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-purple-500/20 text-purple-300 border border-purple-500/30 shrink-0"
+                    class="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-teal-500/20 text-teal-300 border border-teal-500/30 shrink-0"
                     title="GitHub Organization Suite"
                   >
                     ORG
@@ -240,7 +240,7 @@ const copyToClipboard = (text?: string) => {
                 <span
                   v-for="tech in project.technologies.slice(0, 3)"
                   :key="tech"
-                  class="px-2 py-0.5 rounded-md text-[11px] font-mono font-medium bg-blue-500/10 text-blue-300 border border-blue-500/20"
+                  class="px-2 py-0.5 rounded-md text-[11px] font-mono font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/20"
                 >
                   {{ tech }}
                 </span>
@@ -252,7 +252,7 @@ const copyToClipboard = (text?: string) => {
                 </span>
               </div>
 
-              <span class="text-xs font-mono text-blue-400 group-hover:translate-x-1 transition-transform flex items-center gap-1 shrink-0">
+              <span class="text-xs font-mono text-emerald-400 group-hover:translate-x-1 transition-transform flex items-center gap-1 shrink-0">
                 <span>Details</span>
                 <Icon name="carbon:chevron-right" size="14" />
               </span>
@@ -267,15 +267,15 @@ const copyToClipboard = (text?: string) => {
     <UModal
       v-model:open="isModalOpen"
       :ui="{
-        content: 'w-full max-w-4xl bg-[#090e1a] border border-white/15 shadow-2xl rounded-3xl overflow-hidden',
-        header: 'p-5 sm:p-8 bg-[#0c1424] border-b border-white/10',
+        content: 'w-full max-w-4xl bg-[#060c08] border border-emerald-500/30 shadow-2xl rounded-3xl overflow-hidden',
+        header: 'p-5 sm:p-8 bg-[#09130c] border-b border-white/10',
         body: 'p-4 sm:p-8 max-h-[75vh] sm:max-h-[70vh] overflow-y-auto',
-        footer: 'p-4 sm:p-6 bg-[#0c1424] border-t border-white/10'
+        footer: 'p-4 sm:p-6 bg-[#09130c] border-t border-white/10'
       }"
     >
       <template #title>
         <div class="flex flex-col gap-1">
-          <span class="text-xs font-mono text-blue-400 uppercase tracking-wider">PROJECT ARCHITECTURE DEEP DIVE</span>
+          <span class="text-xs font-mono text-emerald-400 uppercase tracking-wider">PROJECT ARCHITECTURE DEEP DIVE</span>
           <h2 class="text-2xl sm:text-3xl font-heading font-black text-white">
             {{ selectedProject?.title }}
           </h2>
@@ -303,8 +303,8 @@ const copyToClipboard = (text?: string) => {
                 <!-- Top Floating Pill Badges -->
                 <div class="absolute top-3 sm:top-4 inset-x-3 sm:inset-x-4 flex items-center justify-between pointer-events-none">
                   <div class="flex items-center gap-2">
-                    <span class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-slate-950/80 backdrop-blur-md border border-white/20 text-[11px] sm:text-xs font-mono font-medium text-blue-300 shadow-lg">
-                      <Icon name="carbon:screen" size="14" class="text-blue-400" />
+                    <span class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-slate-950/80 backdrop-blur-md border border-white/20 text-[11px] sm:text-xs font-mono font-medium text-emerald-300 shadow-lg">
+                      <Icon name="carbon:screen" size="14" class="text-emerald-400" />
                       <span>{{ activeSlide?.title || 'Feature Preview' }}</span>
                     </span>
                   </div>
@@ -318,14 +318,14 @@ const copyToClipboard = (text?: string) => {
                 <div v-if="modalSlides.length > 1" class="absolute inset-y-0 inset-x-2 sm:inset-x-3 flex items-center justify-between pointer-events-none">
                   <button
                     @click.stop="prevSlide"
-                    class="pointer-events-auto w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-950/80 hover:bg-blue-600/90 text-white/80 hover:text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-lg hover:scale-110 active:scale-95"
+                    class="pointer-events-auto w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-950/80 hover:bg-emerald-600/90 text-white/80 hover:text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-lg hover:scale-110 active:scale-95"
                     title="Previous image"
                   >
                     <Icon name="carbon:chevron-left" size="18" />
                   </button>
                   <button
                     @click.stop="nextSlide"
-                    class="pointer-events-auto w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-950/80 hover:bg-blue-600/90 text-white/80 hover:text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-lg hover:scale-110 active:scale-95"
+                    class="pointer-events-auto w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-950/80 hover:bg-emerald-600/90 text-white/80 hover:text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-lg hover:scale-110 active:scale-95"
                     title="Next image"
                   >
                     <Icon name="carbon:chevron-right" size="18" />
@@ -336,9 +336,9 @@ const copyToClipboard = (text?: string) => {
               <!-- Dedicated Bottom Caption Bar (Positioned BELOW the image, NEVER covers it) -->
               <div
                 v-if="activeSlide?.caption"
-                class="p-3.5 sm:p-4 bg-[#0a0f1d] border-t border-white/10 flex items-start gap-2.5"
+                class="p-3.5 sm:p-4 bg-[#071109] border-t border-white/10 flex items-start gap-2.5"
               >
-                <Icon name="carbon:information-filled" size="16" class="text-blue-400 shrink-0 mt-0.5" />
+                <Icon name="carbon:information-filled" size="16" class="text-emerald-400 shrink-0 mt-0.5" />
                 <p class="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
                   {{ activeSlide.caption }}
                 </p>
@@ -353,7 +353,7 @@ const copyToClipboard = (text?: string) => {
                 @click="setSlide(sIdx)"
                 class="relative w-20 sm:w-24 aspect-[16/9] rounded-xl overflow-hidden bg-slate-950 border transition-all duration-200 shrink-0 cursor-pointer focus:outline-none flex items-center justify-center"
                 :class="activeSlideIndex === sIdx
-                  ? 'border-blue-500 ring-2 ring-blue-500/40 opacity-100 scale-102 shadow-md shadow-blue-500/20'
+                  ? 'border-emerald-500 ring-2 ring-emerald-500/40 opacity-100 scale-102 shadow-md shadow-emerald-500/20'
                   : 'border-white/10 opacity-50 hover:opacity-100 hover:border-white/30'"
                 :title="slide.title || `Slide ${sIdx + 1}`"
               >
@@ -364,7 +364,7 @@ const copyToClipboard = (text?: string) => {
                 />
                 <span
                   v-if="sIdx === 0"
-                  class="absolute top-1 left-1 px-1 rounded bg-black/70 text-[9px] font-mono text-blue-300"
+                  class="absolute top-1 left-1 px-1 rounded bg-black/70 text-[9px] font-mono text-emerald-300"
                 >
                   Cover
                 </span>
@@ -375,7 +375,7 @@ const copyToClipboard = (text?: string) => {
           <!-- Quick Metrics Bar -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div class="p-4 rounded-xl bg-white/[0.03] border border-white/10 flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
+              <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
                 <Icon name="carbon:code" size="20" />
               </div>
               <div>
@@ -385,7 +385,7 @@ const copyToClipboard = (text?: string) => {
             </div>
 
             <div class="p-4 rounded-xl bg-white/[0.03] border border-white/10 flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shrink-0">
+              <div class="w-10 h-10 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400 shrink-0">
                 <Icon name="carbon:star" size="20" />
               </div>
               <div>
@@ -411,17 +411,17 @@ const copyToClipboard = (text?: string) => {
           <!-- Organization Suite Header (if is_organization) -->
           <div
             v-if="selectedProject?.is_organization"
-            class="p-5 rounded-2xl bg-gradient-to-r from-purple-950/40 via-[#0d1424] to-blue-950/30 border border-purple-500/30 shadow-xl"
+            class="p-5 rounded-2xl bg-gradient-to-r from-teal-950/40 via-[#071109] to-emerald-950/30 border border-teal-500/30 shadow-xl"
           >
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div class="flex items-center gap-3.5">
-                <div class="w-12 h-12 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300 shrink-0 shadow-inner">
+                <div class="w-12 h-12 rounded-xl bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-300 shrink-0 shadow-inner">
                   <Icon name="carbon:enterprise" size="24" />
                 </div>
                 <div>
                   <div class="flex items-center gap-2">
-                    <span class="text-[11px] font-mono uppercase tracking-wider text-purple-400 font-semibold">GitHub Organization Ecosystem</span>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                    <span class="text-[11px] font-mono uppercase tracking-wider text-teal-400 font-semibold">GitHub Organization Ecosystem</span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-teal-500/20 text-teal-300 border border-teal-500/30">
                       {{ selectedProject?.sub_apps?.length || 0 }} Applications
                     </span>
                   </div>
@@ -449,7 +449,7 @@ const copyToClipboard = (text?: string) => {
           <div v-if="selectedProject?.sub_apps?.length" class="space-y-3">
             <div class="flex items-center justify-between">
               <h3 class="text-sm font-mono uppercase text-slate-400 tracking-wider flex items-center gap-2">
-                <Icon name="carbon:apps" size="16" class="text-purple-400" />
+                <Icon name="carbon:apps" size="16" class="text-teal-400" />
                 <span>Ecosystem Applications ({{ selectedProject.sub_apps.length }})</span>
               </h3>
               <span class="text-xs text-slate-400 font-mono">Multi-App Architecture</span>
@@ -459,7 +459,7 @@ const copyToClipboard = (text?: string) => {
               <div
                 v-for="(app, aIdx) in selectedProject.sub_apps"
                 :key="aIdx"
-                class="p-4 rounded-2xl bg-white/[0.025] hover:bg-white/[0.045] border border-white/10 hover:border-purple-500/40 transition-all duration-200 flex flex-col justify-between group/app"
+                class="p-4 rounded-2xl bg-white/[0.025] hover:bg-white/[0.045] border border-white/10 hover:border-teal-500/40 transition-all duration-200 flex flex-col justify-between group/app"
               >
                 <div>
                   <div class="flex items-start justify-between gap-3 mb-2">
@@ -468,7 +468,7 @@ const copyToClipboard = (text?: string) => {
                         <Icon :name="getAppTypeBadge(app.app_type || app.type).icon" size="18" :class="getAppTypeBadge(app.app_type || app.type).textClass" />
                       </div>
                       <div>
-                        <h4 class="text-sm font-bold text-white group-hover/app:text-purple-300 transition-colors">
+                        <h4 class="text-sm font-bold text-white group-hover/app:text-teal-300 transition-colors">
                           {{ app.name }}
                         </h4>
                         <span class="text-[10px] font-mono text-slate-400 uppercase">
@@ -512,7 +512,7 @@ const copyToClipboard = (text?: string) => {
                     :href="app.live_url || app.demo_url"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="px-3 py-1.5 rounded-lg bg-blue-600/30 hover:bg-blue-600/50 border border-blue-500/40 text-xs font-mono text-blue-300 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
+                    class="px-3 py-1.5 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/50 border border-emerald-500/40 text-xs font-mono text-emerald-300 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
                     title="Launch Live Demo"
                   >
                     <Icon name="carbon:launch" size="14" />
@@ -526,7 +526,7 @@ const copyToClipboard = (text?: string) => {
           <!-- Project Overview Description -->
           <div>
             <h3 class="text-sm font-mono uppercase text-slate-400 tracking-wider mb-2 flex items-center gap-2">
-              <Icon name="carbon:align-box-top-left" size="16" class="text-blue-400" />
+              <Icon name="carbon:align-box-top-left" size="16" class="text-emerald-400" />
               <span>Project Architecture & Overview</span>
             </h3>
             <div class="p-5 rounded-2xl bg-white/[0.02] border border-white/10">
@@ -557,14 +557,14 @@ const copyToClipboard = (text?: string) => {
           <!-- Tech Stack Badges -->
           <div v-if="selectedProject?.technologies?.length">
             <h3 class="text-sm font-mono uppercase text-slate-400 tracking-wider mb-3 flex items-center gap-2">
-              <Icon name="carbon:terminal" size="16" class="text-cyan-400" />
+              <Icon name="carbon:terminal" size="16" class="text-teal-400" />
               <span>Built With</span>
             </h3>
             <div class="flex flex-wrap gap-2 p-4 rounded-2xl bg-white/[0.02] border border-white/10">
               <span
                 v-for="tech in selectedProject?.technologies"
                 :key="tech"
-                class="px-3 py-1.5 rounded-lg text-xs font-mono font-medium bg-blue-500/10 text-blue-300 border border-blue-500/30"
+                class="px-3 py-1.5 rounded-lg text-xs font-mono font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/30"
               >
                 {{ tech }}
               </span>
@@ -572,13 +572,13 @@ const copyToClipboard = (text?: string) => {
           </div>
 
           <!-- Live Preview Link Bar -->
-          <div v-if="selectedProject?.liveUrl" class="p-4 rounded-2xl bg-blue-500/5 border border-blue-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div v-if="selectedProject?.liveUrl" class="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
+              <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
                 <Icon name="carbon:link" size="20" />
               </div>
               <div class="min-w-0">
-                <p class="text-[10px] font-mono uppercase text-blue-300">Live URL</p>
+                <p class="text-[10px] font-mono uppercase text-emerald-300">Live URL</p>
                 <p class="text-xs font-mono text-slate-300 truncate max-w-xs sm:max-w-md">{{ selectedProject.liveUrl }}</p>
               </div>
             </div>

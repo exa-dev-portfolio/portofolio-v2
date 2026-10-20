@@ -24,11 +24,12 @@ let resizeObserver: ResizeObserver | null = null
 
 // Pre-rendered offscreen particle colors for GPU blitting
 const SPRITE_COLORS = [
-  { inner: 'rgba(255, 255, 255, 1)', mid: 'rgba(56, 189, 248, 0.9)', outer: 'rgba(56, 189, 248, 0)' }, // Bright Cyan
-  { inner: 'rgba(255, 255, 255, 1)', mid: 'rgba(96, 165, 250, 0.9)', outer: 'rgba(59, 130, 246, 0)' },  // Electric Blue
-  { inner: 'rgba(255, 255, 255, 1)', mid: 'rgba(251, 191, 36, 0.95)', outer: 'rgba(245, 158, 11, 0)' },  // Fiery Amber
-  { inner: 'rgba(255, 255, 255, 1)', mid: 'rgba(192, 132, 252, 0.85)', outer: 'rgba(147, 51, 234, 0)' }, // Violet Plasma
+  { inner: 'rgba(255, 255, 255, 1)', mid: 'rgba(52, 211, 153, 0.9)', outer: 'rgba(52, 211, 153, 0)' }, // Luminous Mint
+  { inner: 'rgba(255, 255, 255, 1)', mid: 'rgba(16, 185, 129, 0.9)', outer: 'rgba(16, 185, 129, 0)' },  // Cyber Emerald
+  { inner: 'rgba(255, 255, 255, 1)', mid: 'rgba(45, 212, 191, 0.95)', outer: 'rgba(20, 184, 166, 0)' },  // Radiant Teal
+  { inner: 'rgba(255, 255, 255, 1)', mid: 'rgba(110, 231, 183, 0.85)', outer: 'rgba(5, 150, 105, 0)' }, // Pale Mint Glow
 ]
+
 
 const PARTICLE_COUNT = 34
 let particles: Particle[] = []
@@ -94,12 +95,12 @@ onMounted(() => {
   let dpr = 1
 
   // Pre-cached linear gradients along the full screen width
-  let strokeGradCyan: CanvasGradient | null = null
-  let strokeGradBlue: CanvasGradient | null = null
-  let strokeGradAmber: CanvasGradient | null = null
-  let strokeGradViolet: CanvasGradient | null = null
-  let fillGradCyan: CanvasGradient | null = null
-  let fillGradBlue: CanvasGradient | null = null
+  let strokeGradEmerald: CanvasGradient | null = null
+  let strokeGradMint: CanvasGradient | null = null
+  let strokeGradTeal: CanvasGradient | null = null
+  let strokeGradCyber: CanvasGradient | null = null
+  let fillGradEmerald: CanvasGradient | null = null
+  let fillGradMint: CanvasGradient | null = null
 
   function resize() {
     if (!container || !canvas || !ctx) return
@@ -113,47 +114,47 @@ onMounted(() => {
     canvas.height = Math.floor(height * dpr)
 
     // Horizontal full-width gradients: enters at left, brilliant across middle, dissolves at right
-    strokeGradCyan = ctx.createLinearGradient(0, 0, width, 0)
-    strokeGradCyan.addColorStop(0, 'rgba(6, 182, 212, 0.1)')
-    strokeGradCyan.addColorStop(0.12, 'rgba(6, 182, 212, 0.55)')
-    strokeGradCyan.addColorStop(0.45, 'rgba(56, 189, 248, 0.95)')
-    strokeGradCyan.addColorStop(0.82, 'rgba(59, 130, 246, 0.45)')
-    strokeGradCyan.addColorStop(1, 'rgba(59, 130, 246, 0)')
+    strokeGradEmerald = ctx.createLinearGradient(0, 0, width, 0)
+    strokeGradEmerald.addColorStop(0, 'rgba(16, 185, 129, 0.08)')
+    strokeGradEmerald.addColorStop(0.12, 'rgba(16, 185, 129, 0.55)')
+    strokeGradEmerald.addColorStop(0.45, 'rgba(52, 211, 153, 0.95)')
+    strokeGradEmerald.addColorStop(0.82, 'rgba(20, 184, 166, 0.45)')
+    strokeGradEmerald.addColorStop(1, 'rgba(20, 184, 166, 0)')
 
-    strokeGradBlue = ctx.createLinearGradient(0, 0, width, 0)
-    strokeGradBlue.addColorStop(0, 'rgba(59, 130, 246, 0.08)')
-    strokeGradBlue.addColorStop(0.15, 'rgba(59, 130, 246, 0.45)')
-    strokeGradBlue.addColorStop(0.50, 'rgba(99, 102, 241, 0.85)')
-    strokeGradBlue.addColorStop(0.85, 'rgba(147, 51, 234, 0.35)')
-    strokeGradBlue.addColorStop(1, 'rgba(147, 51, 234, 0)')
+    strokeGradMint = ctx.createLinearGradient(0, 0, width, 0)
+    strokeGradMint.addColorStop(0, 'rgba(52, 211, 153, 0.06)')
+    strokeGradMint.addColorStop(0.15, 'rgba(52, 211, 153, 0.50)')
+    strokeGradMint.addColorStop(0.50, 'rgba(110, 231, 183, 0.92)')
+    strokeGradMint.addColorStop(0.85, 'rgba(16, 185, 129, 0.35)')
+    strokeGradMint.addColorStop(1, 'rgba(16, 185, 129, 0)')
 
-    strokeGradAmber = ctx.createLinearGradient(0, 0, width, 0)
-    strokeGradAmber.addColorStop(0, 'rgba(251, 191, 36, 0.05)')
-    strokeGradAmber.addColorStop(0.20, 'rgba(251, 191, 36, 0.45)')
-    strokeGradAmber.addColorStop(0.52, 'rgba(251, 191, 36, 0.92)')
-    strokeGradAmber.addColorStop(0.80, 'rgba(56, 189, 248, 0.45)')
-    strokeGradAmber.addColorStop(1, 'rgba(56, 189, 248, 0)')
+    strokeGradTeal = ctx.createLinearGradient(0, 0, width, 0)
+    strokeGradTeal.addColorStop(0, 'rgba(20, 184, 166, 0.05)')
+    strokeGradTeal.addColorStop(0.20, 'rgba(20, 184, 166, 0.45)')
+    strokeGradTeal.addColorStop(0.52, 'rgba(45, 212, 191, 0.92)')
+    strokeGradTeal.addColorStop(0.80, 'rgba(52, 211, 153, 0.45)')
+    strokeGradTeal.addColorStop(1, 'rgba(52, 211, 153, 0)')
 
-    strokeGradViolet = ctx.createLinearGradient(0, 0, width, 0)
-    strokeGradViolet.addColorStop(0, 'rgba(168, 85, 247, 0.05)')
-    strokeGradViolet.addColorStop(0.22, 'rgba(168, 85, 247, 0.35)')
-    strokeGradViolet.addColorStop(0.60, 'rgba(192, 132, 252, 0.75)')
-    strokeGradViolet.addColorStop(0.90, 'rgba(59, 130, 246, 0.2)')
-    strokeGradViolet.addColorStop(1, 'rgba(59, 130, 246, 0)')
+    strokeGradCyber = ctx.createLinearGradient(0, 0, width, 0)
+    strokeGradCyber.addColorStop(0, 'rgba(5, 150, 105, 0.05)')
+    strokeGradCyber.addColorStop(0.22, 'rgba(16, 185, 129, 0.35)')
+    strokeGradCyber.addColorStop(0.60, 'rgba(52, 211, 153, 0.75)')
+    strokeGradCyber.addColorStop(0.90, 'rgba(45, 212, 191, 0.2)')
+    strokeGradCyber.addColorStop(1, 'rgba(45, 212, 191, 0)')
 
-    fillGradCyan = ctx.createLinearGradient(0, 0, width, 0)
-    fillGradCyan.addColorStop(0, 'rgba(6, 182, 212, 0.04)')
-    fillGradCyan.addColorStop(0.20, 'rgba(6, 182, 212, 0.08)')
-    fillGradCyan.addColorStop(0.50, 'rgba(56, 189, 248, 0.04)')
-    fillGradCyan.addColorStop(0.85, 'rgba(59, 130, 246, 0.01)')
-    fillGradCyan.addColorStop(1, 'rgba(59, 130, 246, 0)')
+    fillGradEmerald = ctx.createLinearGradient(0, 0, width, 0)
+    fillGradEmerald.addColorStop(0, 'rgba(16, 185, 129, 0.04)')
+    fillGradEmerald.addColorStop(0.20, 'rgba(16, 185, 129, 0.08)')
+    fillGradEmerald.addColorStop(0.50, 'rgba(52, 211, 153, 0.04)')
+    fillGradEmerald.addColorStop(0.85, 'rgba(20, 184, 166, 0.01)')
+    fillGradEmerald.addColorStop(1, 'rgba(20, 184, 166, 0)')
 
-    fillGradBlue = ctx.createLinearGradient(0, 0, width, 0)
-    fillGradBlue.addColorStop(0, 'rgba(59, 130, 246, 0.03)')
-    fillGradBlue.addColorStop(0.22, 'rgba(59, 130, 246, 0.06)')
-    fillGradBlue.addColorStop(0.52, 'rgba(99, 102, 241, 0.03)')
-    fillGradBlue.addColorStop(0.85, 'rgba(147, 51, 234, 0.01)')
-    fillGradBlue.addColorStop(1, 'rgba(147, 51, 234, 0)')
+    fillGradMint = ctx.createLinearGradient(0, 0, width, 0)
+    fillGradMint.addColorStop(0, 'rgba(52, 211, 153, 0.03)')
+    fillGradMint.addColorStop(0.22, 'rgba(52, 211, 153, 0.06)')
+    fillGradMint.addColorStop(0.52, 'rgba(110, 231, 183, 0.03)')
+    fillGradMint.addColorStop(0.85, 'rgba(16, 185, 129, 0.01)')
+    fillGradMint.addColorStop(1, 'rgba(16, 185, 129, 0)')
   }
 
   resize()
@@ -199,8 +200,8 @@ onMounted(() => {
     const layers = [
       {
         baseOffset: -32,
-        strokeGrad: strokeGradBlue,
-        fillGrad: fillGradBlue,
+        strokeGrad: strokeGradMint,
+        fillGrad: fillGradMint,
         bloomWidth: 10,
         coreWidth: 1.5,
         bloomAlpha: 0.18,
@@ -208,8 +209,8 @@ onMounted(() => {
       },
       {
         baseOffset: -6,
-        strokeGrad: strokeGradCyan,
-        fillGrad: fillGradCyan,
+        strokeGrad: strokeGradEmerald,
+        fillGrad: fillGradEmerald,
         bloomWidth: 12,
         coreWidth: 2.0,
         bloomAlpha: 0.25,
@@ -217,7 +218,7 @@ onMounted(() => {
       },
       {
         baseOffset: 18,
-        strokeGrad: strokeGradAmber,
+        strokeGrad: strokeGradTeal,
         fillGrad: null,
         bloomWidth: 8,
         coreWidth: 1.5,
@@ -226,7 +227,7 @@ onMounted(() => {
       },
       {
         baseOffset: 42,
-        strokeGrad: strokeGradViolet,
+        strokeGrad: strokeGradCyber,
         fillGrad: null,
         bloomWidth: 8,
         coreWidth: 1.2,
@@ -234,6 +235,7 @@ onMounted(() => {
         coreAlpha: 0.55,
       },
     ]
+
 
     const stepSize = 18 // tight horizontal sampling for buttery smooth curves
     const startX = -40

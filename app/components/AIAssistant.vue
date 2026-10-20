@@ -128,15 +128,15 @@ const toggleChat = () => {
     >
       <div
         v-show="isOpen"
-        class="w-[calc(100vw-2rem)] sm:w-[380px] bg-[#0c1222] border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+        class="w-[calc(100vw-2rem)] sm:w-[380px] bg-[#08120c] border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col"
         style="max-height: calc(100vh - 7rem); height: min(560px, calc(100vh - 7rem))"
       >
         <!-- Header -->
-        <div class="px-5 py-3.5 bg-[#0e1628] border-b border-white/10 flex items-center justify-between">
+        <div class="px-5 py-3.5 bg-[#0a150f] border-b border-white/10 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <div class="relative w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 p-[1px] shadow-sm">
-              <div class="w-full h-full bg-[#080d19] rounded-[11px] flex items-center justify-center">
-                <Icon name="carbon:bot" size="18" class="text-blue-400" />
+            <div class="relative w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 p-[1px] shadow-sm">
+              <div class="w-full h-full bg-[#050807] rounded-[11px] flex items-center justify-center">
+                <Icon name="carbon:bot" size="18" class="text-emerald-400" />
               </div>
             </div>
             <div>
@@ -162,7 +162,7 @@ const toggleChat = () => {
         <!-- Messages Area -->
         <div
           ref="messagesContainer"
-          class="flex-1 overflow-y-auto p-4 space-y-3.5 bg-[#080d19]"
+          class="flex-1 overflow-y-auto p-4 space-y-3.5 bg-[#050807]"
         >
           <div
             v-for="message in messages"
@@ -174,8 +174,8 @@ const toggleChat = () => {
           >
             <!-- Assistant Bubble -->
             <div v-if="message.type === 'assistant'" class="flex gap-2.5 max-w-[88%]">
-              <div class="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                <Icon name="carbon:bot" size="14" class="text-blue-400" />
+              <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                <Icon name="carbon:bot" size="14" class="text-emerald-400" />
               </div>
               <div
                 v-if="message.isHtml"
@@ -192,7 +192,7 @@ const toggleChat = () => {
 
             <!-- User Bubble -->
             <div v-else class="flex gap-2.5 max-w-[85%] justify-end">
-              <div class="p-3 rounded-2xl rounded-tr-none bg-blue-600 text-white text-xs sm:text-sm leading-relaxed font-medium shadow-sm">
+              <div class="p-3 rounded-2xl rounded-tr-none bg-emerald-600 text-white text-xs sm:text-sm leading-relaxed font-medium shadow-sm">
                 {{ message.content }}
               </div>
             </div>
@@ -200,26 +200,26 @@ const toggleChat = () => {
 
           <!-- Loading Dots Indicator -->
           <div v-if="isLoading" class="flex gap-2.5 items-center">
-            <div class="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
-              <Icon name="carbon:bot" size="14" class="text-blue-400" />
+            <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+              <Icon name="carbon:bot" size="14" class="text-emerald-400" />
             </div>
             <div class="p-3 rounded-2xl rounded-tl-none bg-white/[0.04] border border-white/10 flex items-center gap-1.5">
-              <div class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style="animation-delay: 0s"></div>
-              <div class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style="animation-delay: 0.2s"></div>
-              <div class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style="animation-delay: 0.4s"></div>
+              <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce" style="animation-delay: 0s"></div>
+              <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce" style="animation-delay: 0.2s"></div>
+              <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce" style="animation-delay: 0.4s"></div>
             </div>
           </div>
         </div>
 
         <!-- Predefined Quick Question Chips -->
-        <div v-if="messages.length <= 1 && !isLoading" class="p-3 border-t border-white/10 bg-[#0a1020] space-y-1.5">
+        <div v-if="messages.length <= 1 && !isLoading" class="p-3 border-t border-white/10 bg-[#08110b] space-y-1.5">
           <p class="text-[10px] font-mono uppercase text-slate-400 px-1">Suggested prompts:</p>
           <div class="flex flex-col gap-1.5">
             <button
               v-for="(q, idx) in predefinedQuestions"
               :key="idx"
               @click="askQuestion(q)"
-              class="text-left px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/10 hover:border-blue-500/40 hover:bg-blue-500/10 text-xs text-slate-300 hover:text-white transition-colors cursor-pointer"
+              class="text-left px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/10 hover:border-emerald-500/40 hover:bg-emerald-500/10 text-xs text-slate-300 hover:text-white transition-colors cursor-pointer"
             >
               {{ q }}
             </button>
@@ -227,13 +227,13 @@ const toggleChat = () => {
         </div>
 
         <!-- Input Bar -->
-        <div class="p-3 border-t border-white/10 bg-[#0a1020]">
+        <div class="p-3 border-t border-white/10 bg-[#08110b]">
           <form @submit.prevent="sendMessage" class="flex gap-2">
             <input
               v-model="userInput"
               type="text"
               placeholder="Ask me anything..."
-              class="flex-1 px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs sm:text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500/50 transition-colors"
+              class="flex-1 px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs sm:text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 transition-colors"
             />
             <button
               type="submit"
@@ -252,10 +252,10 @@ const toggleChat = () => {
     <button
       @click="toggleChat"
       :aria-label="isOpen ? 'Close AI Assistant' : 'Open AI Assistant'"
-      class="group relative w-12 h-12 sm:w-13 sm:h-13 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 p-[1px] shadow-lg shadow-blue-500/25 hover:scale-105 transition-transform duration-200 cursor-pointer"
+      class="group relative w-12 h-12 sm:w-13 sm:h-13 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 p-[1px] shadow-lg shadow-emerald-500/25 hover:scale-105 transition-transform duration-200 cursor-pointer"
     >
-      <div class="relative w-full h-full bg-[#080d1a] rounded-[15px] flex items-center justify-center text-white">
-        <Icon v-if="!isOpen" name="carbon:bot" size="24" class="text-blue-400 group-hover:scale-105 transition-transform" />
+      <div class="relative w-full h-full bg-[#050807] rounded-[15px] flex items-center justify-center text-white">
+        <Icon v-if="!isOpen" name="carbon:bot" size="24" class="text-emerald-400 group-hover:scale-105 transition-transform" />
         <Icon v-else name="carbon:close" size="22" class="text-slate-200" />
       </div>
     </button>

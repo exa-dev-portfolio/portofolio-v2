@@ -137,9 +137,9 @@ onMounted(() => {
   const height = window.innerHeight;
   isMobile = width < 768;
 
-  // Scene setup with background fog matching portfolio theme (#070b14)
+  // Scene setup with background fog matching portfolio theme (#050807)
   scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x070b14, 0.038);
+  scene.fog = new THREE.FogExp2(0x050807, 0.038);
 
   camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
   camera.position.set(0, 0, 8);
@@ -153,21 +153,21 @@ onMounted(() => {
   renderer.setSize(width, height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-  // Lighting Suite (Cyber Neon Palette)
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+  // Lighting Suite (Cyber Emerald & Mint Palette)
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.55);
   scene.add(ambientLight);
 
-  const pointLightCyan = new THREE.PointLight(0x00f0ff, 3.6, 35);
-  pointLightCyan.position.set(5, 5, 5);
-  scene.add(pointLightCyan);
+  const pointLightEmerald = new THREE.PointLight(0x10b981, 3.8, 35);
+  pointLightEmerald.position.set(5, 5, 5);
+  scene.add(pointLightEmerald);
 
-  const pointLightIndigo = new THREE.PointLight(0x6366f1, 2.8, 35);
-  pointLightIndigo.position.set(-5, -4, 4);
-  scene.add(pointLightIndigo);
+  const pointLightMint = new THREE.PointLight(0x34d399, 3.0, 35);
+  pointLightMint.position.set(-5, -4, 4);
+  scene.add(pointLightMint);
 
-  const pointLightPurple = new THREE.PointLight(0xa855f7, 2.0, 25);
-  pointLightPurple.position.set(0, 4, -3);
-  scene.add(pointLightPurple);
+  const pointLightTeal = new THREE.PointLight(0x14b8a6, 2.2, 25);
+  pointLightTeal.position.set(0, 4, -3);
+  scene.add(pointLightTeal);
 
   // Group container for all 3D mesh components
   meshGroup = new THREE.Group();
@@ -176,11 +176,11 @@ onMounted(() => {
   // 1. Quantum Torus Knot Core (Intricate, non-spherical mathematical geometry)
   const knotGeom = new THREE.TorusKnotGeometry(1.22, 0.32, 128, 32, 2, 3);
   const knotMat = new THREE.MeshStandardMaterial({
-    color: 0x07111e,
+    color: 0x07150e,
     roughness: 0.18,
     metalness: 0.88,
-    emissive: 0x09223a,
-    emissiveIntensity: 0.45,
+    emissive: 0x092b1a,
+    emissiveIntensity: 0.5,
   });
   torusKnotMesh = new THREE.Mesh(knotGeom, knotMat);
   meshGroup.add(torusKnotMesh);
@@ -188,17 +188,17 @@ onMounted(() => {
   // 2. Holographic Outer Wireframe Cage
   const wireKnotGeom = new THREE.TorusKnotGeometry(1.28, 0.34, 64, 16, 2, 3);
   const wireKnotMat = new THREE.MeshBasicMaterial({
-    color: 0x00f0ff,
+    color: 0x10b981,
     wireframe: true,
     transparent: true,
-    opacity: 0.32,
+    opacity: 0.36,
   });
   wireKnotMesh = new THREE.Mesh(wireKnotGeom, wireKnotMat);
   meshGroup.add(wireKnotMesh);
 
   // 3. Glowing Vertex Points (Node Matrix on the Knot)
   const pointsMat = new THREE.PointsMaterial({
-    color: 0x38bdf8,
+    color: 0x6ee7b7,
     size: 0.065,
     transparent: true,
     opacity: 0.85,
@@ -209,19 +209,19 @@ onMounted(() => {
   // 4. Inner Quantum Energy Gem (Floating Dual-Pyramid Octahedron)
   const gemGeom = new THREE.OctahedronGeometry(0.55, 0);
   const gemMat = new THREE.MeshStandardMaterial({
-    color: 0x7c3aed,
+    color: 0x059669,
     roughness: 0.12,
     metalness: 0.9,
     flatShading: true,
-    emissive: 0x6366f1,
-    emissiveIntensity: 0.75,
+    emissive: 0x10b981,
+    emissiveIntensity: 0.8,
   });
   innerGemMesh = new THREE.Mesh(gemGeom, gemMat);
   meshGroup.add(innerGemMesh);
 
   const gemWireGeom = new THREE.OctahedronGeometry(0.68, 0);
   const gemWireMat = new THREE.MeshBasicMaterial({
-    color: 0xa855f7,
+    color: 0x34d399,
     wireframe: true,
     transparent: true,
     opacity: 0.5,
@@ -230,35 +230,35 @@ onMounted(() => {
   meshGroup.add(innerGemWire);
 
   // 5. Multi-Axis Concentric Gyroscopic Rings (Gimbal System)
-  // Ring 1 (Inner Cyan Ring)
+  // Ring 1 (Inner Emerald Ring)
   const ring1Geom = new THREE.TorusGeometry(2.25, 0.022, 16, 120);
   const ring1Mat = new THREE.MeshBasicMaterial({
-    color: 0x00f0ff,
+    color: 0x10b981,
     transparent: true,
-    opacity: 0.55,
+    opacity: 0.6,
   });
   gyroRing1 = new THREE.Mesh(ring1Geom, ring1Mat);
   gyroRing1.rotation.x = Math.PI / 3;
   meshGroup.add(gyroRing1);
 
-  // Ring 2 (Middle Violet / Indigo Ring)
+  // Ring 2 (Middle Mint Ring)
   const ring2Geom = new THREE.TorusGeometry(2.65, 0.016, 16, 120);
   const ring2Mat = new THREE.MeshBasicMaterial({
-    color: 0x818cf8,
+    color: 0x34d399,
     transparent: true,
-    opacity: 0.45,
+    opacity: 0.48,
   });
   gyroRing2 = new THREE.Mesh(ring2Geom, ring2Mat);
   gyroRing2.rotation.y = Math.PI / 4;
   gyroRing2.rotation.z = Math.PI / 6;
   meshGroup.add(gyroRing2);
 
-  // Ring 3 (Outer Celestial Aura Ring)
+  // Ring 3 (Outer Mint Aura Ring)
   const ring3Geom = new THREE.TorusGeometry(3.05, 0.012, 16, 120);
   const ring3Mat = new THREE.MeshBasicMaterial({
-    color: 0x38bdf8,
+    color: 0xa7f3d0,
     transparent: true,
-    opacity: 0.32,
+    opacity: 0.35,
   });
   gyroRing3 = new THREE.Mesh(ring3Geom, ring3Mat);
   gyroRing3.rotation.x = -Math.PI / 5;
@@ -266,10 +266,10 @@ onMounted(() => {
 
   // 6. Orbiting Satellite Nodes (Data Beacons)
   const satelliteConfigs = [
-    { color: 0x00f0ff, radius: 2.25, speed: 0.85, incX: 0.6, incZ: 0.2, phase: 0 },
-    { color: 0xa855f7, radius: 2.65, speed: -0.65, incX: -0.4, incZ: 0.7, phase: Math.PI / 2 },
-    { color: 0x38bdf8, radius: 2.25, speed: 0.75, incX: 0.8, incZ: -0.3, phase: Math.PI },
-    { color: 0x34d399, radius: 3.05, speed: -0.5, incX: -0.5, incZ: -0.5, phase: (3 * Math.PI) / 2 },
+    { color: 0x10b981, radius: 2.25, speed: 0.85, incX: 0.6, incZ: 0.2, phase: 0 },
+    { color: 0x34d399, radius: 2.65, speed: -0.65, incX: -0.4, incZ: 0.7, phase: Math.PI / 2 },
+    { color: 0x2dd4bf, radius: 2.25, speed: 0.75, incX: 0.8, incZ: -0.3, phase: Math.PI },
+    { color: 0x6ee7b7, radius: 3.05, speed: -0.5, incX: -0.5, incZ: -0.5, phase: (3 * Math.PI) / 2 },
   ];
 
   satellites.length = 0;
@@ -278,7 +278,7 @@ onMounted(() => {
     const satMat = new THREE.MeshStandardMaterial({
       color: cfg.color,
       emissive: cfg.color,
-      emissiveIntensity: 0.8,
+      emissiveIntensity: 0.85,
       roughness: 0.2,
       metalness: 0.8,
     });
@@ -305,7 +305,7 @@ onMounted(() => {
   }
   particleGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
   const dustMat = new THREE.PointsMaterial({
-    color: 0x7dd3fc,
+    color: 0xa7f3d0,
     size: 0.035,
     transparent: true,
     opacity: 0.45,

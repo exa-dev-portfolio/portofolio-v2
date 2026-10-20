@@ -63,7 +63,7 @@ const submitForm = async () => {
           class="lg:col-span-5 space-y-6"
         >
           <div>
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-mono mb-4">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono mb-4">
               <Icon name="carbon:chat" size="14" />
               <span>GET IN TOUCH</span>
             </div>
@@ -80,16 +80,16 @@ const submitForm = async () => {
           <!-- Contact Cards -->
           <div class="space-y-3">
             <!-- Email Card -->
-            <div class="card-interactive rounded-2xl p-5 group flex items-start justify-between gap-4">
+            <div class="card-interactive rounded-2xl p-5 group flex items-start justify-between gap-4 border border-white/[0.08] hover:border-emerald-500/40">
               <div class="flex items-start gap-3.5">
-                <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
                   <Icon name="carbon:email" size="20" />
                 </div>
                 <div class="min-w-0">
                   <p class="text-[10px] font-mono uppercase text-slate-400">Direct Email</p>
                   <a
                     :href="`mailto:${user?.email || 'contact@eka-dev.cloud'}`"
-                    class="text-sm font-semibold text-white hover:text-blue-400 transition-colors truncate block"
+                    class="text-sm font-semibold text-white hover:text-emerald-400 transition-colors truncate block"
                   >
                     {{ user?.email || 'contact@eka-dev.cloud' }}
                   </a>
@@ -99,7 +99,7 @@ const submitForm = async () => {
 
               <button
                 @click="copyEmail"
-                class="px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-xs font-mono text-slate-300 flex items-center gap-1 transition-colors cursor-pointer shrink-0"
+                class="px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:border-emerald-500/30 hover:bg-emerald-500/10 text-xs font-mono text-slate-300 flex items-center gap-1 transition-colors cursor-pointer shrink-0"
                 aria-label="Copy email"
               >
                 <Icon :name="emailCopied ? 'carbon:checkmark' : 'carbon:copy'" size="13" :class="emailCopied ? 'text-emerald-400' : 'text-slate-400'" />
@@ -108,8 +108,8 @@ const submitForm = async () => {
             </div>
 
             <!-- Location & Availability Card -->
-            <div class="card-interactive rounded-2xl p-5 flex items-start gap-3.5">
-              <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shrink-0">
+            <div class="card-interactive rounded-2xl p-5 flex items-start gap-3.5 border border-white/[0.08] hover:border-teal-500/40">
+              <div class="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400 shrink-0">
                 <Icon name="carbon:location" size="20" />
               </div>
               <div>
@@ -127,7 +127,7 @@ const submitForm = async () => {
 
             <!-- Response Guarantee Badge -->
             <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06] flex items-center gap-3">
-              <Icon name="carbon:flash" size="18" class="text-amber-400 shrink-0" />
+              <Icon name="carbon:flash" size="18" class="text-emerald-400 shrink-0" />
               <p class="text-xs text-slate-400">
                 Typically responds within <strong class="text-slate-200">24 hours</strong>.
               </p>
@@ -143,12 +143,12 @@ const submitForm = async () => {
           :transition="{ duration: 0.45, ease: 'easeOut' }"
           class="lg:col-span-7"
         >
-          <div class="card-elevated rounded-3xl p-6 sm:p-8 shadow-xl relative">
+          <div class="card-elevated rounded-3xl p-6 sm:p-8 shadow-xl relative border border-white/[0.08]">
             
             <!-- Success Message Toast Banner -->
             <div
               v-if="submitSuccess"
-              class="mb-6 p-4 rounded-xl bg-emerald-950/80 border border-emerald-500/40 flex items-center gap-3 text-emerald-300 text-sm"
+              class="mb-6 p-4 rounded-xl bg-emerald-950/80 border border-emerald-500/40 flex items-center gap-3 text-emerald-300 text-sm backdrop-blur-md"
             >
               <Icon name="carbon:checkmark-filled" size="20" class="text-emerald-400 shrink-0" />
               <span>Thank you! Your message has been sent successfully. I'll get back to you soon.</span>
@@ -160,7 +160,7 @@ const submitForm = async () => {
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label for="contact-name" class="block text-xs font-mono uppercase text-slate-400 mb-1.5">
-                    Your Name <span class="text-blue-400">*</span>
+                    Your Name <span class="text-emerald-400">*</span>
                   </label>
                   <input
                     id="contact-name"
@@ -168,13 +168,13 @@ const submitForm = async () => {
                     type="text"
                     placeholder="e.g. Alex Morgan"
                     required
-                    class="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-white/[0.06] transition-colors"
+                    class="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:border-emerald-500/60 focus:bg-emerald-950/20 transition-all"
                   />
                 </div>
 
                 <div>
                   <label for="contact-email" class="block text-xs font-mono uppercase text-slate-400 mb-1.5">
-                    Email Address <span class="text-blue-400">*</span>
+                    Email Address <span class="text-emerald-400">*</span>
                   </label>
                   <input
                     id="contact-email"
@@ -182,7 +182,7 @@ const submitForm = async () => {
                     type="email"
                     placeholder="alex@company.com"
                     required
-                    class="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-white/[0.06] transition-colors"
+                    class="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:border-emerald-500/60 focus:bg-emerald-950/20 transition-all"
                   />
                 </div>
               </div>
@@ -190,7 +190,7 @@ const submitForm = async () => {
               <!-- Subject -->
               <div>
                 <label for="contact-subject" class="block text-xs font-mono uppercase text-slate-400 mb-1.5">
-                  Subject / Inquiry Type <span class="text-blue-400">*</span>
+                  Subject / Inquiry Type <span class="text-emerald-400">*</span>
                 </label>
                 <input
                   id="contact-subject"
@@ -198,14 +198,14 @@ const submitForm = async () => {
                   type="text"
                   placeholder="e.g. Full-Time Opportunity / Project Consultation"
                   required
-                  class="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-white/[0.06] transition-colors"
+                  class="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:border-emerald-500/60 focus:bg-emerald-950/20 transition-all"
                 />
               </div>
 
               <!-- Message -->
               <div>
                 <label for="contact-message" class="block text-xs font-mono uppercase text-slate-400 mb-1.5">
-                  Message <span class="text-blue-400">*</span>
+                  Message <span class="text-emerald-400">*</span>
                 </label>
                 <textarea
                   id="contact-message"
@@ -213,7 +213,7 @@ const submitForm = async () => {
                   rows="4"
                   placeholder="Describe your vision, timeline, or job opportunity..."
                   required
-                  class="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:border-blue-500/60 focus:bg-white/[0.06] transition-colors resize-none"
+                  class="w-full px-4 py-2.5 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:border-emerald-500/60 focus:bg-emerald-950/20 transition-all resize-none"
                 ></textarea>
               </div>
 
