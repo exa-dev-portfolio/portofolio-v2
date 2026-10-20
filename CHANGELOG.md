@@ -1,3 +1,10 @@
+# [1.12.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.11.0...v1.12.0) (2026-10-20)
+
+
+### Features
+
+* **analytics:** implement real-time telemetry tracking, PostgreSQL storage, and interactive SVG dashboard ([5ee2911](https://github.com/exa-dev-portfolio/portofolio-v2/commit/5ee2911e627b552850c3d00c0335981b2f501736))
+
 # [1.11.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.10.0...v1.11.0) (2026-10-20)
 
 
