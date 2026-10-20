@@ -44,6 +44,7 @@ const commands: CommandItem[] = [
   { id: 'nav-about', title: 'About Me', subtitle: 'Background & core focus', category: 'Navigation', icon: 'carbon:user', action: () => navigateTo('#about') },
   { id: 'nav-projects', title: 'Featured Projects', subtitle: 'Production software and cloud systems', category: 'Navigation', icon: 'carbon:application-web', action: () => navigateTo('#projects') },
   { id: 'nav-stack', title: 'Technical Stack', subtitle: 'Technologies, languages, and tools', category: 'Navigation', icon: 'carbon:code', action: () => navigateTo('#stack') },
+  { id: 'nav-music', title: 'Apple Music', subtitle: 'Now playing track & daily coding soundtracks', category: 'Navigation', icon: 'carbon:music', action: () => navigateTo('#music') },
   { id: 'nav-experience', title: 'Work Experience', subtitle: 'Career milestones and engineering impact', category: 'Navigation', icon: 'carbon:milestone', action: () => navigateTo('#experience') },
   { id: 'nav-contact', title: 'Get in Touch', subtitle: 'Inquiries, opportunities, and contact form', category: 'Navigation', icon: 'carbon:email', action: () => navigateTo('#contact') },
 

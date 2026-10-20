@@ -89,16 +89,16 @@ onBeforeUnmount(() => {
 <template>
   <Motion
     v-if="isConfigured && track"
-    :initial="{ opacity: 0, y: 20 }"
+    :initial="{ opacity: 0, y: 16 }"
     :while-in-view="{ opacity: 1, y: 0 }"
     :viewport="{ once: true, amount: 0.15 }"
-    :transition="{ duration: 0.5, ease: 'easeOut', delay: 0.2 }"
-    class="mt-8"
+    :transition="{ duration: 0.45, ease: 'easeOut' }"
+    class="w-full"
   >
-    <div class="card-elevated rounded-3xl p-6 sm:p-7 relative overflow-hidden border border-white/10 shadow-2xl group transition-all duration-300 hover:border-pink-500/30">
+    <div class="card-elevated rounded-2xl sm:rounded-3xl p-5 sm:p-7 relative overflow-hidden border border-white/10 shadow-2xl group transition-all duration-300 hover:border-[#fa243c]/35">
     <!-- Subtle ambient glow matching Apple Music gradient -->
-    <div class="absolute -top-24 -right-24 w-60 h-60 rounded-full bg-gradient-to-br from-[#fa243c]/15 via-[#fa586a]/10 to-transparent blur-3xl pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
-    <div class="absolute -bottom-24 -left-24 w-52 h-52 rounded-full bg-gradient-to-tr from-cyan-500/10 via-purple-500/10 to-transparent blur-3xl pointer-events-none"></div>
+    <div class="absolute -top-24 -right-24 w-60 h-60 rounded-full bg-gradient-to-br from-[#fa243c]/15 via-[#fa586a]/8 to-transparent blur-3xl pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
+    <div class="absolute -bottom-24 -left-24 w-52 h-52 rounded-full bg-gradient-to-tr from-white/5 to-transparent blur-3xl pointer-events-none"></div>
 
     <!-- Hidden native audio element for preview with preload none -->
     <audio
@@ -338,6 +338,55 @@ onBeforeUnmount(() => {
 
     </div>
   </Motion>
+
+  <!-- Loading Skeleton State -->
+  <div
+    v-else-if="isLoading"
+    class="card-elevated rounded-2xl sm:rounded-3xl p-5 sm:p-7 border border-white/10 w-full animate-pulse space-y-5"
+  >
+    <div class="flex items-center justify-between">
+      <div class="h-6 w-32 bg-white/10 rounded-full"></div>
+      <div class="h-6 w-20 bg-white/10 rounded-full"></div>
+    </div>
+    <div class="flex items-center gap-4">
+      <div class="w-24 h-24 bg-white/10 rounded-2xl shrink-0"></div>
+      <div class="space-y-2.5 flex-1">
+        <div class="h-5 w-2/3 bg-white/10 rounded-lg"></div>
+        <div class="h-4 w-1/3 bg-white/10 rounded-lg"></div>
+        <div class="h-2 w-full bg-white/10 rounded-full mt-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Idle State Fallback if not configured or no recent track -->
+  <div
+    v-else
+    class="card-elevated rounded-2xl sm:rounded-3xl p-5 sm:p-6 border border-white/10 w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+  >
+    <div class="flex items-center gap-3.5">
+      <div class="w-12 h-12 rounded-2xl bg-[#fa243c]/10 border border-[#fa243c]/20 flex items-center justify-center text-[#fa243c] shrink-0">
+        <Icon name="carbon:music" size="22" />
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-[11px] font-mono uppercase text-zinc-400">Apple Music</span>
+          <span class="text-zinc-600">•</span>
+          <span class="text-[11px] font-mono text-zinc-500">Standby</span>
+        </div>
+        <p class="text-sm font-semibold text-white mt-0.5">Focus Mode • Coding Soundtracks</p>
+      </div>
+    </div>
+
+    <a
+      href="https://music.apple.com"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-xs font-mono text-zinc-300 hover:text-white transition-colors self-start sm:self-auto"
+    >
+      <span>Open Apple Music</span>
+      <Icon name="carbon:arrow-up-right" size="12" />
+    </a>
+  </div>
 </template>
 
 <style scoped>

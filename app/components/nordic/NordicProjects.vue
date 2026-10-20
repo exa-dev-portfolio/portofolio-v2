@@ -78,15 +78,30 @@ const closeModal = () => {
           <!-- Screenshot Preview -->
           <div
             @click="openModal(project)"
-            class="relative rounded-xl overflow-hidden aspect-video bg-black/60 border border-white/10 mb-4 cursor-pointer"
+            class="relative rounded-xl overflow-hidden aspect-video bg-black/60 border border-white/10 mb-4 cursor-pointer group/art"
           >
             <img
               :src="project.image"
               :alt="project.title"
-              class="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
+              class="w-full h-full object-cover group-hover/art:scale-104 transition-transform duration-500"
               loading="lazy"
             />
-            <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80 group-hover/art:opacity-40 transition-opacity"></div>
+
+            <!-- Top Corner Category / Status Pill -->
+            <div class="absolute top-2.5 left-2.5">
+              <span class="px-2.5 py-1 rounded-md bg-black/75 border border-white/15 text-[10px] font-mono font-medium text-zinc-200 backdrop-blur-md">
+                {{ project.technologies[0] || 'Full-Stack' }}
+              </span>
+            </div>
+
+            <!-- Quick Preview Button on Hover -->
+            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover/art:opacity-100 transition-opacity pointer-events-none">
+              <span class="px-3.5 py-1.5 rounded-full bg-white text-black font-semibold text-xs shadow-xl flex items-center gap-1.5">
+                <span>View Details</span>
+                <Icon name="carbon:arrow-up-right" size="12" />
+              </span>
+            </div>
           </div>
 
           <!-- Project Meta -->
@@ -100,7 +115,7 @@ const closeModal = () => {
               </h3>
               <button
                 @click="openModal(project)"
-                class="text-zinc-500 hover:text-white text-xs font-mono flex items-center gap-1 cursor-pointer"
+                class="text-zinc-400 hover:text-white text-xs font-mono flex items-center gap-1 cursor-pointer"
               >
                 <span>Details</span>
                 <Icon name="carbon:arrow-up-right" size="12" />
@@ -144,10 +159,11 @@ const closeModal = () => {
               :href="project.liveUrl"
               target="_blank"
               rel="noopener noreferrer"
-              class="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
+              class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-mono transition-colors flex items-center gap-1"
               title="Live Demo"
             >
-              <Icon name="carbon:launch" size="16" />
+              <span>Demo</span>
+              <Icon name="carbon:launch" size="12" />
             </a>
           </div>
         </div>

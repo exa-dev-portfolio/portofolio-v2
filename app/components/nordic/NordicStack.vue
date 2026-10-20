@@ -93,5 +93,42 @@ const categories = computed(() => {
       </div>
     </div>
 
+    <!-- Architectural Pipeline Workflow Banner -->
+    <div class="p-5 rounded-2xl bg-[#141417]/50 border border-white/10">
+      <div class="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
+        <div class="flex items-center gap-2">
+          <Icon name="carbon:flow-stream" size="15" class="text-white" />
+          <span class="text-xs font-mono uppercase tracking-wider text-zinc-400 font-semibold">End-to-End Delivery Pipeline</span>
+        </div>
+        <span class="text-[11px] font-mono text-zinc-500">Autonomous & Repeatable</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+          <span class="text-[10px] font-mono text-zinc-500">01 / ARCHITECTURE</span>
+          <p class="text-xs font-semibold text-white">Domain Modeling</p>
+          <p class="text-[11px] text-zinc-400">Clean architecture, typed Protobuf contracts, and database schema migrations.</p>
+        </div>
+
+        <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+          <span class="text-[10px] font-mono text-zinc-500">02 / BACKEND & DATA</span>
+          <p class="text-xs font-semibold text-white">Go Microservices</p>
+          <p class="text-[11px] text-zinc-400">Stateless services, Redis caching, PostgreSQL persistence, and gRPC streaming.</p>
+        </div>
+
+        <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+          <span class="text-[10px] font-mono text-zinc-500">03 / FRONTEND</span>
+          <p class="text-xs font-semibold text-white">Fluid Vue 3 & Nuxt</p>
+          <p class="text-[11px] text-zinc-400">SSR rendering, reactive state management, tactile micro-interactions, and 60fps animations.</p>
+        </div>
+
+        <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+          <span class="text-[10px] font-mono text-zinc-500">04 / DEVOPS</span>
+          <p class="text-xs font-semibold text-white">Kubernetes & CI/CD</p>
+          <p class="text-[11px] text-zinc-400">Zero-downtime rolling deploys, Docker image hardening, and automated test pipelines.</p>
+        </div>
+      </div>
+    </div>
+
   </section>
 </template>
