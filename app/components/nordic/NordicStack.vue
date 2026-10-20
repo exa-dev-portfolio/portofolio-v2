@@ -1,95 +1,210 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import type { Skill } from '~/types/skill'
 
 const props = defineProps<{
   skills: Skill[]
 }>()
 
+const searchQuery = ref('')
+const activeFilter = ref<string>('All')
+
+// Descriptions for the 4 core categories
+const categoryMeta: Record<string, { desc: string; icon: string }> = {
+  'Backend & APIs': {
+    desc: 'High-throughput microservices, REST & gRPC APIs, and robust application logic',
+    icon: 'carbon:data-base',
+  },
+  'Frontend & Mobile': {
+    desc: 'Modern reactive web apps, responsive UI architecture, and mobile engineering',
+    icon: 'carbon:application-web',
+  },
+  'Databases & Queues': {
+    desc: 'Relational persistence, distributed in-memory caching, and asynchronous message brokers',
+    icon: 'carbon:bare-metal-server',
+  },
+  'Cloud & DevOps': {
+    desc: 'Container orchestration, API gateways, CI/CD pipelines, and cloud infrastructure',
+    icon: 'carbon:cloud-app',
+  },
+}
+
+// Dynamically group 100% of skills from API by category_name
 const categories = computed(() => {
-  const all = props.skills
+  const map = new Map<string, { id: number; title: string; color: string; desc: string; icon: string; items: Skill[] }>()
 
-  const backend = all.filter(s => {
-    const n = (s.name + ' ' + (s.category?.name || '')).toLowerCase()
-    return n.includes('go') || n.includes('node') || n.includes('express') || n.includes('api') || n.includes('grpc') || n.includes('back')
-  })
-
-  const frontend = all.filter(s => {
-    const n = (s.name + ' ' + (s.category?.name || '')).toLowerCase()
-    return n.includes('vue') || n.includes('nuxt') || n.includes('typescript') || n.includes('react') || n.includes('css') || n.includes('flutter') || n.includes('front')
-  })
-
-  const database = all.filter(s => {
-    const n = (s.name + ' ' + (s.category?.name || '')).toLowerCase()
-    return n.includes('postgres') || n.includes('sql') || n.includes('redis') || n.includes('vector') || n.includes('data')
-  })
-
-  const devops = all.filter(s => {
-    const n = (s.name + ' ' + (s.category?.name || '')).toLowerCase()
-    return n.includes('docker') || n.includes('k8s') || n.includes('kubernetes') || n.includes('gcp') || n.includes('cloud') || n.includes('git') || n.includes('linux') || n.includes('devops')
-  })
-
-  return [
-    {
-      title: 'Backend & Systems',
-      desc: 'High-concurrency microservices, REST & gRPC APIs',
-      items: backend.length ? backend : props.skills.slice(0, 6)
-    },
-    {
-      title: 'Frontend & Reactive UI',
-      desc: 'Modern web apps, component architectures, and mobile',
-      items: frontend.length ? frontend : props.skills.slice(6, 12)
-    },
-    {
-      title: 'Databases & Storage',
-      desc: 'Relational persistence, vector search, and caching',
-      items: database.length ? database : props.skills.slice(12, 18)
-    },
-    {
-      title: 'Cloud & Infrastructure',
-      desc: 'Container orchestration, CI/CD pipelines, and Linux',
-      items: devops.length ? devops : props.skills.slice(18, 24)
+  props.skills.forEach(skill => {
+    const catName = skill.category_name || 'Other Tools'
+    if (!map.has(catName)) {
+      const meta = categoryMeta[catName] || { desc: 'Specialized technologies and tooling', icon: 'carbon:code' }
+      map.set(catName, {
+        id: skill.category_id || 99,
+        title: catName,
+        color: skill.category_color || '#3b82f6',
+        desc: meta.desc,
+        icon: meta.icon,
+        items: [],
+      })
     }
-  ]
+    map.get(catName)!.items.push(skill)
+  })
+
+  // Sort by category_id (1: Frontend, 2: Backend, 3: Cloud, 4: Databases)
+  const list = Array.from(map.values()).sort((a, b) => a.id - b.id)
+
+  // Apply search query filter if user is searching
+  if (searchQuery.value.trim()) {
+    const q = searchQuery.value.toLowerCase().trim()
+    return list.map(cat => ({
+      ...cat,
+      items: cat.items.filter(item => item.name.toLowerCase().includes(q)),
+    })).filter(cat => cat.items.length > 0)
+  }
+
+  // Apply active category filter tab if not 'All'
+  if (activeFilter.value !== 'All') {
+    return list.filter(cat => cat.title === activeFilter.value)
+  }
+
+  return list
 })
+
+// Unique category list for filter tabs with accurate counts
+const categoryTabs = computed(() => {
+  const counts: Record<string, number> = {}
+  props.skills.forEach(s => {
+    const cat = s.category_name || 'Other'
+    counts[cat] = (counts[cat] || 0) + 1
+  })
+
+  const tabs = [
+    { title: 'All', count: props.skills.length },
+    ...Object.keys(counts).map(cat => ({
+      title: cat,
+      count: counts[cat],
+    })),
+  ]
+
+  return tabs
+})
+
+const totalSkillsCount = computed(() => props.skills.length)
 </script>
 
 <template>
   <section class="space-y-8">
     
-    <!-- Section Header -->
-    <div class="pb-2 border-b border-white/10">
-      <span class="text-xs font-mono uppercase tracking-wider text-zinc-500 block">Technical Stack</span>
-      <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight mt-1">Skills & Tooling</h2>
-      <p class="text-xs sm:text-sm text-zinc-400 mt-1 max-w-xl">
-        Technologies and runtime environments I use daily to architect resilient production software.
-      </p>
+    <!-- Section Header & Filter Controls -->
+    <div class="space-y-4 pb-2 border-b border-white/10">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono uppercase tracking-wider text-zinc-500 font-semibold block">Technical Stack</span>
+            <span class="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono text-zinc-300">
+              {{ totalSkillsCount }} Verified Technologies
+            </span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight mt-1">Skills & Tooling Arsenal</h2>
+        </div>
+
+        <!-- Search Input -->
+        <div class="relative w-full sm:w-64">
+          <Icon name="carbon:search" size="14" class="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Search technology..."
+            class="w-full pl-9 pr-8 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 focus:border-white/30 focus:outline-none text-xs text-white placeholder-zinc-500 font-sans transition-colors"
+          />
+          <button
+            v-if="searchQuery"
+            @click="searchQuery = ''"
+            class="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white text-xs cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="flex items-center gap-1.5 flex-wrap pt-1">
+        <button
+          v-for="tab in categoryTabs"
+          :key="tab.title"
+          @click="activeFilter = tab.title"
+          class="px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5"
+          :class="activeFilter === tab.title ? 'bg-white text-black font-semibold shadow-sm' : 'bg-white/[0.03] text-zinc-400 hover:text-white hover:bg-white/[0.07] border border-white/5'"
+        >
+          <span>{{ tab.title }}</span>
+          <span
+            class="text-[10px] px-1.5 py-0.2 rounded-full"
+            :class="activeFilter === tab.title ? 'bg-black/15 text-black font-bold' : 'bg-white/10 text-zinc-400'"
+          >
+            {{ tab.count }}
+          </span>
+        </button>
+      </div>
     </div>
 
-    <!-- 4 Bento Cards Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+    <!-- Grouped Categories Grid - 100% Skills Rendered -->
+    <div class="space-y-6">
       <div
         v-for="cat in categories"
         :key="cat.title"
-        class="p-5 sm:p-6 rounded-2xl bg-[#141417]/70 border border-white/10 space-y-4 hover:border-white/20 transition-colors"
+        class="p-5 sm:p-6 rounded-2xl bg-[#141417]/70 border border-white/10 space-y-4 hover:border-white/20 transition-all duration-300 group"
       >
-        <div>
-          <h3 class="text-base sm:text-lg font-bold text-white tracking-tight">{{ cat.title }}</h3>
-          <p class="text-xs text-zinc-400 mt-0.5">{{ cat.desc }}</p>
+        <!-- Category Card Header -->
+        <div class="flex items-start justify-between gap-3 pb-3 border-b border-white/5">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white shrink-0">
+              <Icon :name="cat.icon" size="16" />
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-base sm:text-lg font-bold text-white tracking-tight">{{ cat.title }}</h3>
+                <span class="text-[11px] font-mono text-zinc-400">({{ cat.items.length }} skills)</span>
+              </div>
+              <p class="text-xs text-zinc-400 mt-0.5">{{ cat.desc }}</p>
+            </div>
+          </div>
         </div>
 
-        <div class="flex flex-wrap gap-2">
+        <!-- Skills Pills Matrix -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5">
           <div
             v-for="item in cat.items"
             :key="item.id"
-            class="px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/5 hover:border-white/15 text-zinc-300 hover:text-white text-xs flex items-center gap-2 transition-colors cursor-default"
+            class="px-3 py-2 rounded-xl bg-white/[0.03] border border-white/5 hover:border-white/20 hover:bg-white/[0.07] text-zinc-300 hover:text-white text-xs flex items-center gap-2.5 transition-all duration-200 cursor-default group/skill"
           >
-            <Icon v-if="item.icon" :name="item.icon" size="14" class="text-zinc-400" />
-            <Icon v-else name="carbon:code" size="14" class="text-zinc-400" />
-            <span class="font-medium">{{ item.name }}</span>
-            <span v-if="item.level" class="text-[10px] text-zinc-500 font-mono pl-1 border-l border-white/10">{{ item.level }}</span>
+            <div
+              class="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover/skill:scale-110"
+              :style="{ color: item.color || '#ffffff' }"
+            >
+              <Icon v-if="item.icon" :name="item.icon" size="16" />
+              <Icon v-else name="carbon:code" size="16" />
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="font-medium text-white truncate text-xs">{{ item.name }}</p>
+            </div>
+            <span
+              class="w-1.5 h-1.5 rounded-full shrink-0 opacity-40 group-hover/skill:opacity-100 transition-opacity"
+              :style="{ backgroundColor: item.color || '#ffffff' }"
+            ></span>
           </div>
         </div>
+      </div>
+
+      <!-- Empty Search Fallback -->
+      <div v-if="categories.length === 0" class="p-12 text-center rounded-2xl bg-[#141417]/50 border border-white/10 space-y-2">
+        <Icon name="carbon:search" size="24" class="text-zinc-500 mx-auto" />
+        <p class="text-sm font-semibold text-white">No technologies found matching "{{ searchQuery }}"</p>
+        <p class="text-xs text-zinc-400">Try clearing the search query or selecting a different category.</p>
+        <button
+          @click="searchQuery = ''; activeFilter = 'All'"
+          class="mt-2 px-3 py-1 rounded-full bg-white text-black font-semibold text-xs cursor-pointer"
+        >
+          Reset Filter
+        </button>
       </div>
     </div>
 

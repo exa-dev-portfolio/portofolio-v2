@@ -34,6 +34,20 @@ const filteredProjects = computed(() => {
   })
 })
 
+const featuredProject = computed(() => {
+  if (activeCategory.value === 'All' && filteredProjects.value.length > 0) {
+    return filteredProjects.value[0]
+  }
+  return null
+})
+
+const remainingProjects = computed(() => {
+  if (activeCategory.value === 'All' && filteredProjects.value.length > 0) {
+    return filteredProjects.value.slice(1)
+  }
+  return filteredProjects.value
+})
+
 const openModal = (p: ProjectItem) => {
   selectedProject.value = p
 }
@@ -49,8 +63,8 @@ const closeModal = () => {
     <!-- Section Header & Category Filters -->
     <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-2 border-b border-white/10">
       <div>
-        <span class="text-xs font-mono uppercase tracking-wider text-zinc-500 block">Selected Work</span>
-        <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight mt-1">Featured Projects</h2>
+        <span class="text-xs font-mono uppercase tracking-wider text-zinc-500 block">Selected Portfolio</span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight mt-1">Featured Production Works</h2>
       </div>
 
       <!-- Category Filter Pills -->
@@ -67,10 +81,114 @@ const closeModal = () => {
       </div>
     </div>
 
-    <!-- 2-Column Responsive Minimalist Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- 1. Flagship Spotlight Project Card (when All filter is active) -->
+    <div
+      v-if="featuredProject"
+      class="rounded-2xl bg-[#141417]/80 border border-white/10 hover:border-white/25 p-5 sm:p-6 transition-all duration-300 group shadow-xl"
+    >
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <!-- Large Preview Image -->
+        <div
+          @click="openModal(featuredProject)"
+          class="lg:col-span-7 relative rounded-xl overflow-hidden aspect-video bg-black/60 border border-white/10 cursor-pointer group/art"
+        >
+          <img
+            :src="featuredProject.image"
+            :alt="featuredProject.title"
+            class="w-full h-full object-cover group-hover/art:scale-104 transition-transform duration-500"
+            loading="lazy"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-80 group-hover/art:opacity-40 transition-opacity"></div>
+          
+          <div class="absolute top-3 left-3">
+            <span class="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-[11px] font-mono font-medium text-emerald-300 backdrop-blur-md flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>Flagship Showcase</span>
+            </span>
+          </div>
+
+          <!-- Quick Details on Hover -->
+          <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover/art:opacity-100 transition-opacity pointer-events-none">
+            <span class="px-4 py-2 rounded-full bg-white text-black font-semibold text-xs shadow-xl flex items-center gap-1.5">
+              <span>View Case Study</span>
+              <Icon name="carbon:arrow-up-right" size="13" />
+            </span>
+          </div>
+        </div>
+
+        <!-- Project Story & Details -->
+        <div class="lg:col-span-5 space-y-4">
+          <div>
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="text-[10px] font-mono text-zinc-300 bg-white/5 px-2 py-0.5 rounded border border-white/10">
+                {{ featuredProject.technologies[0] || 'Full-Stack' }}
+              </span>
+              <span class="text-zinc-600">•</span>
+              <span class="text-[10px] font-mono text-zinc-400">Production Tested</span>
+            </div>
+
+            <h3
+              @click="openModal(featuredProject)"
+              class="text-xl sm:text-2xl font-bold text-white group-hover:text-zinc-200 transition-colors cursor-pointer"
+            >
+              {{ featuredProject.title }}
+            </h3>
+          </div>
+
+          <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed line-clamp-3">
+            {{ featuredProject.shortDesc || featuredProject.description }}
+          </p>
+
+          <!-- Tech Pills -->
+          <div class="flex flex-wrap gap-1.5 pt-1">
+            <span
+              v-for="tech in featuredProject.technologies.slice(0, 5)"
+              :key="tech"
+              class="px-2.5 py-1 rounded-md bg-white/5 text-[11px] font-mono text-zinc-300 border border-white/5"
+            >
+              {{ tech }}
+            </span>
+          </div>
+
+          <!-- Direct Actions -->
+          <div class="flex items-center gap-2.5 pt-3 border-t border-white/10">
+            <a
+              v-if="featuredProject.liveUrl"
+              :href="featuredProject.liveUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="px-4 py-2 rounded-xl bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition-colors flex items-center gap-1.5 shadow-md cursor-pointer"
+            >
+              <span>Explore Live</span>
+              <Icon name="carbon:launch" size="13" />
+            </a>
+
+            <button
+              @click="openModal(featuredProject)"
+              class="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white text-xs font-mono transition-colors cursor-pointer"
+            >
+              Case Study
+            </button>
+
+            <a
+              v-if="featuredProject.link"
+              :href="featuredProject.link"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+              title="GitHub Repository"
+            >
+              <Icon name="line-md:github" size="18" />
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Remaining Projects Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
       <div
-        v-for="project in filteredProjects"
+        v-for="project in remainingProjects"
         :key="project.id"
         class="rounded-2xl bg-[#141417]/70 border border-white/10 p-4 sm:p-5 flex flex-col justify-between group hover:border-white/25 transition-all duration-300"
       >
