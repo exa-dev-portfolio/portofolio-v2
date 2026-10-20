@@ -18,18 +18,18 @@ const user = computed(() => dataUser.value?.data)
 
 const navItems = [
   { name: 'About', href: '#about' },
+  { name: 'Music', href: '#music' },
   { name: 'Projects', href: '#projects' },
   { name: 'Stack', href: '#stack' },
-  { name: 'Music', href: '#music' },
   { name: 'Experience', href: '#experience' },
   { name: 'Contact', href: '#contact' }
 ]
 
 const sectionOrder = [
   { id: 'about', href: '#about' },
+  { id: 'music', href: '#music' },
   { id: 'projects', href: '#projects' },
   { id: 'stack', href: '#stack' },
-  { id: 'music', href: '#music' },
   { id: 'experience', href: '#experience' },
   { id: 'contact', href: '#contact' }
 ]

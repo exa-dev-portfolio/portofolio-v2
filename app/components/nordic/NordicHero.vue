@@ -96,10 +96,18 @@ const competencies = [
         </button>
 
         <button
-          @click="scrollTo('stack')"
-          class="px-4 py-2.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white font-medium text-xs sm:text-sm transition-colors cursor-pointer"
+          @click="scrollTo('music')"
+          class="px-4 py-2.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white font-medium text-xs sm:text-sm transition-colors cursor-pointer flex items-center gap-1.5"
         >
-          View Tech Arsenal (29)
+          <Icon name="carbon:music" size="13" class="text-[#fa243c]" />
+          <span>Apple Music</span>
+        </button>
+
+        <button
+          @click="scrollTo('stack')"
+          class="px-4 py-2.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-zinc-300 hover:text-white font-medium text-xs sm:text-sm transition-colors cursor-pointer"
+        >
+          Tech Stack (29)
         </button>
 
         <button
