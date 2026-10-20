@@ -1,3 +1,22 @@
+# [1.11.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.10.0...v1.11.0) (2026-10-20)
+
+
+### Bug Fixes
+
+* **hero:** pass dynamic skillsCount prop from index.vue instead of hardcoding ([84e4a74](https://github.com/exa-dev-portfolio/portofolio-v2/commit/84e4a74e787c06d44d20ff2fc79bb29442041165))
+* **skills:** load 100% of skills dynamically and overhaul studio masthead layout ([d8a8196](https://github.com/exa-dev-portfolio/portofolio-v2/commit/d8a819648c020667d3c2360ac206b32bc7d80b91))
+
+
+### Features
+
+* **3d:** replace generic torus mesh with interconnected network cables and data packet pulses ([8ed43e8](https://github.com/exa-dev-portfolio/portofolio-v2/commit/8ed43e8a36c7017679d65d0acb7416f08f1fda63))
+* **3d:** replace with high-tech Quantum Silicon Processor and circuit bus architecture ([2a67d3a](https://github.com/exa-dev-portfolio/portofolio-v2/commit/2a67d3aaa8fb1cb73bbbb9c3bf3db5c4e5ff372c)), closes [hi#tech](https://github.com/hi/issues/tech)
+* **apps:** redesign personal software and apps store to Nordic Monochrome Minimalist ([ebbdb94](https://github.com/exa-dev-portfolio/portofolio-v2/commit/ebbdb947c569adefdc973116beaa25e24b36e71d))
+* **design:** implement Nordic Monochrome Minimalist layout and aesthetic ([5c389f8](https://github.com/exa-dev-portfolio/portofolio-v2/commit/5c389f8bf5345154e1f70815c0109731b1c9c445))
+* **layout:** radical overhaul to Cyberdeck Developer OS & multi-tab workstation architecture ([954cd28](https://github.com/exa-dev-portfolio/portofolio-v2/commit/954cd281e1a2643803fcf7105c0c238f1cc39f7f))
+* **nav:** place Music link directly adjacent to About in navbar and hero actions ([3d0a77a](https://github.com/exa-dev-portfolio/portofolio-v2/commit/3d0a77ac43a72a047c4cfcd88cba8014c441ede5))
+* **ui:** reintegrate Apple Music showcase and enrich Nordic bento layout density ([8e0d43b](https://github.com/exa-dev-portfolio/portofolio-v2/commit/8e0d43b08a4eabbddd8eb02363fc0fb9069c3953))
+
 # [1.10.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.9.0...v1.10.0) (2026-10-20)
 
 
