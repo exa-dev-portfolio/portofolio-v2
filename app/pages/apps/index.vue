@@ -1,352 +1,334 @@
 <template>
-  <div class="min-h-screen bg-slate-950 text-slate-100 selection:bg-cyan-500 selection:text-white">
-    <!-- Background glow decoration -->
-    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-      <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-cyan-500/10 blur-[130px] rounded-full"></div>
-      <div class="absolute top-1/3 -left-40 w-[500px] h-[500px] bg-blue-600/10 blur-[140px] rounded-full"></div>
-      <div class="absolute bottom-10 right-0 w-[450px] h-[450px] bg-emerald-500/10 blur-[130px] rounded-full"></div>
+  <div class="relative max-w-5xl mx-auto px-4 sm:px-6 space-y-10 sm:space-y-14">
+    <!-- Top Sub-Navigation Bar / Breadcrumb -->
+    <div class="flex items-center justify-between pb-4 border-b border-white/10">
+      <NuxtLink
+        to="/"
+        class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-zinc-300 hover:text-white text-xs font-mono transition-colors cursor-pointer"
+      >
+        <Icon name="carbon:arrow-left" size="13" />
+        <span>Back to Portfolio</span>
+      </NuxtLink>
+
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-xs font-mono text-zinc-400">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>GitHub Release Sync</span>
+      </div>
     </div>
 
-    <!-- Navigation Header -->
-    <header class="relative z-10 border-b border-white/5 backdrop-blur-md bg-slate-950/70 sticky top-0">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <NuxtLink to="/" class="flex items-center gap-3 group">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform">
-            <UIcon name="i-carbon-application-mobile" class="w-5 h-5" />
-          </div>
-          <div>
-            <span class="text-base font-bold text-white tracking-wide">Eka<span class="text-cyan-400">.Apps</span></span>
-            <span class="hidden sm:inline-block ml-2 text-xs px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-mono">APK Hub</span>
-          </div>
-        </NuxtLink>
-
-        <div class="flex items-center gap-4">
-          <NuxtLink to="/" class="text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-1.5">
-            <UIcon name="i-carbon-arrow-left" class="w-4 h-4" />
-            <span>Back to Portfolio</span>
-          </NuxtLink>
-        </div>
+    <!-- Hero Section -->
+    <div class="space-y-4 max-w-3xl">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-xs font-mono text-zinc-300">
+        <Icon name="carbon:application-mobile" size="14" class="text-zinc-400" />
+        <span>Cross-Platform Binary Distribution</span>
       </div>
-    </header>
+      <h1 class="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-tight">
+        Personal Software & Applications
+      </h1>
+      <p class="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-2xl font-normal">
+        Curated collection of cross-platform applications built and maintained by me. Download official release binaries directly or install seamlessly via Google Play Store, Apple App Store, and TestFlight.
+      </p>
+    </div>
 
-    <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
-      <!-- Hero Section -->
-      <div class="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
-        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-medium mb-4">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>Self-Hosted & Realtime GitHub Sync</span>
-        </div>
-        <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mb-4">
-          Personal <span class="bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">Software & Apps Store</span>
-        </h1>
-        <p class="text-slate-400 text-base sm:text-lg leading-relaxed">
-          Curated collection of cross-platform applications built and maintained by me. Download official binaries directly or install seamlessly via Google Play Store, Apple App Store, and TestFlight.
-        </p>
-      </div>
-
-      <!-- Search & Filters Bar -->
-      <div class="flex flex-col gap-4 mb-8">
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-          <!-- Search Input -->
-          <div class="relative w-full sm:w-72">
-            <UIcon name="i-carbon-search" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="Search apps or software..."
-              class="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-900/80 border border-white/10 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors"
-            />
-          </div>
-
-          <!-- Status Filter Pills -->
-          <div class="flex items-center gap-1 p-1 rounded-xl bg-slate-900/80 border border-white/10 self-start sm:self-auto">
-            <button
-              @click="selectedStatusFilter = 'all'"
-              :class="[
-                'px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer',
-                selectedStatusFilter === 'all'
-                  ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/25'
-                  : 'text-slate-400 hover:text-white'
-              ]"
-            >
-              All ({{ counts.all }})
-            </button>
-            <button
-              @click="selectedStatusFilter = 'production'"
-              :class="[
-                'px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer',
-                selectedStatusFilter === 'production'
-                  ? 'bg-emerald-500 text-slate-950 font-bold shadow-md shadow-emerald-500/25'
-                  : 'text-slate-400 hover:text-emerald-400'
-              ]"
-            >
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span>Full Release ({{ counts.production }})</span>
-            </button>
-            <button
-              @click="selectedStatusFilter = 'development'"
-              :class="[
-                'px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer',
-                selectedStatusFilter === 'development'
-                  ? 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/25'
-                  : 'text-slate-400 hover:text-amber-400'
-              ]"
-            >
-              <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-              <span>Development ({{ counts.development }})</span>
-            </button>
-          </div>
+    <!-- Search & Filters Bar -->
+    <div class="space-y-4 pb-2 border-b border-white/10">
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+        <!-- Search Input -->
+        <div class="relative w-full sm:w-80">
+          <Icon name="carbon:search" size="14" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Search apps, package name..."
+            class="w-full pl-10 pr-4 py-2 rounded-xl bg-[#141417]/80 border border-white/10 text-xs sm:text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-white/30 transition-colors font-mono"
+          />
         </div>
 
-        <!-- Platform Filter Tabs & Counter -->
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2 border-t border-white/5">
-          <div class="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-slate-900/60 border border-white/10">
-            <button
-              v-for="p in platformFilters"
-              :key="p.id"
-              @click="selectedPlatformFilter = p.id as any"
-              :class="[
-                'px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer',
-                selectedPlatformFilter === p.id
-                  ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/25'
-                  : 'text-slate-400 hover:text-white'
-              ]"
-            >
-              <PlatformIcon v-if="p.id !== 'all'" :platform="p.id" class="w-3.5 h-3.5 shrink-0" />
-              <span>{{ p.label }}</span>
-            </button>
-          </div>
-
-          <div class="text-xs text-slate-400 flex items-center gap-2">
-            <span>Showing {{ filteredApps.length }} of {{ apps.length }} apps</span>
-          </div>
+        <!-- Status Filter Pills -->
+        <div class="flex items-center gap-1 p-1 rounded-full bg-[#141417]/80 border border-white/10 self-start sm:self-auto">
+          <button
+            @click="selectedStatusFilter = 'all'"
+            :class="[
+              'px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer',
+              selectedStatusFilter === 'all'
+                ? 'bg-white text-black font-semibold shadow-sm'
+                : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+            ]"
+          >
+            All ({{ counts.all }})
+          </button>
+          <button
+            @click="selectedStatusFilter = 'production'"
+            :class="[
+              'px-3.5 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer',
+              selectedStatusFilter === 'production'
+                ? 'bg-white text-black font-semibold shadow-sm'
+                : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+            ]"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            <span>Full Release ({{ counts.production }})</span>
+          </button>
+          <button
+            @click="selectedStatusFilter = 'development'"
+            :class="[
+              'px-3.5 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer',
+              selectedStatusFilter === 'development'
+                ? 'bg-white text-black font-semibold shadow-sm'
+                : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+            ]"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+            <span>Development ({{ counts.development }})</span>
+          </button>
         </div>
       </div>
 
-      <!-- Loading State -->
-      <div v-if="pending" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div v-for="i in 3" :key="i" class="h-64 rounded-2xl bg-slate-900/50 border border-white/5 animate-pulse"></div>
-      </div>
-
-      <!-- Empty State -->
-      <div v-else-if="filteredApps.length === 0" class="text-center py-20 rounded-2xl border border-dashed border-white/10 bg-slate-900/30">
-        <div class="w-16 h-16 rounded-2xl bg-slate-800/80 border border-white/10 flex items-center justify-center mx-auto mb-4 text-slate-400">
-          <UIcon name="i-carbon-application-mobile" class="w-8 h-8" />
+      <!-- Platform Filter Tabs & Counter -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2">
+        <div class="flex flex-wrap items-center gap-1 p-1 rounded-full bg-[#141417]/80 border border-white/10">
+          <button
+            v-for="p in platformFilters"
+            :key="p.id"
+            @click="selectedPlatformFilter = p.id as any"
+            :class="[
+              'px-3.5 py-1 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer',
+              selectedPlatformFilter === p.id
+                ? 'bg-white text-black font-semibold shadow-sm'
+                : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+            ]"
+          >
+            <PlatformIcon v-if="p.id !== 'all'" :platform="p.id" class="w-3.5 h-3.5 shrink-0" />
+            <span>{{ p.label }}</span>
+          </button>
         </div>
-        <h3 class="text-lg font-semibold text-white mb-1">No Applications Found</h3>
-        <p class="text-slate-400 text-sm max-w-md mx-auto mb-6">
-          {{ searchQuery ? 'No applications match your search query.' : 'Applications released on GitHub will automatically appear here once synchronized.' }}
-        </p>
-        <NuxtLink to="/dashboard/apps" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 text-sm font-medium transition-colors">
-          <UIcon name="i-carbon-settings" class="w-4 h-4" />
-          <span>Manage Repositories in Dashboard</span>
-        </NuxtLink>
+
+        <div class="text-xs font-mono text-zinc-400 flex items-center gap-2">
+          <span>Showing {{ filteredApps.length }} of {{ apps.length }} apps</span>
+        </div>
       </div>
+    </div>
 
-      <!-- Apps Grid -->
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div
-          v-for="app in filteredApps"
-          :key="app.id"
-          class="group relative rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-900/50 border border-white/10 p-6 flex flex-col justify-between hover:border-cyan-500/40 hover:shadow-xl hover:shadow-cyan-500/5 transition-all duration-300"
-        >
-          <!-- Card Top: Icon & Basic Info -->
-          <div>
-            <div class="flex items-start gap-4 mb-4">
-              <!-- App Icon -->
-              <div class="w-16 h-16 rounded-2xl bg-slate-800 border border-white/10 p-1 flex-shrink-0 flex items-center justify-center shadow-md overflow-hidden group-hover:scale-105 transition-transform">
-                <img
-                  v-if="app.icon_url"
-                  :src="app.icon_url"
-                  :alt="app.app_name"
-                  class="w-full h-full object-cover rounded-xl"
-                  @error="(e: any) => e.target.style.display = 'none'"
-                />
-                <UIcon v-else name="i-carbon-application-mobile" class="w-8 h-8 text-cyan-400" />
-              </div>
+    <!-- Loading State -->
+    <div v-if="pending" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div v-for="i in 4" :key="i" class="h-64 rounded-2xl bg-[#141417]/50 border border-white/5 animate-pulse"></div>
+    </div>
 
-              <!-- Titles & Badges -->
-              <div class="flex-1 min-w-0">
-                <h3 class="text-lg font-bold text-white truncate group-hover:text-cyan-400 transition-colors">
+    <!-- Empty State -->
+    <div v-else-if="filteredApps.length === 0" class="text-center py-20 rounded-2xl border border-dashed border-white/10 bg-[#141417]/40">
+      <div class="w-16 h-16 rounded-2xl bg-zinc-900 border border-white/10 flex items-center justify-center mx-auto mb-4 text-zinc-400">
+        <Icon name="carbon:application-mobile" size="32" />
+      </div>
+      <h3 class="text-lg font-bold text-white mb-1">No Applications Found</h3>
+      <p class="text-zinc-400 text-xs sm:text-sm max-w-md mx-auto mb-6">
+        {{ searchQuery ? 'No applications match your search query.' : 'Applications released on GitHub will automatically appear here once synchronized.' }}
+      </p>
+      <NuxtLink to="/dashboard/apps" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-white border border-white/10 text-xs font-mono transition-colors">
+        <Icon name="carbon:settings" size="14" />
+        <span>Manage Repositories in Dashboard</span>
+      </NuxtLink>
+    </div>
+
+    <!-- Apps Grid -->
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 items-stretch">
+      <div
+        v-for="app in filteredApps"
+        :key="app.id"
+        class="rounded-2xl bg-[#141417]/80 border border-white/10 hover:border-white/25 p-5 sm:p-6 transition-all duration-300 flex flex-col justify-between group shadow-xl hover:-translate-y-0.5"
+      >
+        <!-- Card Top: Icon & Basic Info -->
+        <div class="space-y-4">
+          <div class="flex items-start gap-4">
+            <!-- App Icon -->
+            <div class="w-14 h-14 rounded-2xl bg-zinc-900 border border-white/15 p-1 shrink-0 flex items-center justify-center shadow-md overflow-hidden group-hover:scale-105 transition-transform">
+              <img
+                v-if="app.icon_url"
+                :src="app.icon_url"
+                :alt="app.app_name"
+                class="w-full h-full object-cover rounded-xl"
+                @error="(e: any) => e.target.style.display = 'none'"
+              />
+              <Icon v-else name="carbon:application-mobile" size="24" class="text-zinc-400" />
+            </div>
+
+            <!-- Titles & Badges -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-2">
+                <h3 class="text-base sm:text-lg font-bold text-white truncate group-hover:text-zinc-200 transition-colors">
                   {{ app.app_name }}
                 </h3>
-                <p class="text-xs text-slate-400 font-mono truncate mb-2">
-                  {{ app.package_name }}
-                </p>
-                <div class="flex flex-wrap items-center gap-1.5">
-                  <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 text-xs font-semibold font-mono">
-                    v{{ app.latest_version_name || '1.0.0' }}
-                  </span>
-
-                  <!-- Status Badge -->
+                <!-- Status Badge -->
+                <span
+                  :class="[
+                    'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold font-mono border shrink-0',
+                    (app.status || 'development') === 'production'
+                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                      : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                  ]"
+                >
                   <span
                     :class="[
-                      'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold font-mono border',
-                      (app.status || 'development') === 'production'
-                        ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
-                        : 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+                      'w-1.5 h-1.5 rounded-full',
+                      (app.status || 'development') === 'production' ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'
                     ]"
-                  >
-                    <span
-                      :class="[
-                        'w-1.5 h-1.5 rounded-full',
-                        (app.status || 'development') === 'production' ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'
-                      ]"
-                    />
-                    {{ (app.status || 'development') === 'production' ? 'Full Release' : 'Development' }}
-                  </span>
-
-                  <span v-if="app.latest_release?.file_size_bytes" class="text-[11px] text-slate-400 font-mono">
-                    {{ formatFileSize(app.latest_release.file_size_bytes) }}
-                  </span>
-                </div>
-
-                <!-- Platform Badges -->
-                <div class="flex flex-wrap items-center gap-1 pt-1.5">
-                  <span
-                    v-for="plat in (app.supported_platforms || ['android'])"
-                    :key="plat"
-                    class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[10px] font-mono text-slate-300 uppercase"
-                  >
-                    <PlatformIcon :platform="plat" class="w-3 h-3 text-cyan-400 shrink-0" />
-                    <span>{{ plat }}</span>
-                  </span>
-                </div>
+                  />
+                  {{ (app.status || 'development') === 'production' ? 'Full Release' : 'Development' }}
+                </span>
               </div>
-            </div>
 
-            <!-- Description -->
-            <p v-if="app.description" class="text-xs text-slate-400 line-clamp-2 mb-4">
-              {{ app.description }}
-            </p>
-            <p v-else class="text-xs text-slate-500 italic mb-4">
-              Synced from repository: {{ app.repo_slug }}
-            </p>
+              <p class="text-xs text-zinc-500 font-mono truncate mt-0.5">
+                {{ app.package_name }}
+              </p>
 
-            <!-- Metadata Pills -->
-            <div class="grid grid-cols-2 gap-2 text-[11px] bg-slate-950/60 rounded-xl p-2.5 border border-white/5 mb-5 font-mono">
-              <div class="text-slate-400">
-                <span>Released: </span>
-                <span class="text-slate-200">{{ formatDate(app.latest_release?.published_at) }}</span>
+              <div class="flex flex-wrap items-center gap-1.5 pt-2">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-white/5 text-zinc-300 border border-white/10 text-[11px] font-mono">
+                  v{{ app.latest_version_name || '1.0.0' }}
+                </span>
+
+                <span v-if="app.latest_release?.file_size_bytes" class="text-[11px] text-zinc-500 font-mono">
+                  {{ formatFileSize(app.latest_release.file_size_bytes) }}
+                </span>
               </div>
-              <div class="text-slate-400 text-right">
-                <span>Downloads: </span>
-                <span class="text-emerald-400 font-semibold">{{ app.download_count }}x</span>
+
+              <!-- Platform Badges -->
+              <div class="flex flex-wrap items-center gap-1 pt-2">
+                <span
+                  v-for="plat in (app.supported_platforms || ['android'])"
+                  :key="plat"
+                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/[0.03] border border-white/5 text-[10px] font-mono text-zinc-400 uppercase"
+                >
+                  <PlatformIcon :platform="plat" class="w-3 h-3 text-zinc-400 shrink-0" />
+                  <span>{{ plat }}</span>
+                </span>
               </div>
             </div>
           </div>
 
-          <!-- Card Bottom: Actions -->
-          <div class="space-y-2 pt-2 border-t border-white/5">
-            <!-- Direct Download Buttons -->
-            <div v-if="(app.supported_platforms && app.supported_platforms.length > 1)" class="space-y-1.5">
-              <div class="text-[10px] uppercase font-mono text-slate-400 font-semibold tracking-wider flex items-center justify-between">
-                <span>Download Build</span>
-                <span class="text-cyan-400">{{ app.supported_platforms.length }} OS</span>
-              </div>
-              <div class="grid grid-cols-2 gap-1.5">
-                <a
-                  v-for="plat in app.supported_platforms"
-                  :key="plat"
-                  :href="`/api/v1/apps/${app.package_name}/download?platform=${plat}`"
-                  class="inline-flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl bg-gradient-to-r from-cyan-500/15 to-blue-600/15 hover:from-cyan-500 hover:to-blue-600 text-cyan-300 hover:text-white font-medium text-xs border border-cyan-500/25 transition-all cursor-pointer truncate"
-                >
-                  <PlatformIcon :platform="plat" class="w-3.5 h-3.5 shrink-0" />
-                  <span class="capitalize truncate">{{ plat }}</span>
-                </a>
-              </div>
+          <!-- Description -->
+          <p v-if="app.description" class="text-xs sm:text-sm text-zinc-400 line-clamp-2 leading-relaxed">
+            {{ app.description }}
+          </p>
+          <p v-else class="text-xs text-zinc-500 italic">
+            Synced from repository: {{ app.repo_slug }}
+          </p>
+
+          <!-- Metadata Bar -->
+          <div class="grid grid-cols-2 gap-2 text-xs bg-black/40 rounded-xl p-2.5 border border-white/5 font-mono">
+            <div class="text-zinc-400">
+              <span class="text-zinc-500">Released: </span>
+              <span class="text-zinc-200">{{ formatDate(app.latest_release?.published_at) }}</span>
             </div>
-            <a
-              v-else
-              :href="`/api/v1/apps/${app.package_name}/download?platform=${(app.supported_platforms && app.supported_platforms[0]) || 'android'}`"
-              class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium text-sm shadow-lg shadow-cyan-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-            >
-              <PlatformIcon :platform="(app.supported_platforms && app.supported_platforms[0]) || 'android'" class="w-4 h-4 shrink-0" />
-              <span>{{ getDownloadButtonLabel((app.supported_platforms && app.supported_platforms[0]) || 'android') }}</span>
-            </a>
-
-            <!-- Official Store or Testing Actions (Release prioritized; Testing only if not released) -->
-            <div
-              v-if="getAppStoreActions(app).length > 0"
-              class="grid gap-1.5"
-              :class="getAppStoreActions(app).length > 1 ? 'grid-cols-2' : 'grid-cols-1'"
-            >
-              <template v-for="action in getAppStoreActions(app)" :key="action.label">
-                <!-- Release Direct Link -->
-                <a
-                  v-if="action.type === 'link'"
-                  :href="action.url"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  :class="[
-                    'inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer truncate shadow-sm group/store',
-                    action.class
-                  ]"
-                  :title="`Open in ${action.label}`"
-                >
-                  <UIcon :name="action.icon" class="w-3.5 h-3.5 shrink-0" />
-                  <span class="truncate">{{ action.label }}</span>
-                  <UIcon name="i-carbon-launch" class="w-3 h-3 opacity-60 group-hover/store:opacity-100 shrink-0 ml-0.5" />
-                </a>
-
-                <!-- Beta Testing Button (Only shown if NOT released) -->
-                <button
-                  v-else
-                  @click="openBetaModal(app, action.platform)"
-                  :class="[
-                    'inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer truncate shadow-sm',
-                    action.class
-                  ]"
-                >
-                  <UIcon :name="action.icon" class="w-3.5 h-3.5 shrink-0" />
-                  <span class="truncate">{{ action.label }}</span>
-                </button>
-              </template>
-            </div>
-
-            <!-- Secondary Actions: QR Code & Details -->
-            <div class="grid grid-cols-2 gap-2">
-              <button
-                @click="openQrModal(app)"
-                class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 text-xs font-medium border border-white/5 transition-colors cursor-pointer"
-              >
-                <UIcon name="i-carbon-qr-code" class="w-3.5 h-3.5 text-cyan-400" />
-                <span>Scan QR</span>
-              </button>
-              <button
-                @click="openDetailModal(app)"
-                class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 text-xs font-medium border border-white/5 transition-colors cursor-pointer"
-              >
-                <UIcon name="i-carbon-document-view" class="w-3.5 h-3.5 text-blue-400" />
-                <span>Changelog</span>
-              </button>
+            <div class="text-zinc-400 text-right">
+              <span class="text-zinc-500">Downloads: </span>
+              <span class="text-white font-semibold">{{ app.download_count }}x</span>
             </div>
           </div>
         </div>
+
+        <!-- Card Bottom: Actions -->
+        <div class="space-y-2.5 pt-4 mt-4 border-t border-white/10">
+          <!-- Direct Download Buttons -->
+          <div v-if="(app.supported_platforms && app.supported_platforms.length > 1)" class="space-y-1.5">
+            <div class="text-[10px] uppercase font-mono text-zinc-500 font-semibold tracking-wider flex items-center justify-between">
+              <span>Download Build</span>
+              <span class="text-zinc-400">{{ app.supported_platforms.length }} OS</span>
+            </div>
+            <div class="grid grid-cols-2 gap-1.5">
+              <a
+                v-for="plat in app.supported_platforms"
+                :key="plat"
+                :href="`/api/v1/apps/${app.package_name}/download?platform=${plat}`"
+                class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 hover:text-white font-medium text-xs border border-white/10 transition-colors cursor-pointer truncate"
+              >
+                <PlatformIcon :platform="plat" class="w-3.5 h-3.5 shrink-0" />
+                <span class="capitalize truncate">{{ plat }}</span>
+              </a>
+            </div>
+          </div>
+          <a
+            v-else
+            :href="`/api/v1/apps/${app.package_name}/download?platform=${(app.supported_platforms && app.supported_platforms[0]) || 'android'}`"
+            class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white text-black font-semibold text-xs sm:text-sm shadow-md hover:bg-zinc-200 transition-colors cursor-pointer"
+          >
+            <PlatformIcon :platform="(app.supported_platforms && app.supported_platforms[0]) || 'android'" class="w-4 h-4 shrink-0" />
+            <span>{{ getDownloadButtonLabel((app.supported_platforms && app.supported_platforms[0]) || 'android') }}</span>
+          </a>
+
+          <!-- Official Store or Testing Actions -->
+          <div
+            v-if="getAppStoreActions(app).length > 0"
+            class="grid gap-1.5"
+            :class="getAppStoreActions(app).length > 1 ? 'grid-cols-2' : 'grid-cols-1'"
+          >
+            <template v-for="action in getAppStoreActions(app)" :key="action.label">
+              <!-- Release Direct Link -->
+              <a
+                v-if="action.type === 'link'"
+                :href="action.url"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white text-xs font-medium border border-white/10 transition-colors cursor-pointer truncate shadow-sm group/store"
+                :title="`Open in ${action.label}`"
+              >
+                <Icon :name="action.icon" size="14" class="shrink-0" />
+                <span class="truncate">{{ action.label }}</span>
+                <Icon name="carbon:launch" size="12" class="opacity-60 group-hover/store:opacity-100 shrink-0 ml-0.5" />
+              </a>
+
+              <!-- Beta Testing Button -->
+              <button
+                v-else
+                @click="openBetaModal(app, action.platform)"
+                class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white text-xs font-medium border border-white/10 transition-colors cursor-pointer truncate shadow-sm"
+              >
+                <Icon :name="action.icon" size="14" class="shrink-0" />
+                <span class="truncate">{{ action.label }}</span>
+              </button>
+            </template>
+          </div>
+
+          <!-- Secondary Actions: QR Code & Changelog Details -->
+          <div class="grid grid-cols-2 gap-2">
+            <button
+              @click="openQrModal(app)"
+              class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white text-xs font-mono border border-white/10 transition-colors cursor-pointer"
+            >
+              <Icon name="carbon:qr-code" size="14" class="text-zinc-400" />
+              <span>Scan QR</span>
+            </button>
+            <button
+              @click="openDetailModal(app)"
+              class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white text-xs font-mono border border-white/10 transition-colors cursor-pointer"
+            >
+              <Icon name="carbon:document-view" size="14" class="text-zinc-400" />
+              <span>Changelog</span>
+            </button>
+          </div>
+        </div>
       </div>
-    </main>
+    </div>
 
     <!-- QR Code Scanner Modal -->
     <div
       v-if="activeQrApp"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
       @click.self="activeQrApp = null"
     >
-      <div class="bg-slate-900 border border-white/10 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
+      <div class="bg-[#141417] border border-white/10 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative text-white">
         <button
           @click="activeQrApp = null"
-          class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
+          class="absolute top-4 right-4 p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
         >
-          <UIcon name="i-carbon-close" class="w-5 h-5" />
+          <Icon name="carbon:close" size="18" />
         </button>
 
-        <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mx-auto mb-3 text-cyan-400">
-          <UIcon name="i-carbon-qr-code" class="w-6 h-6" />
+        <div class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-3 text-zinc-300">
+          <Icon name="carbon:qr-code" size="22" />
         </div>
 
         <h3 class="text-lg font-bold text-white mb-1">Scan to Download on Mobile</h3>
-        <p class="text-xs text-slate-400 mb-5">
-          Point your Android camera or QR code scanner at this code to download <strong class="text-white">{{ activeQrApp.app_name }}</strong> directly to your device.
+        <p class="text-xs text-zinc-400 mb-5 leading-relaxed">
+          Point your device camera at this QR code to download <strong class="text-white">{{ activeQrApp.app_name }}</strong> directly.
         </p>
 
         <!-- QR Code Display -->
@@ -358,15 +340,15 @@
           />
         </div>
 
-        <p class="text-[11px] font-mono text-slate-400 break-all bg-slate-950/80 px-3 py-2 rounded-lg border border-white/5 mb-4">
+        <p class="text-[11px] font-mono text-zinc-400 break-all bg-black/60 px-3 py-2 rounded-lg border border-white/10 mb-4">
           {{ getFullDownloadUrl(activeQrApp) }}
         </p>
 
         <button
           @click="copyUrl(getFullDownloadUrl(activeQrApp))"
-          class="w-full py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 font-medium border border-white/10 flex items-center justify-center gap-1.5 transition-colors"
+          class="w-full py-2.5 px-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-xs text-zinc-200 hover:text-white font-mono border border-white/10 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
         >
-          <UIcon :name="copied ? 'i-carbon-checkmark' : 'i-carbon-copy'" class="w-4 h-4 text-cyan-400" />
+          <Icon :name="copied ? 'carbon:checkmark' : 'carbon:copy'" size="14" class="text-zinc-300" />
           <span>{{ copied ? 'Link Copied!' : 'Copy Download Link' }}</span>
         </button>
       </div>
@@ -375,26 +357,26 @@
     <!-- App Detail / Changelog Modal -->
     <div
       v-if="selectedAppDetail"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
       @click.self="selectedAppDetail = null"
     >
-      <div class="bg-slate-900 border border-white/10 rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative max-h-[88vh] flex flex-col">
+      <div class="bg-[#141417] border border-white/10 rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative max-h-[88vh] flex flex-col text-white">
         <button
           @click="selectedAppDetail = null"
-          class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors z-10 cursor-pointer"
+          class="absolute top-4 right-4 p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors z-10 cursor-pointer"
         >
-          <UIcon name="i-carbon-close" class="w-5 h-5" />
+          <Icon name="carbon:close" size="18" />
         </button>
 
         <!-- Header -->
         <div class="flex items-center gap-4 pb-4 border-b border-white/10 shrink-0">
-          <div class="w-14 h-14 rounded-2xl bg-slate-800 border border-white/10 p-1 flex items-center justify-center shrink-0">
+          <div class="w-14 h-14 rounded-2xl bg-zinc-900 border border-white/10 p-1 flex items-center justify-center shrink-0">
             <img
               v-if="selectedAppDetail.icon_url"
               :src="selectedAppDetail.icon_url"
               class="w-full h-full object-cover rounded-xl"
             />
-            <UIcon v-else name="i-carbon-application-mobile" class="w-7 h-7 text-cyan-400" />
+            <Icon v-else name="carbon:application-mobile" size="24" class="text-zinc-400" />
           </div>
           <div class="min-w-0 pr-8">
             <div class="flex items-center gap-2 mb-1">
@@ -403,8 +385,8 @@
                 :class="[
                   'text-[10px] px-2.5 py-0.5 rounded-full font-mono font-bold uppercase tracking-wider border flex items-center gap-1 shrink-0',
                   (selectedAppDetail.status || 'development') === 'production'
-                    ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
-                    : 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                    : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                 ]"
               >
                 <span
@@ -416,7 +398,7 @@
                 {{ (selectedAppDetail.status || 'development') === 'production' ? 'Full Release' : 'Development' }}
               </span>
             </div>
-            <p class="text-xs text-slate-400 font-mono truncate">{{ selectedAppDetail.package_name }}</p>
+            <p class="text-xs text-zinc-500 font-mono truncate">{{ selectedAppDetail.package_name }}</p>
           </div>
         </div>
 
@@ -427,12 +409,13 @@
             v-if="(selectedAppDetail.status || 'development') === 'development'"
             class="flex items-center gap-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs"
           >
-            <UIcon name="i-carbon-warning-alt" class="w-4 h-4 shrink-0 text-amber-400" />
+            <Icon name="carbon:warning-alt" size="16" class="shrink-0 text-amber-400" />
             <span>This build is currently in <strong>Development / Testing</strong> status. You can download and test this APK directly on your device.</span>
           </div>
-          <!-- Multi-version Switcher (if app has multiple releases) -->
+
+          <!-- Multi-version Switcher -->
           <div v-if="selectedAppDetail.releases && selectedAppDetail.releases.length > 1">
-            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Available Versions</h4>
+            <h4 class="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2 font-mono">Available Versions</h4>
             <div class="flex items-center gap-2 overflow-x-auto pb-1">
               <button
                 v-for="(rel, idx) in selectedAppDetail.releases"
@@ -441,8 +424,8 @@
                 :class="[
                   'px-3 py-1.5 rounded-xl text-xs font-mono font-medium transition-all shrink-0 cursor-pointer',
                   selectedReleaseIndex === idx
-                    ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/25'
-                    : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700/80 border border-white/5'
+                    ? 'bg-white text-black font-semibold shadow-sm'
+                    : 'bg-white/[0.04] text-zinc-400 hover:text-white border border-white/10'
                 ]"
               >
                 v{{ rel.version_name || rel.tag_name }}
@@ -453,38 +436,38 @@
 
           <!-- Active Release Details -->
           <div>
-            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Release Information</h4>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs bg-slate-950/80 p-3 rounded-xl border border-white/5 font-mono">
+            <h4 class="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2 font-mono">Release Information</h4>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs bg-black/60 p-3.5 rounded-xl border border-white/10 font-mono">
               <div>
-                <span class="text-slate-400 block text-[10px] uppercase font-sans">Version</span>
-                <span class="text-cyan-400 font-bold">v{{ currentRelease?.version_name || selectedAppDetail.latest_version_name }}</span>
+                <span class="text-zinc-500 block text-[10px] uppercase font-sans">Version</span>
+                <span class="text-white font-bold">v{{ currentRelease?.version_name || selectedAppDetail.latest_version_name }}</span>
               </div>
               <div>
-                <span class="text-slate-400 block text-[10px] uppercase font-sans">Build Code</span>
-                <span class="text-slate-200">{{ currentRelease?.version_code || selectedAppDetail.latest_version_code }}</span>
+                <span class="text-zinc-500 block text-[10px] uppercase font-sans">Build Code</span>
+                <span class="text-zinc-300">{{ currentRelease?.version_code || selectedAppDetail.latest_version_code }}</span>
               </div>
               <div>
-                <span class="text-slate-400 block text-[10px] uppercase font-sans">File Size</span>
-                <span class="text-slate-200">{{ formatFileSize(currentRelease?.file_size_bytes) }}</span>
+                <span class="text-zinc-500 block text-[10px] uppercase font-sans">File Size</span>
+                <span class="text-zinc-300">{{ formatFileSize(currentRelease?.file_size_bytes) }}</span>
               </div>
               <div>
-                <span class="text-slate-400 block text-[10px] uppercase font-sans">Min / Target SDK</span>
-                <span class="text-slate-200">{{ currentRelease?.target_sdk ? `API ${currentRelease.target_sdk}` : (currentRelease?.min_sdk ? `SDK ${currentRelease.min_sdk}+` : '-') }}</span>
+                <span class="text-zinc-500 block text-[10px] uppercase font-sans">Min / Target SDK</span>
+                <span class="text-zinc-300">{{ currentRelease?.target_sdk ? `API ${currentRelease.target_sdk}` : (currentRelease?.min_sdk ? `SDK ${currentRelease.min_sdk}+` : '-') }}</span>
               </div>
             </div>
           </div>
 
           <!-- Checksum -->
           <div v-if="currentRelease?.sha256_hash">
-            <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">SHA-256 Checksum</h4>
-            <div class="text-[11px] font-mono text-slate-400 bg-slate-950/80 p-2.5 rounded-xl border border-white/5 break-all flex items-center justify-between gap-2">
+            <h4 class="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1 font-mono">SHA-256 Checksum</h4>
+            <div class="text-[11px] font-mono text-zinc-400 bg-black/60 p-2.5 rounded-xl border border-white/10 break-all flex items-center justify-between gap-2">
               <span class="truncate">{{ currentRelease.sha256_hash }}</span>
               <button
                 @click="copyUrl(currentRelease.sha256_hash)"
-                class="text-cyan-400 hover:text-cyan-300 shrink-0 cursor-pointer"
+                class="text-zinc-300 hover:text-white shrink-0 cursor-pointer"
                 title="Copy SHA-256 Hash"
               >
-                <UIcon :name="copied ? 'i-carbon-checkmark' : 'i-carbon-copy'" class="w-4 h-4" />
+                <Icon :name="copied ? 'carbon:checkmark' : 'carbon:copy'" size="14" />
               </button>
             </div>
           </div>
@@ -492,21 +475,21 @@
           <!-- Release Notes & Changelog (Rendered Markdown) -->
           <div>
             <div class="flex items-center justify-between mb-2">
-              <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Release Notes & Changelog</h4>
-              <span v-if="currentRelease?.published_at" class="text-[11px] text-slate-400">
+              <h4 class="text-xs font-semibold text-zinc-400 uppercase tracking-wider font-mono">Release Notes & Changelog</h4>
+              <span v-if="currentRelease?.published_at" class="text-[11px] text-zinc-500 font-mono">
                 Released on {{ formatDate(currentRelease.published_at) }}
               </span>
             </div>
 
-            <!-- Beautiful Markdown Output -->
+            <!-- Markdown Output -->
             <div
               v-if="currentRelease?.changelog"
-              class="bg-slate-950/70 p-4 rounded-xl border border-white/10 changelog-prose max-h-72 overflow-y-auto"
+              class="bg-black/60 p-4 rounded-xl border border-white/10 changelog-prose max-h-72 overflow-y-auto"
               v-html="renderMarkdown(currentRelease.changelog)"
             />
             <div
               v-else
-              class="bg-slate-950/50 p-6 rounded-xl border border-white/5 text-xs text-slate-400 italic text-center"
+              class="bg-black/40 p-6 rounded-xl border border-white/5 text-xs text-zinc-500 italic text-center"
             >
               No release notes provided for this version.
             </div>
@@ -515,8 +498,8 @@
 
         <!-- Footer / Download Action -->
         <div class="mt-4 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 shrink-0">
-          <div class="text-xs text-slate-400">
-            Total app downloads: <span class="text-emerald-400 font-bold font-mono">{{ selectedAppDetail.download_count }}x</span>
+          <div class="text-xs text-zinc-400 font-mono">
+            Total downloads: <span class="text-white font-bold">{{ selectedAppDetail.download_count }}x</span>
           </div>
           <div class="flex flex-wrap items-center gap-2">
             <!-- Google Play Store Direct Link -->
@@ -525,12 +508,12 @@
               :href="selectedAppDetail.play_store_url"
               target="_blank"
               rel="noopener noreferrer"
-              class="px-3.5 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 hover:text-white border border-emerald-500/25 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+              class="px-3.5 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white border border-white/10 text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
               title="Open in Google Play Store"
             >
-              <UIcon name="i-carbon-logo-google" class="w-4 h-4 text-emerald-400" />
+              <Icon name="carbon:logo-google" size="14" />
               <span>Google Play</span>
-              <UIcon name="i-carbon-launch" class="w-3 h-3 opacity-60" />
+              <Icon name="carbon:launch" size="12" class="opacity-60" />
             </a>
 
             <!-- Apple App Store Direct Link -->
@@ -539,12 +522,12 @@
               :href="selectedAppDetail.app_store_url"
               target="_blank"
               rel="noopener noreferrer"
-              class="px-3.5 py-2 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 hover:text-white border border-sky-500/25 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+              class="px-3.5 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white border border-white/10 text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
               title="Open in Apple App Store"
             >
-              <UIcon name="i-carbon-apple" class="w-4 h-4 text-sky-400" />
+              <Icon name="carbon:apple" size="14" />
               <span>App Store</span>
-              <UIcon name="i-carbon-launch" class="w-3 h-3 opacity-60" />
+              <Icon name="carbon:launch" size="12" class="opacity-60" />
             </a>
 
             <!-- Apple TestFlight Direct Link -->
@@ -553,28 +536,28 @@
               :href="selectedAppDetail.testflight_url"
               target="_blank"
               rel="noopener noreferrer"
-              class="px-3.5 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 hover:text-white border border-cyan-500/25 text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+              class="px-3.5 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white border border-white/10 text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
               title="Join via Apple TestFlight"
             >
-              <UIcon name="i-carbon-apple" class="w-4 h-4 text-cyan-400" />
+              <Icon name="carbon:apple" size="14" />
               <span>TestFlight</span>
-              <UIcon name="i-carbon-launch" class="w-3 h-3 opacity-60" />
+              <Icon name="carbon:launch" size="12" class="opacity-60" />
             </a>
 
             <!-- Store Beta Pass -->
             <button
               v-if="hasStoreBeta(selectedAppDetail)"
               @click="openBetaModal(selectedAppDetail)"
-              class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-white/10 transition-colors flex items-center gap-1.5 cursor-pointer"
+              class="px-3.5 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white text-xs font-medium border border-white/10 transition-colors flex items-center gap-1.5 cursor-pointer"
             >
-              <UIcon name="i-carbon-badge" class="w-4 h-4 text-cyan-400" />
+              <Icon name="carbon:badge" size="14" />
               <span>Beta Pass (14d)</span>
             </button>
             <a
               v-for="plat in (selectedAppDetail.supported_platforms || ['android'])"
               :key="plat"
               :href="`/api/v1/apps/${selectedAppDetail.package_name}/download?platform=${plat}`"
-              class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-semibold shadow-lg shadow-cyan-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 cursor-pointer"
+              class="px-4 py-2 rounded-xl bg-white text-black font-semibold text-xs shadow-md hover:bg-zinc-200 transition-colors flex items-center gap-2 cursor-pointer"
             >
               <PlatformIcon :platform="plat" class="w-4 h-4 shrink-0" />
               <span>Download for {{ getPlatformLabel(plat) }}</span>
@@ -587,26 +570,26 @@
     <!-- Official Store Invite Modal -->
     <div
       v-if="betaModalApp"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
       @click.self="closeBetaModal"
     >
-      <div class="bg-slate-900 border border-white/10 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+      <div class="bg-[#141417] border border-white/10 rounded-2xl max-w-md w-full p-6 shadow-2xl relative text-white">
         <button
           @click="closeBetaModal"
-          class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors cursor-pointer"
+          class="absolute top-4 right-4 p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
         >
-          <UIcon name="i-carbon-close" class="w-5 h-5" />
+          <Icon name="carbon:close" size="18" />
         </button>
 
         <div class="flex items-center gap-3 mb-4">
-          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
-            <UIcon :name="betaPlatform === 'ios' ? 'i-carbon-apple' : 'i-carbon-logo-google'" class="w-5 h-5" />
+          <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-300">
+            <Icon :name="betaPlatform === 'ios' ? 'carbon:apple' : 'carbon:logo-google'" size="20" />
           </div>
           <div>
             <h3 class="text-base font-bold text-white">
               {{ betaPlatform === 'ios' ? 'Apple TestFlight Invite' : 'Google Play Beta Invite' }}
             </h3>
-            <p class="text-xs text-slate-400">
+            <p class="text-xs text-zinc-400 font-mono">
               {{ betaModalApp.app_name }} • 14-Day {{ betaPlatform === 'ios' ? 'iOS' : 'Android' }} Testing Pass
             </p>
           </div>
@@ -614,7 +597,7 @@
 
         <!-- Step 1: Input Email -->
         <div v-if="betaStep === 1" class="space-y-4">
-          <p class="text-xs text-slate-300 leading-relaxed">
+          <p class="text-xs text-zinc-300 leading-relaxed">
             {{
               betaPlatform === 'ios'
                 ? 'Get an official TestFlight invite sent directly by Apple to your inbox to install securely on your iPhone or iPad.'
@@ -622,17 +605,17 @@
             }}
           </p>
 
-          <div class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-950/60 border border-white/5 text-xs text-slate-300">
-            <UIcon :name="betaPlatform === 'ios' ? 'i-carbon-apple' : 'i-carbon-logo-google'" class="w-4 h-4 text-cyan-400 shrink-0" />
+          <div class="flex items-center gap-2 p-2.5 rounded-xl bg-black/60 border border-white/10 text-xs text-zinc-300 font-mono">
+            <Icon :name="betaPlatform === 'ios' ? 'carbon:apple' : 'carbon:logo-google'" size="16" class="text-zinc-400 shrink-0" />
             <span class="font-medium">
               Platform: {{ betaPlatform === 'ios' ? 'Apple TestFlight (iOS)' : 'Google Play Testing (Android)' }}
             </span>
-            <span class="ml-auto text-[10px] px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-mono font-semibold">14 Days</span>
+            <span class="ml-auto text-[10px] px-2 py-0.5 rounded-md bg-white/10 text-zinc-300 border border-white/10 font-mono font-semibold">14 Days</span>
           </div>
 
           <!-- Email Input -->
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1.5">
+            <label class="block text-xs font-semibold text-zinc-300 mb-1.5">
               {{ betaPlatform === 'ios' ? 'Email (Apple ID recommended) *' : 'Email (Google Play account) *' }}
             </label>
             <input
@@ -640,32 +623,32 @@
               type="email"
               required
               :placeholder="betaPlatform === 'ios' ? 'e.g. appleid@example.com' : 'e.g. account@gmail.com'"
-              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-black/80 border border-white/10 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white/30 transition-colors font-mono"
             />
-            <p class="text-[11px] text-slate-500 mt-1">
+            <p class="text-[11px] text-zinc-500 mt-1">
               A 6-digit confirmation code will be sent to verify your email.
             </p>
           </div>
 
-          <div v-if="betaError" class="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+          <div v-if="betaError" class="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono">
             {{ betaError }}
           </div>
 
           <button
             @click="submitRequestOtp"
             :disabled="betaLoading || !betaEmail"
-            class="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold text-xs transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-cyan-500/20"
+            class="w-full py-2.5 rounded-xl bg-white text-black font-semibold text-xs transition-colors hover:bg-zinc-200 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-md"
           >
-            <UIcon v-if="betaLoading" name="i-carbon-renew" class="w-4 h-4 animate-spin" />
+            <Icon v-if="betaLoading" name="carbon:renew" size="14" class="animate-spin" />
             <span>{{ betaLoading ? 'Sending Confirmation Code...' : 'Send Verification Code' }}</span>
           </button>
 
-          <!-- Direct Link to enter OTP for users who already requested code -->
+          <!-- Direct Link to enter OTP -->
           <div class="text-center pt-1">
             <button
               type="button"
               @click="goToStep2"
-              class="text-[11px] text-cyan-400/90 hover:text-cyan-300 transition-colors cursor-pointer"
+              class="text-[11px] text-zinc-400 hover:text-white transition-colors cursor-pointer"
             >
               Already requested a code? <span class="underline underline-offset-2">Enter verification code</span>
             </button>
@@ -674,18 +657,18 @@
 
         <!-- Step 2: OTP Verification -->
         <div v-else-if="betaStep === 2" class="space-y-4">
-          <div class="flex items-center justify-between text-xs text-slate-300 bg-slate-950/60 p-2.5 rounded-xl border border-white/5">
+          <div class="flex items-center justify-between text-xs text-zinc-300 bg-black/60 p-2.5 rounded-xl border border-white/10 font-mono">
             <span class="truncate">Code sent to: <strong class="text-white">{{ betaEmail }}</strong></span>
             <button
               type="button"
               @click="betaStep = 1; betaError = null;"
-              class="text-cyan-400 hover:text-cyan-300 text-[11px] underline shrink-0 cursor-pointer ml-2"
+              class="text-zinc-300 hover:text-white text-[11px] underline shrink-0 cursor-pointer ml-2"
             >
               Change
             </button>
           </div>
 
-          <p class="text-xs text-slate-400 leading-relaxed">
+          <p class="text-xs text-zinc-400 leading-relaxed">
             Enter the 6-digit confirmation code below to activate your 14-day official pass:
           </p>
 
@@ -695,11 +678,11 @@
               type="text"
               maxlength="6"
               placeholder="123456"
-              class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-cyan-500/40 text-center font-mono font-bold text-xl tracking-[0.4em] text-cyan-300 focus:outline-none focus:border-cyan-400"
+              class="w-full px-4 py-3 rounded-xl bg-black border border-white/20 text-center font-mono font-bold text-xl tracking-[0.4em] text-white focus:outline-none focus:border-white transition-colors"
             />
           </div>
 
-          <div v-if="betaError" class="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+          <div v-if="betaError" class="p-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono">
             {{ betaError }}
           </div>
 
@@ -707,14 +690,14 @@
             <button
               @click="submitVerifyOtp"
               :disabled="betaLoading || betaOtp.length !== 6"
-              class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold text-xs transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-cyan-500/20"
+              class="flex-1 py-2.5 rounded-xl bg-white text-black font-semibold text-xs transition-colors hover:bg-zinc-200 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow-md"
             >
-              <UIcon v-if="betaLoading" name="i-carbon-renew" class="w-4 h-4 animate-spin" />
+              <Icon v-if="betaLoading" name="carbon:renew" size="14" class="animate-spin" />
               <span>{{ betaLoading ? 'Verifying...' : 'Verify & Activate Pass' }}</span>
             </button>
             <button
               @click="betaStep = 1"
-              class="px-3 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs hover:bg-slate-700 transition-colors cursor-pointer"
+              class="px-3.5 py-2.5 rounded-xl bg-white/[0.04] text-zinc-300 text-xs hover:bg-white/[0.08] transition-colors border border-white/10 cursor-pointer"
             >
               Back
             </button>
@@ -725,9 +708,9 @@
               type="button"
               @click="submitRequestOtp"
               :disabled="betaLoading"
-              class="text-[11px] text-slate-400 hover:text-cyan-400 transition-colors cursor-pointer"
+              class="text-[11px] text-zinc-400 hover:text-white transition-colors cursor-pointer font-mono"
             >
-              Didn't receive the code? <span class="text-cyan-400 underline">Resend code</span>
+              Didn't receive the code? <span class="underline">Resend code</span>
             </button>
           </div>
         </div>
@@ -735,27 +718,27 @@
         <!-- Step 3: Success Confirmation -->
         <div v-else-if="betaStep === 3" class="text-center space-y-4 py-2">
           <div class="w-14 h-14 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-400">
-            <UIcon name="i-carbon-checkmark-filled" class="w-8 h-8" />
+            <Icon name="carbon:checkmark-filled" size="28" />
           </div>
 
           <div>
             <h4 class="text-base font-bold text-white mb-1">
               {{ betaPlatform === 'ios' ? 'TestFlight Pass Activated!' : 'Google Play Pass Activated!' }}
             </h4>
-            <p class="text-xs text-slate-300 leading-relaxed max-w-sm mx-auto">
+            <p class="text-xs text-zinc-300 leading-relaxed max-w-sm mx-auto">
               {{ betaSuccessMessage }}
             </p>
           </div>
 
-          <div class="p-3 bg-slate-950/80 rounded-xl border border-white/5 text-left text-xs space-y-1 font-mono">
+          <div class="p-3 bg-black/60 rounded-xl border border-white/10 text-left text-xs space-y-1 font-mono">
             <div>
               Platform: <strong class="text-white">{{ betaPlatform === 'ios' ? 'Apple TestFlight (iOS)' : 'Google Play (Android)' }}</strong>
             </div>
             <div>Valid Until: <strong class="text-emerald-400">{{ formatDate(betaExpiresAt) }}</strong> (14 Days)</div>
-            <div>Recipient: <strong class="text-slate-300">{{ betaEmail }}</strong></div>
+            <div>Recipient: <strong class="text-zinc-300">{{ betaEmail }}</strong></div>
           </div>
 
-          <p class="text-[11px] text-slate-400 italic">
+          <p class="text-[11px] text-zinc-500 italic">
             {{
               betaPlatform === 'ios'
                 ? 'Check your inbox now for the official email from Apple (no_reply@email.apple.com) to install via TestFlight on your iPhone.'
@@ -768,17 +751,17 @@
               :href="betaStoreUrl"
               target="_blank"
               rel="noopener noreferrer"
-              class="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-lg shadow-cyan-500/20 cursor-pointer"
+              class="w-full py-2.5 rounded-xl bg-white text-black font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors hover:bg-zinc-200 shadow-md cursor-pointer"
             >
-              <UIcon :name="betaPlatform === 'ios' ? 'i-carbon-apple' : 'i-carbon-logo-google'" class="w-4 h-4" />
+              <Icon :name="betaPlatform === 'ios' ? 'carbon:apple' : 'carbon:logo-google'" size="16" />
               <span>{{ betaPlatform === 'ios' ? 'Open TestFlight Invitation' : 'Open Google Play Track' }}</span>
-              <UIcon name="i-carbon-launch" class="w-3.5 h-3.5 opacity-80" />
+              <Icon name="carbon:launch" size="14" class="opacity-80" />
             </a>
           </div>
 
           <button
             @click="closeBetaModal"
-            class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition-colors cursor-pointer"
+            class="w-full py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-white text-xs font-semibold border border-white/10 transition-colors cursor-pointer"
           >
             Done
           </button>
@@ -803,10 +786,10 @@ if (!isApkStoreEnabled.value) {
 const { renderMarkdown } = useMarkdown();
 
 useSeoMeta({
-  title: "Android Apps & APK Releases | Eka Portfolio",
-  description: "Download official Android APK release binaries directly from GitHub releases.",
-  ogTitle: "Android Apps & APK Releases | Eka Portfolio",
-  ogDescription: "Curated collection of Android applications ready for direct APK download with automated GitHub synchronization.",
+  title: "Software & Mobile Applications | Eka Portfolio",
+  description: "Curated collection of cross-platform applications and direct binaries with automated GitHub release sync.",
+  ogTitle: "Software & Mobile Applications | Eka Portfolio",
+  ogDescription: "Curated collection of cross-platform applications and direct binaries with automated GitHub release sync.",
 });
 
 const { data: response, pending } = await useFetch<any>("/api/v1/apps");
@@ -846,30 +829,12 @@ const selectedStatusFilter = ref<"all" | "production" | "development">("all");
 const selectedPlatformFilter = ref<"all" | "android" | "windows" | "macos" | "linux">("all");
 
 const platformFilters = [
-  { id: "all", label: "All Platforms", icon: undefined },
-  { id: "windows", label: "Windows", icon: "simple-icons:windows" },
-  { id: "macos", label: "macOS", icon: "simple-icons:apple" },
-  { id: "android", label: "Android", icon: "simple-icons:android" },
-  { id: "linux", label: "Linux", icon: "simple-icons:linux" },
+  { id: "all", label: "All Platforms" },
+  { id: "windows", label: "Windows" },
+  { id: "macos", label: "macOS" },
+  { id: "android", label: "Android" },
+  { id: "linux", label: "Linux" },
 ];
-
-const getPlatformIcon = (plat?: string) => {
-  switch (plat?.toLowerCase()) {
-    case "windows":
-    case "win":
-      return "simple-icons:windows";
-    case "macos":
-    case "mac":
-    case "ios":
-      return "simple-icons:apple";
-    case "linux":
-      return "simple-icons:linux";
-    case "android":
-      return "simple-icons:android";
-    default:
-      return "carbon:application";
-  }
-};
 
 const getPlatformLabel = (plat?: string) => {
   switch (plat?.toLowerCase()) {
@@ -1033,8 +998,8 @@ const getAppStoreActions = (app: any): AppStoreAction[] => {
         url: app.play_store_url,
         platform: "android",
         isRelease: true,
-        icon: "i-carbon-logo-google",
-        class: "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 hover:text-white border-emerald-500/25 hover:border-emerald-500/40",
+        icon: "carbon:logo-google",
+        class: "bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white border border-white/10 hover:border-white/25",
       });
     } else if (app.google_tester_group_email) {
       actions.push({
@@ -1042,8 +1007,8 @@ const getAppStoreActions = (app: any): AppStoreAction[] => {
         label: "Google Play Beta",
         platform: "android",
         isRelease: false,
-        icon: "i-carbon-logo-google",
-        class: "bg-slate-800/80 hover:bg-slate-700/80 text-emerald-300 hover:text-white border-white/10 hover:border-emerald-500/30",
+        icon: "carbon:logo-google",
+        class: "bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white border border-white/10 hover:border-white/25",
       });
     }
   }
@@ -1057,8 +1022,8 @@ const getAppStoreActions = (app: any): AppStoreAction[] => {
         url: app.app_store_url,
         platform: "ios",
         isRelease: true,
-        icon: "i-carbon-apple",
-        class: "bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 hover:text-white border-sky-500/25 hover:border-sky-500/40",
+        icon: "carbon:apple",
+        class: "bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white border border-white/10 hover:border-white/25",
       });
     } else if (app.testflight_url) {
       actions.push({
@@ -1067,8 +1032,8 @@ const getAppStoreActions = (app: any): AppStoreAction[] => {
         url: app.testflight_url,
         platform: "ios",
         isRelease: false,
-        icon: "i-carbon-apple",
-        class: "bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 hover:text-white border-cyan-500/25 hover:border-cyan-500/40",
+        icon: "carbon:apple",
+        class: "bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white border border-white/10 hover:border-white/25",
       });
     } else if (app.apple_beta_group_id) {
       actions.push({
@@ -1076,8 +1041,8 @@ const getAppStoreActions = (app: any): AppStoreAction[] => {
         label: "Apple TestFlight",
         platform: "ios",
         isRelease: false,
-        icon: "i-carbon-apple",
-        class: "bg-slate-800/80 hover:bg-slate-700/80 text-cyan-300 hover:text-white border-white/10 hover:border-cyan-500/30",
+        icon: "carbon:apple",
+        class: "bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white border border-white/10 hover:border-white/25",
       });
     }
   }

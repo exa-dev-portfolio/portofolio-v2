@@ -169,7 +169,10 @@ onUnmounted(() => {
           <NuxtLink
             v-if="isApkStoreEnabled"
             to="/apps"
-            class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 text-xs font-medium text-zinc-300 hover:text-white transition-all cursor-pointer"
+            class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-all cursor-pointer"
+            :class="route.path === '/apps'
+              ? 'bg-white text-black font-semibold shadow-sm border-white'
+              : 'bg-white/5 border-white/10 hover:bg-white/10 text-zinc-300 hover:text-white'"
           >
             <Icon name="carbon:application-mobile" size="14" />
             <span>Apps</span>
@@ -219,6 +222,20 @@ onUnmounted(() => {
         >
           {{ item.name }}
         </button>
+
+        <NuxtLink
+          v-if="isApkStoreEnabled"
+          to="/apps"
+          @click="closeMobileMenu"
+          class="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium transition-colors cursor-pointer"
+          :class="route.path === '/apps' ? 'bg-white text-black font-semibold' : 'text-zinc-300 hover:text-white bg-white/5 border border-white/5'"
+        >
+          <div class="flex items-center gap-2">
+            <Icon name="carbon:application-mobile" size="16" />
+            <span>Apps Store</span>
+          </div>
+          <Icon name="carbon:arrow-up-right" size="14" class="opacity-60" />
+        </NuxtLink>
 
         <div class="pt-2 border-t border-white/10 flex flex-col gap-2">
           <button
