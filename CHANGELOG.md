@@ -1,3 +1,10 @@
+# [1.13.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.12.0...v1.13.0) (2026-10-21)
+
+
+### Features
+
+* **dashboard:** align admin dashboard and components to Nordic Monochrome theme ([3d9c734](https://github.com/exa-dev-portfolio/portofolio-v2/commit/3d9c734bbd2fa264643e16a8c5a26b6a9b879492))
+
 # [1.12.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.11.0...v1.12.0) (2026-10-20)
 
 
