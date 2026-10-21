@@ -21,14 +21,14 @@ const handleGenerate = async (input: GenerateInput) => {
 </script>
 
 <template>
-    <div class="p-8">
-        <div class="mb-8">
-            <h1 class="text-4xl font-black text-white mb-2">New Application</h1>
-            <p class="text-white/60">Fill in the job details and generate a personalized application email</p>
+    <div class="space-y-8">
+        <div>
+            <h1 class="text-3xl font-bold tracking-tight text-white mb-1">New Application</h1>
+            <p class="text-sm text-zinc-400">Fill in the job details and generate a personalized application email</p>
         </div>
 
         <div class="max-w-2xl">
-            <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6">
+            <div class="bg-[#141417] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-sm">
                 <ApplyInputForm
                     :loading="isGenerating"
                     @submit="handleGenerate"

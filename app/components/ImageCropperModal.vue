@@ -246,8 +246,8 @@ const applyCrop = async () => {
       throw new Error("Could not initialize 2D canvas context");
     }
 
-    // Fill background with elegant dark background (#090e1a) so letterbox looks integrated with dark theme
-    ctx.fillStyle = "#090e1a";
+    // Fill background with Nordic dark canvas (#09090b) so letterbox looks integrated with dark theme
+    ctx.fillStyle = "#09090b";
     ctx.fillRect(0, 0, outputW, outputH);
 
     ctx.imageSmoothingEnabled = true;
@@ -328,17 +328,17 @@ const applyCrop = async () => {
     v-model:open="isOpen"
     :ui="{
       content:
-        'w-full max-w-2xl bg-[#090e1a] border border-white/15 shadow-2xl rounded-3xl overflow-hidden',
-      header: 'p-5 bg-[#0c1424] border-b border-white/10',
+        'w-full max-w-2xl bg-[#141417] border border-white/15 shadow-2xl rounded-3xl overflow-hidden',
+      header: 'p-5 bg-[#18181c] border-b border-white/10',
       body: 'p-5 sm:p-6',
       footer:
-        'p-4 sm:p-5 bg-[#0c1424] border-t border-white/10 flex items-center justify-between',
+        'p-4 sm:p-5 bg-[#18181c] border-t border-white/10 flex items-center justify-between',
     }"
   >
     <template #title>
       <div class="flex items-center gap-2.5">
         <div
-          class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400"
+          class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-zinc-300"
         >
           <Icon name="carbon:crop" size="18" />
         </div>
@@ -346,7 +346,7 @@ const applyCrop = async () => {
           <h2 class="text-base sm:text-lg font-heading font-bold text-white">
             Crop & Optimize Image
           </h2>
-          <p class="text-xs text-slate-400 font-mono">
+          <p class="text-xs text-zinc-400 font-mono">
             Standardize dimensions (16:9) and convert to WebP
           </p>
         </div>
@@ -358,7 +358,7 @@ const applyCrop = async () => {
         <!-- Aspect Ratio Selection & Presets -->
         <div class="flex items-center justify-between flex-wrap gap-2">
           <div class="flex items-center gap-1.5">
-            <span class="text-xs font-mono text-slate-300 mr-1">Preset:</span>
+            <span class="text-xs font-mono text-zinc-400 mr-1">Preset:</span>
             <button
               v-for="ratio in aspectRatios"
               :key="ratio.label"
@@ -367,8 +367,8 @@ const applyCrop = async () => {
               class="px-3 py-1 rounded-lg text-xs font-mono transition-all cursor-pointer"
               :class="
                 selectedRatio === ratio.value
-                  ? 'bg-blue-600 text-white font-semibold shadow-md shadow-blue-500/20'
-                  : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'
+                  ? 'bg-white text-zinc-950 font-semibold shadow-sm'
+                  : 'bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/10'
               "
             >
               {{ ratio.label.split(' ')[0] }}
@@ -380,7 +380,7 @@ const applyCrop = async () => {
             <button
               type="button"
               @click="fitFullImage"
-              class="px-2.5 py-1 rounded-lg text-xs font-mono bg-white/5 hover:bg-white/15 text-blue-300 border border-blue-500/30 flex items-center gap-1 transition-colors cursor-pointer"
+              class="px-2.5 py-1 rounded-lg text-xs font-mono bg-white/5 hover:bg-white/15 text-zinc-300 border border-white/10 hover:border-white/20 flex items-center gap-1 transition-colors cursor-pointer"
               title="Show entire image without cropping"
             >
               <Icon name="carbon:fit-to-screen" size="13" />
@@ -389,7 +389,7 @@ const applyCrop = async () => {
             <button
               type="button"
               @click="fillCoverImage"
-              class="px-2.5 py-1 rounded-lg text-xs font-mono bg-white/5 hover:bg-white/15 text-slate-300 border border-white/10 flex items-center gap-1 transition-colors cursor-pointer"
+              class="px-2.5 py-1 rounded-lg text-xs font-mono bg-white/5 hover:bg-white/15 text-zinc-300 border border-white/10 hover:border-white/20 flex items-center gap-1 transition-colors cursor-pointer"
               title="Cover the entire crop frame"
             >
               <Icon name="carbon:maximize" size="13" />
@@ -401,7 +401,7 @@ const applyCrop = async () => {
         <!-- Interactive Crop Viewport -->
         <div
           ref="containerRef"
-          class="relative w-full h-80 sm:h-96 rounded-2xl bg-slate-950 border border-white/10 overflow-hidden select-none cursor-grab active:cursor-grabbing flex items-center justify-center"
+          class="relative w-full h-80 sm:h-96 rounded-2xl bg-zinc-950 border border-white/10 overflow-hidden select-none cursor-grab active:cursor-grabbing flex items-center justify-center"
           @mousedown="onMouseDown"
           @mousemove="onMouseMove"
           @mouseup="onMouseUp"
@@ -430,7 +430,7 @@ const applyCrop = async () => {
             class="absolute inset-0 pointer-events-none flex items-center justify-center"
           >
             <div
-              class="relative border-2 border-blue-400/80 shadow-[0_0_0_9999px_rgba(5,10,20,0.78)] rounded-lg transition-all duration-200"
+              class="relative border-2 border-white/80 shadow-[0_0_0_9999px_rgba(9,9,11,0.82)] rounded-lg transition-all duration-200"
               :style="{
                 width: `${cropBoxW}px`,
                 height: `${cropBoxH}px`,
@@ -450,16 +450,16 @@ const applyCrop = async () => {
 
               <!-- Corner handles -->
               <span
-                class="absolute -top-1.5 -left-1.5 w-3 h-3 border-t-2 border-l-2 border-blue-400 bg-blue-500"
+                class="absolute -top-1.5 -left-1.5 w-3 h-3 border-t-2 border-l-2 border-white bg-white"
               ></span>
               <span
-                class="absolute -top-1.5 -right-1.5 w-3 h-3 border-t-2 border-r-2 border-blue-400 bg-blue-500"
+                class="absolute -top-1.5 -right-1.5 w-3 h-3 border-t-2 border-r-2 border-white bg-white"
               ></span>
               <span
-                class="absolute -bottom-1.5 -left-1.5 w-3 h-3 border-b-2 border-l-2 border-blue-400 bg-blue-500"
+                class="absolute -bottom-1.5 -left-1.5 w-3 h-3 border-b-2 border-l-2 border-white bg-white"
               ></span>
               <span
-                class="absolute -bottom-1.5 -right-1.5 w-3 h-3 border-b-2 border-r-2 border-blue-400 bg-blue-500"
+                class="absolute -bottom-1.5 -right-1.5 w-3 h-3 border-b-2 border-r-2 border-white bg-white"
               ></span>
             </div>
           </div>
@@ -469,7 +469,7 @@ const applyCrop = async () => {
             class="absolute bottom-3 inset-x-0 text-center pointer-events-none"
           >
             <span
-              class="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 text-[11px] font-mono text-slate-300"
+              class="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm border border-white/10 text-[11px] font-mono text-zinc-300"
             >
               Drag to reposition · Scroll or slider to zoom
             </span>
@@ -484,7 +484,7 @@ const applyCrop = async () => {
             <Icon
               name="carbon:zoom-out"
               size="16"
-              class="text-slate-400 shrink-0"
+              class="text-zinc-400 shrink-0"
             />
             <input
               type="range"
@@ -492,14 +492,14 @@ const applyCrop = async () => {
               :max="maxZoom"
               step="0.02"
               v-model.number="zoom"
-              class="w-full accent-blue-500 cursor-pointer"
+              class="w-full accent-white cursor-pointer"
             />
             <Icon
               name="carbon:zoom-in"
               size="16"
-              class="text-slate-400 shrink-0"
+              class="text-zinc-400 shrink-0"
             />
-            <span class="text-xs font-mono text-slate-300 w-12 text-right">
+            <span class="text-xs font-mono text-zinc-300 w-12 text-right">
               {{ Math.round(zoom * 100) }}%
             </span>
           </div>
@@ -508,13 +508,13 @@ const applyCrop = async () => {
             <button
               type="button"
               @click="resetTransform"
-              class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white text-xs font-mono transition-colors flex items-center gap-1 cursor-pointer"
+              class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white text-xs font-mono transition-colors flex items-center gap-1 cursor-pointer"
             >
               <Icon name="carbon:reset" size="13" />
               <span>Reset</span>
             </button>
 
-            <span class="text-xs font-mono text-blue-400">
+            <span class="text-xs font-mono text-zinc-300">
               {{ currentTargetW }} × {{ currentTargetH }} px (WebP)
             </span>
           </div>
@@ -523,11 +523,11 @@ const applyCrop = async () => {
         <!-- File Size Preview -->
         <div
           v-if="props.imageFile"
-          class="flex items-center justify-between text-xs font-mono text-slate-400 px-1"
+          class="flex items-center justify-between text-xs font-mono text-zinc-400 px-1"
         >
           <span
             >Original:
-            <strong class="text-slate-200">{{
+            <strong class="text-zinc-200">{{
               formatSize(props.imageFile.size)
             }}</strong></span
           >
@@ -540,30 +540,24 @@ const applyCrop = async () => {
     </template>
 
     <template #footer>
-      <UButton
-        color="neutral"
-        variant="ghost"
-        size="sm"
-        @click="
-          () => {
-            isOpen = false;
-          }
-        "
-        class="text-slate-400 hover:text-white cursor-pointer"
+      <button
+        type="button"
+        @click="() => { isOpen = false; }"
+        class="px-4 py-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 text-sm font-medium transition-colors cursor-pointer"
       >
         Cancel
-      </UButton>
+      </button>
 
-      <UButton
-        color="primary"
-        size="sm"
-        :loading="isProcessing"
+      <button
+        type="button"
+        :disabled="isProcessing"
         @click="applyCrop"
-        class="rounded-xl px-5 font-semibold text-white bg-blue-600 hover:bg-blue-500 cursor-pointer shadow-md shadow-blue-500/20 flex items-center gap-2"
+        class="rounded-xl px-5 py-2 font-semibold text-zinc-950 bg-white hover:bg-zinc-200 cursor-pointer shadow-sm flex items-center gap-2 text-sm disabled:opacity-50 transition-all"
       >
-        <Icon name="carbon:checkmark" size="16" />
+        <Icon v-if="isProcessing" name="line-md:loading-loop" size="16" />
+        <Icon v-else name="carbon:checkmark" size="16" />
         <span>Apply & Convert to WebP</span>
-      </UButton>
+      </button>
     </template>
   </UModal>
 </template>

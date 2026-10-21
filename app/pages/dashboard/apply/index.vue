@@ -60,61 +60,64 @@ const handleDelete = async (id: string) => {
 </script>
 
 <template>
-    <div class="p-8">
-        <div class="flex items-center justify-between mb-8">
+    <div class="space-y-8">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-                <h1 class="text-4xl font-black text-white mb-2">Job Applications</h1>
-                <p class="text-white/60">Manage your job applications</p>
+                <h1 class="text-3xl font-bold tracking-tight text-white mb-1">Job Applications</h1>
+                <p class="text-sm text-zinc-400">Track and manage your targeted job applications</p>
             </div>
             <NuxtLink
                 to="/dashboard/apply/new"
-                class="px-5 py-2.5 rounded-lg bg-primary text-white font-semibold hover:brightness-110 transition-all flex items-center gap-2"
+                class="px-5 py-2.5 rounded-xl bg-white text-zinc-950 font-semibold hover:bg-zinc-200 transition-all flex items-center justify-center gap-2 shadow-sm text-sm"
             >
-                <Icon name="carbon:add" size="20"/>
+                <Icon name="carbon:add" size="18"/>
                 New Application
             </NuxtLink>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-            <div class="bg-white/5 border border-white/10 rounded-xl p-4">
-                <p class="text-2xl font-bold text-white">{{ stats.total }}</p>
-                <p class="text-sm text-white/50">Total</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-[#141417] border border-white/10 rounded-2xl p-5 shadow-sm">
+                <p class="text-3xl font-bold text-white tracking-tight">{{ stats.total }}</p>
+                <p class="text-xs font-medium text-zinc-500 mt-1 uppercase tracking-wider">Total Applications</p>
             </div>
-            <div class="bg-white/5 border border-white/10 rounded-xl p-4">
-                <p class="text-2xl font-bold text-yellow-400">{{ stats.draft }}</p>
-                <p class="text-sm text-white/50">Draft</p>
+            <div class="bg-[#141417] border border-white/10 rounded-2xl p-5 shadow-sm">
+                <p class="text-3xl font-bold text-amber-400 tracking-tight">{{ stats.draft }}</p>
+                <p class="text-xs font-medium text-zinc-500 mt-1 uppercase tracking-wider">Drafts</p>
             </div>
-            <div class="bg-white/5 border border-white/10 rounded-xl p-4">
-                <p class="text-2xl font-bold text-green-400">{{ stats.sent }}</p>
-                <p class="text-sm text-white/50">Sent</p>
+            <div class="bg-[#141417] border border-white/10 rounded-2xl p-5 shadow-sm">
+                <p class="text-3xl font-bold text-emerald-400 tracking-tight">{{ stats.sent }}</p>
+                <p class="text-xs font-medium text-zinc-500 mt-1 uppercase tracking-wider">Sent Out</p>
             </div>
         </div>
 
-        <div class="flex gap-2 mb-6">
+        <div class="flex items-center gap-2 border-b border-white/10 pb-4">
             <button
                 v-for="f in (['all', 'draft', 'sent'] as const)"
                 :key="f"
                 @click="filterStatus = f"
                 :class="[
-                    'px-4 py-2 rounded-lg text-sm font-medium transition-all',
+                    'px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all capitalize',
                     filterStatus === f
-                        ? 'bg-primary text-white'
-                        : 'bg-white/10 text-white/60 hover:bg-white/20'
+                        ? 'bg-white text-zinc-950 font-semibold shadow-sm'
+                        : 'bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10 border border-white/10'
                 ]"
             >
-                {{ f.charAt(0).toUpperCase() + f.slice(1) }}
+                {{ f }}
             </button>
         </div>
 
         <div v-if="isLoading" class="flex justify-center py-20">
-            <Icon name="line-md:loading-loop" size="32" class="text-primary"/>
+            <Icon name="line-md:loading-loop" size="32" class="text-zinc-400"/>
         </div>
 
-        <div v-else-if="filteredApps.length === 0" class="text-center py-20">
-            <Icon name="carbon:document" size="48" class="text-white/20 mx-auto mb-4"/>
-            <p class="text-white/50">No applications yet</p>
-            <NuxtLink to="/dashboard/apply/new" class="text-primary hover:underline text-sm mt-2 inline-block">
-                Create your first application
+        <div v-else-if="filteredApps.length === 0" class="text-center py-20 bg-[#141417] border border-white/10 rounded-2xl p-8">
+            <div class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-3 text-zinc-500">
+                <Icon name="carbon:document" size="24"/>
+            </div>
+            <p class="text-zinc-300 font-medium text-sm">No applications found</p>
+            <p class="text-xs text-zinc-500 mt-1">Ready to apply? Create your first application package.</p>
+            <NuxtLink to="/dashboard/apply/new" class="mt-4 inline-flex items-center gap-1.5 text-xs text-white hover:underline font-medium">
+                Create your first application &rarr;
             </NuxtLink>
         </div>
 
@@ -123,35 +126,35 @@ const handleDelete = async (id: string) => {
                 v-for="app in filteredApps"
                 :key="app.id"
                 :to="`/dashboard/apply/${app.id}`"
-                class="block bg-white/5 border border-white/10 rounded-xl p-5 hover:border-primary/50 hover:bg-white/[0.07] transition-all group"
+                class="block bg-[#141417] border border-white/10 rounded-2xl p-5 hover:border-white/20 hover:bg-[#18181c] transition-all group shadow-sm"
             >
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-all">
-                            <Icon name="carbon:building" size="20" class="text-primary"/>
+                        <div class="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-300 group-hover:text-white transition-all">
+                            <Icon name="carbon:building" size="22"/>
                         </div>
                         <div>
-                            <p class="text-white font-semibold">{{ app.company_name }}</p>
-                            <p class="text-white/50 text-sm">{{ app.position }}</p>
+                            <p class="text-white font-semibold group-hover:text-zinc-100 transition-colors">{{ app.company_name }}</p>
+                            <p class="text-zinc-400 text-sm">{{ app.position }}</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-4">
-                        <span class="text-xs text-white/40">{{ formatDate(app.created_at) }}</span>
+                        <span class="text-xs text-zinc-500 hidden sm:inline">{{ formatDate(app.created_at) }}</span>
                         <span
                             :class="[
-                                'px-3 py-1 rounded-full text-xs font-semibold border',
+                                'px-2.5 py-0.5 rounded-full text-[11px] font-medium border',
                                 app.status === 'sent'
-                                    ? 'bg-green-500/20 text-green-400 border-green-500/40'
-                                    : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40'
+                                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                    : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                             ]"
                         >
                             {{ app.status === 'sent' ? 'Sent' : 'Draft' }}
                         </span>
                         <button
                             @click.prevent="handleDelete(app.id)"
-                            class="p-2 rounded-lg hover:bg-red-500/10 text-white/30 hover:text-red-400 transition-all"
+                            class="p-2 rounded-lg hover:bg-rose-500/10 text-zinc-500 hover:text-rose-400 transition-all cursor-pointer"
                         >
-                            <Icon name="carbon:trash-can" size="18"/>
+                            <Icon name="carbon:trash-can" size="16"/>
                         </button>
                     </div>
                 </div>

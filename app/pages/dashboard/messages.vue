@@ -143,11 +143,11 @@ const getAvatarStyle = (name: string) => {
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'unread':
-      return 'bg-blue-500/20 text-blue-400 border-blue-500/40'
+      return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
     case 'read':
-      return 'bg-white/10 text-white/70 border-white/20'
+      return 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
     default:
-      return 'bg-white/10 text-white/70'
+      return 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
   }
 }
 
@@ -216,32 +216,27 @@ const formatStatus = (status?: string): string => {
     <div class="flex gap-2 mb-8 border-b border-white/10">
       <button
           @click="selectedStatus = 'unread'"
-          class="cursor-pointer"
+          class="cursor-pointer px-6 py-3 font-semibold transition-all border-b-2 text-sm flex items-center gap-2"
           :class="[
-            'px-6 py-3 font-semibold transition-all border-b-2',
             selectedStatus === 'unread'
-              ? 'text-primary border-primary'
-              : 'text-white/60 border-transparent hover:text-white/80'
+              ? 'text-white border-white'
+              : 'text-zinc-400 border-transparent hover:text-white'
           ]"
       >
         <Icon name="material-symbols:mark-email-unread" size="18"/>
-        Unread
+        <span>Unread</span>
       </button>
       <button
           @click="selectedStatus = 'read'"
-          class="cursor-pointer"
+          class="cursor-pointer px-6 py-3 font-semibold transition-all border-b-2 text-sm flex items-center gap-2"
           :class="[
-
-            'px-6 py-3 font-semibold transition-all border-b-2',
             selectedStatus === 'read'
-              ? 'text-primary border-primary'
-              : 'text-white/60 border-transparent hover:text-white/80'
+              ? 'text-white border-white'
+              : 'text-zinc-400 border-transparent hover:text-white'
           ]"
       >
-        <div class="flex items-center gap-2">
-          <Icon name="mdi:email-open" size="18"/>
-          Read
-        </div>
+        <Icon name="mdi:email-open" size="18"/>
+        <span>Read</span>
       </button>
     </div>
 
@@ -249,13 +244,13 @@ const formatStatus = (status?: string): string => {
     <div class="space-y-3 mb-8">
       <!-- Skeleton Loading -->
       <div v-if="isLoading && messages.length === 0" v-for="i in 5" :key="`skeleton-${i}`"
-           class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 animate-pulse">
+           class="bg-[#141417] border border-white/10 rounded-2xl p-4 animate-pulse">
         <div class="flex items-start gap-4">
-          <div class="w-12 h-12 rounded-full bg-white/10 shrink-0"></div>
+          <div class="w-10 h-10 rounded-xl bg-white/5 shrink-0"></div>
           <div class="flex-1 space-y-2">
-            <div class="h-5 bg-white/10 rounded w-1/3"></div>
-            <div class="h-4 bg-white/10 rounded w-1/2"></div>
-            <div class="h-4 bg-white/10 rounded w-full"></div>
+            <div class="h-4 bg-white/10 rounded w-1/3"></div>
+            <div class="h-3 bg-white/10 rounded w-1/2"></div>
+            <div class="h-3 bg-white/10 rounded w-full"></div>
           </div>
         </div>
       </div>
@@ -265,127 +260,128 @@ const formatStatus = (status?: string): string => {
           v-for="message in messages"
           :key="message.id"
           @click="openMessage(message)"
-          class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 hover:border-primary/50 hover:bg-white/10 transition-all duration-300 cursor-pointer"
-          :class="message.status === 'unread' ? 'border-blue-500/30 bg-blue-500/5' : ''"
+          class="group bg-[#141417] border border-white/10 rounded-2xl p-4 sm:p-5 hover:border-white/25 hover:bg-[#18181c] transition-all duration-300 cursor-pointer"
+          :class="message.status === 'unread' ? 'border-emerald-500/30' : ''"
       >
         <div class="flex items-start gap-4">
           <!-- Avatar with Initials -->
           <div
-              class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 text-white font-bold text-sm"
-              :style="getAvatarStyle(message.name)">
+              class="w-10 h-10 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center shrink-0 text-white font-mono font-bold text-xs shadow-inner">
             {{ getInitials(message.name) }}
           </div>
 
           <!-- Content -->
           <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-3 mb-2">
-              <h3 class="text-base font-bold text-white group-hover:text-primary transition-colors">
+            <div class="flex items-center gap-3 mb-1.5">
+              <h3 class="text-sm font-bold text-white group-hover:text-zinc-200 transition-colors tracking-tight">
                 {{ message.name }}
               </h3>
               <span
-                  :class="['px-3 py-1 rounded-full text-xs font-semibold border shrink-0 flex items-center gap-1', getStatusColor(message.status || 'read')]">
-                <Icon :name="getStatusIcon(message.status || 'read')" size="14"/>
-                {{ formatStatus(message.status) }}
+                  :class="['px-2.5 py-0.5 rounded-full text-xs font-mono font-medium border shrink-0 flex items-center gap-1', getStatusColor(message.status || 'read')]">
+                <Icon :name="getStatusIcon(message.status || 'read')" size="13"/>
+                <span>{{ formatStatus(message.status) }}</span>
               </span>
             </div>
-            <p class="text-sm text-white/60 mb-1">{{ message.email }}</p>
-            <p class="text-sm font-semibold text-white mb-2">{{ message.subject }}</p>
-            <p class="text-sm text-white/70 line-clamp-2 mb-3">{{ message.message }}</p>
-            <p class="text-xs text-white/40">{{ formatDate(message.created_at || '') }}</p>
+            <p class="text-xs text-zinc-400 mb-1 font-mono">{{ message.email }}</p>
+            <p class="text-sm font-semibold text-white mb-1.5 tracking-tight">{{ message.subject }}</p>
+            <p class="text-xs text-zinc-400 line-clamp-2 mb-2 leading-relaxed">{{ message.message }}</p>
+            <p class="text-[11px] font-mono text-zinc-500">{{ formatDate(message.created_at || '') }}</p>
           </div>
 
           <!-- Action -->
           <button
-              class="p-2 rounded-lg bg-white/5 hover:bg-primary/20 text-white/50 hover:text-primary transition-all shrink-0">
-            <Icon name="carbon:arrow-right" size="18"/>
+              class="p-2 rounded-xl bg-white/5 hover:bg-white/15 text-zinc-400 hover:text-white transition-all shrink-0">
+            <Icon name="carbon:arrow-right" size="16"/>
           </button>
         </div>
       </div>
     </div>
 
     <!-- Empty State -->
-    <div v-if="messages.length === 0 && !isLoading" class="flex flex-col items-center justify-center py-20">
-      <Icon name="carbon:email" size="48" class="text-white/30 mb-4"/>
-      <h3 class="text-xl font-bold text-white mb-2">No messages</h3>
-      <p class="text-white/60 text-center">You don't have any {{ selectedStatus }} messages yet</p>
+    <div v-if="messages.length === 0 && !isLoading" class="flex flex-col items-center justify-center py-16 rounded-2xl bg-[#141417] border border-white/10">
+      <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-500 mb-4">
+        <Icon name="carbon:email" size="24"/>
+      </div>
+      <h3 class="text-base font-bold text-white mb-1 tracking-tight">No messages</h3>
+      <p class="text-xs text-zinc-400 text-center">You don't have any {{ selectedStatus }} messages in this folder.</p>
     </div>
 
     <!-- Scroll Trigger for Infinite Scroll (Load More) -->
     <div ref="scrollTriggerRef" class="h-10 flex items-center justify-center">
       <div v-if="isLoading && messages.length > 0 && canLoadMore"
-           class="flex items-center gap-2 text-white/60 text-sm">
-        <Icon name="carbon:loading" size="16" class="animate-spin"/>
+           class="flex items-center gap-2 text-zinc-400 text-xs font-mono">
+        <Icon name="carbon:circle-dash" size="14" class="animate-spin"/>
         <p>Loading more messages...</p>
       </div>
     </div>
 
     <!-- Message Detail Modal -->
-    <UModal v-model:open="isDetailOpen">
-      <!-- Hidden Title for Accessibility -->
+    <UModal
+      v-model:open="isDetailOpen"
+      :ui="{
+        content: 'w-full max-w-2xl bg-[#141417] border border-white/15 shadow-2xl rounded-2xl sm:rounded-3xl overflow-hidden',
+        header: 'p-5 sm:p-6 bg-[#18181c] border-b border-white/10',
+        body: 'p-5 sm:p-6 max-h-[75vh] overflow-y-auto',
+        footer: 'p-4 sm:p-5 bg-[#18181c] border-t border-white/10'
+      }"
+    >
       <template #title>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-3 mb-3">
-            <div
-                class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xs"
-                :style="getAvatarStyle(selectedMessage?.name || '')">
-              {{ getInitials(selectedMessage?.name || '') }}
-            </div>
-            <div>
-              <h2 class="text-2xl sm:text-3xl font-black text-white">{{ selectedMessage?.name }}</h2>
-              <p class="text-xs sm:text-sm text-white/50">{{ selectedMessage?.email }}</p>
-            </div>
+        <div class="flex items-center gap-3">
+          <div
+              class="w-10 h-10 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center text-white font-mono font-bold text-xs shrink-0 shadow-inner">
+            {{ getInitials(selectedMessage?.name || '') }}
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-white tracking-tight">{{ selectedMessage?.name }}</h2>
+            <p class="text-xs text-zinc-400 font-mono">{{ selectedMessage?.email }}</p>
           </div>
         </div>
       </template>
 
       <template #description>
-        <p class="text-sm font-semibold text-white">{{ selectedMessage?.subject }}</p>
+        <p class="text-xs text-zinc-400 font-medium">{{ selectedMessage?.subject }}</p>
       </template>
 
       <!-- Body -->
       <template #body>
-        <div class="overflow-y-auto flex-1">
-          <div class="mx-auto px-4 sm:px-8 py-8 sm:py-12">
-            <div class="space-y-8">
-              <!-- Message Content -->
-              <div>
-                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                  <Icon name="solar:letter-opened-bold" size="20" class="text-primary"/>
-                  Message Content
-                </h3>
-                <div class="bg-white/5 border border-white/10 rounded-lg p-6">
-                  <p class="text-white/85 leading-relaxed whitespace-pre-wrap">{{ selectedMessage?.message }}</p>
-                </div>
-              </div>
+        <div class="space-y-6">
+          <!-- Message Content -->
+          <div>
+            <h3 class="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <Icon name="carbon:email" size="16" class="text-zinc-300"/>
+              <span>Message Content</span>
+            </h3>
+            <div class="bg-white/5 border border-white/10 rounded-xl p-5">
+              <p class="text-zinc-200 text-sm leading-relaxed whitespace-pre-wrap">{{ selectedMessage?.message }}</p>
+            </div>
+          </div>
 
-              <!-- Sender Details -->
-              <div>
-                <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                  <Icon name="carbon:user" size="20" class="text-primary"/>
-                  Sender Details
-                </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div class="bg-white/5 border border-white/10 rounded-lg p-4">
-                    <p class="text-xs text-white/60 mb-2">Name</p>
-                    <p class="text-white font-semibold">{{ selectedMessage?.name }}</p>
-                  </div>
-                  <div class="bg-white/5 border border-white/10 rounded-lg p-4">
-                    <p class="text-xs text-white/60 mb-2">Email</p>
-                    <p class="text-white font-semibold break-all">{{ selectedMessage?.email }}</p>
-                  </div>
-                  <div class="bg-white/5 border border-white/10 rounded-lg p-4">
-                    <p class="text-xs text-white/60 mb-2">Status</p>
-                    <span
-                        :class="['px-3 py-1 rounded-full text-xs font-semibold border inline-flex items-center gap-1', getStatusColor(selectedMessage?.status || '')]">
-                      <Icon :name="getStatusIcon(selectedMessage?.status || '')" size="14"/>
-                      {{ formatStatus(selectedMessage?.status || '') }}
-                    </span>
-                  </div>
-                  <div class="bg-white/5 border border-white/10 rounded-lg p-4">
-                    <p class="text-xs text-white/60 mb-2">Received</p>
-                    <p class="text-white font-semibold">{{ formatDate(selectedMessage?.created_at || '') }}</p>
-                  </div>
-                </div>
+          <!-- Sender Details -->
+          <div>
+            <h3 class="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <Icon name="carbon:user" size="16" class="text-zinc-300"/>
+              <span>Sender Information</span>
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="bg-white/5 border border-white/10 rounded-xl p-3.5">
+                <p class="text-[11px] font-mono text-zinc-500 mb-1">Name</p>
+                <p class="text-white font-medium text-xs">{{ selectedMessage?.name }}</p>
+              </div>
+              <div class="bg-white/5 border border-white/10 rounded-xl p-3.5">
+                <p class="text-[11px] font-mono text-zinc-500 mb-1">Email</p>
+                <p class="text-white font-medium text-xs break-all font-mono">{{ selectedMessage?.email }}</p>
+              </div>
+              <div class="bg-white/5 border border-white/10 rounded-xl p-3.5">
+                <p class="text-[11px] font-mono text-zinc-500 mb-1">Status</p>
+                <span
+                    :class="['px-2.5 py-0.5 rounded-full text-xs font-mono font-medium border inline-flex items-center gap-1', getStatusColor(selectedMessage?.status || '')]">
+                  <Icon :name="getStatusIcon(selectedMessage?.status || '')" size="12"/>
+                  <span>{{ formatStatus(selectedMessage?.status || '') }}</span>
+                </span>
+              </div>
+              <div class="bg-white/5 border border-white/10 rounded-xl p-3.5">
+                <p class="text-[11px] font-mono text-zinc-500 mb-1">Received</p>
+                <p class="text-white font-medium text-xs font-mono">{{ formatDate(selectedMessage?.created_at || '') }}</p>
               </div>
             </div>
           </div>
@@ -394,16 +390,16 @@ const formatStatus = (status?: string): string => {
 
       <!-- Footer -->
       <template #footer>
-        <div class="px-4 sm:px-8 py-4 sm:py-6 flex w-full justify-end gap-2 sm:gap-3">
+        <div class="flex w-full justify-end gap-2.5">
           <button
               @click="deleteMessageHandler(selectedMessage?.id || '')"
-              class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-red-500/20 text-red-400 font-semibold hover:bg-red-500/30 transition-all border border-red-500/40">
-            <Icon name="carbon:trash-can" size="18"/>
-            Delete
+              class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 text-xs font-semibold transition-all border border-rose-500/20 cursor-pointer">
+            <Icon name="carbon:trash-can" size="14"/>
+            <span>Delete</span>
           </button>
           <button
               @click="closeDetail"
-              class="px-6 py-3 rounded-lg bg-white/10 text-white hover:bg-white/20 font-semibold transition-all">
+              class="px-5 py-2 rounded-xl bg-white text-zinc-950 hover:bg-zinc-200 text-xs font-semibold transition-all shadow-sm cursor-pointer">
             Close
           </button>
         </div>

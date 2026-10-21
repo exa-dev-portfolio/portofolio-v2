@@ -326,23 +326,23 @@ const handleDeleteAttachment = async (attachmentId: string) => {
 
 <template>
   <div v-if="isLoading" class="flex justify-center items-center h-64">
-    <Icon name="line-md:loading-loop" size="32" class="text-primary" />
+    <Icon name="line-md:loading-loop" size="32" class="text-zinc-400" />
   </div>
 
-  <div v-else-if="application" class="p-8">
-    <div class="flex items-center justify-between mb-8">
+  <div v-else-if="application" class="space-y-8">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-black text-white mb-1">
+        <h1 class="text-3xl font-bold tracking-tight text-white mb-1">
           {{ application.company_name }}
         </h1>
-        <p class="text-white/60">{{ application.position }}</p>
+        <p class="text-sm text-zinc-400">{{ application.position }}</p>
       </div>
       <div class="flex items-center gap-3">
         <button
           v-if="application.status === 'draft'"
           @click="handleSave"
           :disabled="isSaving"
-          class="px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all flex items-center gap-2 text-sm"
+          class="px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-300 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2 text-sm cursor-pointer"
         >
           <Icon v-if="isSaving" name="line-md:loading-loop" size="16" />
           <Icon v-else name="carbon:save" size="16" />
@@ -351,7 +351,7 @@ const handleDeleteAttachment = async (attachmentId: string) => {
         <button
           @click="handleSend"
           :disabled="isSending || application.status === 'sent'"
-          class="px-5 py-2 rounded-lg bg-primary text-white font-semibold hover:brightness-110 disabled:opacity-50 transition-all flex items-center gap-2"
+          class="px-5 py-2.5 rounded-xl bg-white text-zinc-950 font-semibold hover:bg-zinc-200 disabled:opacity-40 transition-all flex items-center gap-2 text-sm shadow-sm cursor-pointer"
         >
           <Icon v-if="isSending" name="line-md:loading-loop" size="16" />
           <Icon v-else name="carbon:send" size="16" />
@@ -371,7 +371,7 @@ const handleDeleteAttachment = async (attachmentId: string) => {
           :sent_at="application.sent_at"
         />
 
-        <div class="bg-white/5 border border-white/10 rounded-xl p-6">
+        <div class="bg-[#141417] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-sm">
           <ApplyEmailEditor
             v-model:subject="subject"
             v-model:body="body"
@@ -380,35 +380,35 @@ const handleDeleteAttachment = async (attachmentId: string) => {
           />
         </div>
 
-        <div class="bg-white/5 border border-white/10 rounded-xl p-6">
-          <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <Icon name="carbon:attachment" size="18" class="text-primary" />
+        <div class="bg-[#141417] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-sm">
+          <h3 class="text-base font-semibold text-white mb-4 flex items-center gap-2">
+            <Icon name="carbon:attachment" size="18" class="text-zinc-400" />
             Attachments
           </h3>
 
           <div class="space-y-2 mb-4">
             <div
-              class="flex items-center justify-between bg-white/5 rounded-lg px-4 py-3 border border-white/10"
+              class="flex items-center justify-between bg-white/5 rounded-xl px-4 py-3 border border-white/10"
             >
               <div class="flex items-center gap-3">
                 <Icon
                   name="carbon:document-pdf"
                   size="20"
-                  class="text-red-400"
+                  class="text-rose-400"
                 />
                 <div>
                   <p class="text-sm font-medium text-white">CV.pdf</p>
-                  <p class="text-xs text-white/40">Attach CV as PDF</p>
+                  <p class="text-xs text-zinc-500">Attach CV as PDF</p>
                 </div>
               </div>
               <button
                 v-if="application.status === 'draft'"
                 @click="attachCv = !attachCv"
                 :class="[
-                  'px-3 py-1.5 rounded-lg text-xs font-medium border transition-all',
+                  'px-3 py-1 rounded-lg text-xs font-medium border transition-all cursor-pointer',
                   attachCv
-                    ? 'bg-green-500/20 text-green-400 border-green-500/40'
-                    : 'bg-white/10 text-white/50 border-white/20',
+                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                    : 'bg-white/5 text-zinc-400 border-white/10 hover:text-white',
                 ]"
               >
                 {{ attachCv ? "Attached" : "Not attached" }}
@@ -417,22 +417,22 @@ const handleDeleteAttachment = async (attachmentId: string) => {
                 v-else
                 name="carbon:checkmark"
                 size="18"
-                class="text-green-400"
+                class="text-emerald-400"
               />
             </div>
 
             <div
               v-for="att in attachments"
               :key="att.id"
-              class="flex items-center justify-between bg-white/5 rounded-lg px-4 py-3 border border-white/10"
+              class="flex items-center justify-between bg-white/5 rounded-xl px-4 py-3 border border-white/10"
             >
               <div class="flex items-center gap-3">
-                <Icon name="carbon:document" size="20" class="text-primary" />
+                <Icon name="carbon:document" size="20" class="text-zinc-400" />
                 <div>
                   <p class="text-sm font-medium text-white">
                     {{ att.file_name }}
                   </p>
-                  <p v-if="att.file_size" class="text-xs text-white/40">
+                  <p v-if="att.file_size" class="text-xs text-zinc-500">
                     {{ (att.file_size / 1024).toFixed(1) }} KB
                   </p>
                 </div>
@@ -440,7 +440,7 @@ const handleDeleteAttachment = async (attachmentId: string) => {
               <button
                 v-if="application.status === 'draft'"
                 @click="handleDeleteAttachment(att.id)"
-                class="p-1.5 rounded-lg hover:bg-red-500/10 text-white/30 hover:text-red-400 transition-all"
+                class="p-1.5 rounded-lg hover:bg-rose-500/10 text-zinc-500 hover:text-rose-400 transition-all cursor-pointer"
               >
                 <Icon name="carbon:close" size="16" />
               </button>
@@ -458,7 +458,7 @@ const handleDeleteAttachment = async (attachmentId: string) => {
             />
             <label
               for="fileUpload"
-              class="flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 border-dashed border-white/20 text-white/50 hover:border-primary/50 hover:text-primary transition-all cursor-pointer text-sm"
+              class="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-dashed border-white/15 text-zinc-400 hover:border-white/30 hover:text-white transition-all cursor-pointer text-sm bg-white/[0.02]"
             >
               <Icon v-if="isUploading" name="line-md:loading-loop" size="16" />
               <Icon v-else name="carbon:cloud-upload" size="18" />

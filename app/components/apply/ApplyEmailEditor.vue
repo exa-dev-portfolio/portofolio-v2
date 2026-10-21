@@ -22,37 +22,37 @@ watch(localBody, (v) => emit('update:body', v))
 </script>
 
 <template>
-    <div class="space-y-4">
+    <div class="space-y-5">
         <div>
-            <label class="block text-sm font-semibold text-white mb-2">Subject</label>
+            <label class="block text-xs font-medium text-zinc-300 uppercase tracking-wider mb-2">Subject</label>
             <input
                 v-model="localSubject"
                 type="text"
                 :readonly="readonly"
-                class="w-full px-4 py-2.5 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-primary/50 focus:bg-white/15 transition-all"
+                class="w-full px-4 py-2.5 rounded-xl bg-zinc-900/60 border border-white/10 text-white placeholder:text-zinc-600 focus:outline-none focus:border-white/30 transition-all text-sm"
             />
         </div>
 
         <div>
-            <label class="block text-sm font-semibold text-white mb-2">Email Body</label>
+            <label class="block text-xs font-medium text-zinc-300 uppercase tracking-wider mb-2">Email Body</label>
             <textarea
                 v-model="localBody"
                 :readonly="readonly"
                 rows="16"
-                class="w-full px-4 py-2.5 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-primary/50 focus:bg-white/15 transition-all resize-y font-mono text-sm leading-relaxed"
+                class="w-full px-4 py-2.5 rounded-xl bg-zinc-900/60 border border-white/10 text-white placeholder:text-zinc-600 focus:outline-none focus:border-white/30 transition-all resize-y font-mono text-sm leading-relaxed"
             ></textarea>
-            <p class="text-xs text-white/40 mt-1">{{ localBody.length }} characters</p>
+            <p class="text-xs text-zinc-500 mt-1.5">{{ localBody.length }} characters</p>
         </div>
 
-        <div v-if="reasoning.length > 0">
-            <label class="block text-sm font-semibold text-white/60 mb-2">Why this email?</label>
-            <ul class="space-y-1.5">
+        <div v-if="reasoning.length > 0" class="pt-3 border-t border-white/5">
+            <label class="block text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2">Why this email?</label>
+            <ul class="space-y-2">
                 <li
                     v-for="(point, idx) in reasoning"
                     :key="idx"
-                    class="flex items-start gap-2 text-sm text-white/50"
+                    class="flex items-start gap-2.5 text-xs text-zinc-400 leading-relaxed"
                 >
-                    <Icon name="carbon:idea" size="16" class="text-primary shrink-0 mt-0.5"/>
+                    <Icon name="carbon:idea" size="15" class="text-amber-400 shrink-0 mt-0.5"/>
                     <span>{{ point }}</span>
                 </li>
             </ul>

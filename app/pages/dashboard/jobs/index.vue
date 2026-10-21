@@ -168,14 +168,14 @@ onMounted(() => {
       v-if="!statsLoading"
       class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
     >
-      <div class="bg-[#0f1520] border border-white/5 rounded-xl p-5">
+      <div class="bg-[#141417] border border-white/10 rounded-2xl p-5 shadow-sm">
         <div
-          class="text-white/50 text-xs font-medium mb-1 uppercase tracking-wider"
+          class="text-zinc-500 text-xs font-medium mb-1 uppercase tracking-wider"
         >
           Total Lowongan Scraped
         </div>
-        <div class="text-3xl font-bold text-white">{{ stats.total }}</div>
-        <div v-if="stats.lastScraped" class="text-xs text-white/40 mt-2">
+        <div class="text-3xl font-bold text-white tracking-tight">{{ stats.total }}</div>
+        <div v-if="stats.lastScraped" class="text-xs text-zinc-500 mt-2">
           Update terakhir: {{ formatDate(stats.lastScraped) }}
         </div>
       </div>
@@ -183,14 +183,14 @@ onMounted(() => {
       <div
         v-for="source in sources"
         :key="source"
-        class="bg-[#0f1520] border border-white/5 rounded-xl p-5"
+        class="bg-[#141417] border border-white/10 rounded-2xl p-5 shadow-sm"
       >
         <div
-          class="text-white/50 text-xs font-medium mb-1 uppercase tracking-wider"
+          class="text-zinc-500 text-xs font-medium mb-1 uppercase tracking-wider capitalize"
         >
           {{ source }}
         </div>
-        <div class="text-3xl font-bold text-white">
+        <div class="text-3xl font-bold text-white tracking-tight">
           {{ stats.bySource[source] }}
         </div>
       </div>
@@ -198,18 +198,18 @@ onMounted(() => {
 
     <!-- Filters -->
     <div
-      class="bg-[#0f1520] border border-white/5 rounded-xl p-4 flex flex-col lg:flex-row gap-4 items-center justify-between"
+      class="bg-[#141417] border border-white/10 rounded-2xl p-4 flex flex-col lg:flex-row gap-4 items-center justify-between"
     >
       <div class="relative flex-1 w-full">
         <Icon
           name="carbon:search"
-          class="absolute left-3 top-1/2 -translate-y-1/2 text-white/40"
+          class="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400"
         />
         <input
           v-model.lazy="search"
           type="text"
           placeholder="Cari posisi atau perusahaan..."
-          class="w-full bg-white/5 border border-white/10 rounded-lg py-2 pl-10 pr-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors"
+          class="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-white text-sm focus:outline-none focus:border-white/30 transition-colors"
         />
       </div>
 
@@ -217,11 +217,11 @@ onMounted(() => {
         <div class="flex flex-wrap gap-2">
           <select
             v-model="selectedStatus"
-            class="bg-white/5 border border-white/10 rounded-lg py-1.5 px-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors"
+            class="bg-white/5 border border-white/10 rounded-xl py-2 px-3 text-white text-sm focus:outline-none focus:border-white/30 transition-colors cursor-pointer"
           >
-            <option value="active" class="bg-[#0f1520]">Aktif</option>
-            <option value="archived" class="bg-[#0f1520]">Diarsipkan</option>
-            <option value="all" class="bg-[#0f1520]">Semua</option>
+            <option value="active" class="bg-[#141417]">Aktif</option>
+            <option value="archived" class="bg-[#141417]">Diarsipkan</option>
+            <option value="all" class="bg-[#141417]">Semua</option>
           </select>
         </div>
 
@@ -229,10 +229,10 @@ onMounted(() => {
           <button
             @click="selectedSource = ''"
             :class="[
-              'px-3 py-1.5 rounded-lg text-sm transition-colors',
+              'px-3.5 py-1.5 rounded-xl text-xs transition-colors cursor-pointer',
               selectedSource === ''
-                ? 'bg-primary text-black font-medium'
-                : 'bg-white/5 text-white/70 hover:bg-white/10',
+                ? 'bg-white text-zinc-950 font-semibold shadow-sm'
+                : 'bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10 border border-white/10',
             ]"
           >
             Semua
@@ -242,10 +242,10 @@ onMounted(() => {
             :key="source"
             @click="selectedSource = source"
             :class="[
-              'px-3 py-1.5 rounded-lg text-sm transition-colors capitalize',
+              'px-3.5 py-1.5 rounded-xl text-xs transition-colors capitalize cursor-pointer',
               selectedSource === source
-                ? 'bg-primary text-black font-medium'
-                : 'bg-white/5 text-white/70 hover:bg-white/10',
+                ? 'bg-white text-zinc-950 font-semibold shadow-sm'
+                : 'bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10 border border-white/10',
             ]"
           >
             {{ source }}
@@ -255,10 +255,10 @@ onMounted(() => {
     </div>
 
     <div class="flex justify-between items-center" v-if="jobs.length > 0 && selectedStatus !== 'archived'">
-      <label class="flex items-center gap-2 cursor-pointer text-sm text-white/70 hover:text-white transition-colors">
+      <label class="flex items-center gap-2 cursor-pointer text-sm text-zinc-400 hover:text-white transition-colors">
         <input 
           type="checkbox" 
-          class="rounded border-white/10 bg-white/5 text-primary focus:ring-primary focus:ring-offset-[#0f1520]"
+          class="rounded border-white/10 bg-white/5 text-white focus:ring-white focus:ring-offset-[#141417]"
           :checked="selectedJobs.length === jobs.length && jobs.length > 0"
           @change="toggleSelectAll"
         />
@@ -268,7 +268,7 @@ onMounted(() => {
       <button
         v-if="selectedJobs.length > 0"
         @click="archiveSelectedJobs"
-        class="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg text-sm font-medium transition-colors border border-red-500/20"
+        class="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-xl text-sm font-medium transition-colors border border-rose-500/20 cursor-pointer"
       >
         Arsipkan {{ selectedJobs.length }} Terpilih
       </button>
@@ -282,7 +282,7 @@ onMounted(() => {
       <div
         v-for="i in 6"
         :key="i"
-        class="bg-[#0f1520] border border-white/5 rounded-xl p-5 h-48 animate-pulse"
+        class="bg-[#141417] border border-white/10 rounded-2xl p-5 h-48 animate-pulse"
       >
         <div class="h-6 bg-white/10 rounded w-3/4 mb-4"></div>
         <div class="h-4 bg-white/5 rounded w-1/2 mb-8"></div>
@@ -301,7 +301,7 @@ onMounted(() => {
       <div
         v-for="job in jobs"
         :key="job.id"
-        :class="['bg-[#0f1520] border rounded-xl p-5 transition-all group flex flex-col', selectedJobs.includes(job.id) ? 'border-primary/50 bg-primary/5' : 'border-white/5 hover:border-primary/30']"
+        :class="['bg-[#141417] border rounded-2xl p-5 transition-all group flex flex-col', selectedJobs.includes(job.id) ? 'border-white/40 bg-[#18181c]' : 'border-white/10 hover:border-white/25']"
       >
         <div class="flex justify-between items-start gap-4 mb-3">
           <input 
@@ -309,39 +309,39 @@ onMounted(() => {
             type="checkbox" 
             :value="job.id"
             v-model="selectedJobs"
-            class="mt-1 rounded border-white/10 bg-white/5 text-primary focus:ring-primary focus:ring-offset-[#0f1520]"
+            class="mt-1 rounded border-white/10 bg-white/5 text-white focus:ring-white focus:ring-offset-[#141417]"
           />
           <div>
             <h3
-              class="text-lg font-semibold text-white group-hover:text-primary transition-colors line-clamp-2"
+              class="text-base font-bold text-white group-hover:text-zinc-200 transition-colors line-clamp-2 tracking-tight"
               :title="job.title"
             >
               {{ job.title }}
             </h3>
-            <p class="text-white/60 text-sm mt-1">{{ job.company }}</p>
+            <p class="text-zinc-400 text-xs mt-0.5">{{ job.company }}</p>
           </div>
           <div
-            class="px-2.5 py-1 rounded-md text-xs font-bold border flex-shrink-0 text-blue-400 bg-blue-400/10 border-blue-400/20"
+            class="px-2.5 py-0.5 rounded-full text-xs font-mono font-medium border flex-shrink-0 text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
           >
             Baru
           </div>
         </div>
 
-        <div class="flex flex-wrap gap-2 my-3">
+        <div class="flex flex-wrap gap-1.5 my-3">
           <span
             v-if="job.location"
-            class="px-2 py-1 bg-white/5 rounded text-xs text-white/70 flex items-center gap-1"
+            class="px-2 py-0.5 bg-white/5 border border-white/10 rounded-md text-[11px] font-mono text-zinc-300 flex items-center gap-1"
           >
             <Icon name="carbon:location" /> {{ job.location }}
           </span>
           <span
             v-if="job.salary"
-            class="px-2 py-1 bg-white/5 rounded text-xs text-green-400/80 flex items-center gap-1"
+            class="px-2 py-0.5 bg-white/5 border border-white/10 rounded-md text-[11px] font-mono text-emerald-400/90 flex items-center gap-1"
           >
             <Icon name="carbon:currency" /> {{ job.salary }}
           </span>
           <span
-            class="px-2 py-1 bg-white/5 rounded text-xs text-white/50 uppercase tracking-wider"
+            class="px-2 py-0.5 bg-white/5 border border-white/10 rounded-md text-[11px] font-mono text-zinc-500 uppercase tracking-wider"
           >
             {{ job.source }}
           </span>
@@ -349,24 +349,24 @@ onMounted(() => {
 
         <p
           v-if="job.relevance_reason"
-          class="text-xs text-white/40 line-clamp-2 mt-auto mb-4 italic"
+          class="text-xs text-zinc-400 line-clamp-2 mt-auto mb-4 italic"
         >
           "{{ job.relevance_reason }}"
         </p>
 
         <div
-          class="flex justify-between items-center mt-auto pt-4 border-t border-white/5"
+          class="flex justify-between items-center mt-auto pt-4 border-t border-white/10"
         >
-          <span class="text-xs text-white/30">{{
+          <span class="text-xs font-mono text-zinc-500">{{
             formatDate(job.posted_at || job.created_at)
           }}</span>
           <a
             :href="job.job_url"
             target="_blank"
             rel="noopener noreferrer"
-            class="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+            class="px-3 py-1.5 bg-white/5 hover:bg-white/15 text-white border border-white/10 rounded-xl text-xs font-mono transition-colors flex items-center gap-1.5"
           >
-            Buka <Icon name="carbon:launch" size="14" />
+            <span>Buka</span> <Icon name="carbon:launch" size="13" />
           </a>
         </div>
       </div>
@@ -375,7 +375,7 @@ onMounted(() => {
     <!-- Empty State -->
     <div
       v-else
-      class="bg-[#0f1520] border border-white/5 rounded-xl p-12 flex flex-col items-center justify-center text-center"
+      class="bg-[#141417] border border-white/10 rounded-2xl p-12 flex flex-col items-center justify-center text-center"
     >
       <div
         class="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4 text-white/20"

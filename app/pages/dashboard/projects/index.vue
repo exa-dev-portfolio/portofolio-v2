@@ -97,12 +97,12 @@ if (import.meta.client) {
 
 const getStatusColor = (status: any) => {
   if (status === 'published' || status === true) {
-    return 'bg-green-500/20 text-green-400 border-green-500/40'
+    return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
   }
   if (status === 'archived') {
-    return 'bg-amber-500/20 text-amber-400 border-amber-500/40'
+    return 'bg-amber-500/10 text-amber-400 border-amber-500/20'
   }
-  return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40'
+  return 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
 }
 
 const getStatusText = (status: any) => {
@@ -149,24 +149,24 @@ const deleteProjectHandler = async (id: number) => {
       <!-- Add New Project Button -->
       <button
           @click="navigateTo('/dashboard/projects/new')"
-          class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-white font-semibold hover:brightness-110 transition-all whitespace-nowrap">
-        <Icon name="carbon:add" size="20"/>
+          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-zinc-950 font-semibold hover:bg-zinc-200 transition-all whitespace-nowrap text-sm cursor-pointer shadow-sm">
+        <Icon name="carbon:add" size="18"/>
         Add New Project
       </button>
     </div>
 
     <!-- Filters Section -->
-    <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 mb-8">
+    <div class="bg-[#141417] border border-white/10 rounded-2xl p-4 sm:p-5 mb-8">
       <div class="flex items-center gap-4">
         <!-- Search -->
         <div class="relative flex-1">
-          <Icon name="carbon:search" size="20"
-                class="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50"/>
+          <Icon name="carbon:search" size="18"
+                class="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-zinc-400"/>
           <input
               v-model="searchQuery"
               type="text"
               placeholder="Search projects by name..."
-              class="w-full pl-10 pr-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-primary/50 focus:bg-white/15 transition-all"
+              class="w-full pl-10 pr-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-zinc-500 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all text-sm"
           />
         </div>
 
@@ -175,37 +175,35 @@ const deleteProjectHandler = async (id: number) => {
           <button
               @click="viewMode = 'grid'"
               :class="[
-                'p-2 rounded-lg transition-all',
+                'p-2 rounded-xl transition-all cursor-pointer',
                 viewMode === 'grid'
-                  ? 'bg-primary/20 text-primary border border-primary/40'
-                  : 'bg-white/5 text-white/50 hover:bg-white/10 border border-white/10'
+                  ? 'bg-white text-zinc-950 font-semibold shadow-sm'
+                  : 'bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10 border border-white/10'
               ]"
           >
-            <Icon name="carbon:grid" size="20"/>
+            <Icon name="carbon:grid" size="18"/>
           </button>
           <button
               @click="viewMode = 'list'"
               :class="[
-                'p-2 rounded-lg transition-all',
+                'p-2 rounded-xl transition-all cursor-pointer',
                 viewMode === 'list'
-                  ? 'bg-primary/20 text-primary border border-primary/40'
-                  : 'bg-white/5 text-white/50 hover:bg-white/10 border border-white/10'
+                  ? 'bg-white text-zinc-950 font-semibold shadow-sm'
+                  : 'bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10 border border-white/10'
               ]"
           >
-            <Icon name="carbon:list" size="20"/>
+            <Icon name="carbon:list" size="18"/>
           </button>
         </div>
       </div>
-
-
     </div>
 
     <!-- Grid View -->
     <div v-if="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <!-- Skeleton Loading -->
       <div v-if="isSearching || isLoading" v-for="i in 6" :key="`skeleton-${i}`"
-           class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden animate-pulse">
-        <div class="h-48 bg-white/10"></div>
+           class="bg-[#141417] border border-white/10 rounded-2xl overflow-hidden animate-pulse">
+        <div class="h-48 bg-white/5"></div>
         <div class="p-6 space-y-3">
           <div class="h-6 bg-white/10 rounded w-3/4"></div>
           <div class="h-4 bg-white/10 rounded w-full"></div>
@@ -230,66 +228,72 @@ const deleteProjectHandler = async (id: number) => {
           :key="project.id"
           @click="openProject(project)"
           v-else
-          class="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 cursor-pointer"
+          class="group bg-[#141417] border border-white/10 rounded-2xl overflow-hidden hover:border-white/25 transition-all duration-300 cursor-pointer flex flex-col justify-between"
       >
           <!-- Image -->
-          <div class="relative w-full aspect-[16/9] bg-slate-950 overflow-hidden flex items-center justify-center">
+          <div class="relative w-full aspect-[16/9] bg-black/40 overflow-hidden flex items-center justify-center">
             <NuxtImg
                 :src="project.preview_image"
                 :alt="project.name"
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
             <!-- Org Badge -->
-            <div v-if="project.is_organization" class="absolute top-4 left-4">
-              <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-950/80 text-purple-300 border border-purple-500/40 backdrop-blur-md flex items-center gap-1.5 shadow-md">
-                <Icon name="carbon:enterprise" size="13" class="text-purple-400" />
+            <div v-if="project.is_organization" class="absolute top-3 left-3">
+              <span class="px-2.5 py-1 rounded-full text-xs font-mono font-medium bg-zinc-950/80 text-zinc-200 border border-white/20 backdrop-blur-md flex items-center gap-1.5 shadow-md">
+                <Icon name="carbon:enterprise" size="13" class="text-zinc-300" />
                 <span>Org · {{ project.sub_apps?.length || 0 }} Apps</span>
               </span>
             </div>
             <!-- Status Badge -->
-            <div class="absolute top-4 right-4">
-              <span :class="['px-3 py-1 rounded-full text-xs font-semibold border', getStatusColor(project.status)]">
+            <div class="absolute top-3 right-3">
+              <span :class="['px-2.5 py-0.5 rounded-full text-xs font-mono font-medium border', getStatusColor(project.status)]">
                 {{ getStatusText(project.status) }}
               </span>
             </div>
           </div>
 
         <!-- Content -->
-        <div class="p-6">
-          <!-- Title -->
-          <h3 class="text-lg font-bold text-white mb-2 group-hover:text-primary transition-colors">
-            {{ project.name }}
-          </h3>
+        <div class="p-5 flex-1 flex flex-col justify-between">
+          <div>
+            <!-- Title -->
+            <h3 class="text-base font-bold text-white mb-1.5 group-hover:text-zinc-200 transition-colors tracking-tight">
+              {{ project.name }}
+            </h3>
 
-          <!-- Description -->
-          <p class="text-sm text-white/60 mb-4 line-clamp-2">{{ project.description }}</p>
+            <!-- Description -->
+            <p class="text-xs text-zinc-400 mb-4 line-clamp-2 leading-relaxed">{{ project.description }}</p>
 
-          <!-- Technologies -->
-          <div class="flex flex-wrap gap-2 mb-4">
-            <span
-                v-for="tech in project.technologies"
-                :key="tech"
-                class="px-2 py-1 text-xs font-medium bg-primary/15 text-primary border border-primary/30 rounded group-hover:bg-primary/25 transition-colors"
-            >
-              {{ tech }}
-            </span>
+            <!-- Technologies -->
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              <span
+                  v-for="tech in project.technologies"
+                  :key="tech"
+                  class="px-2 py-0.5 text-[11px] font-mono bg-white/5 text-zinc-300 border border-white/10 rounded-md"
+              >
+                {{ tech }}
+              </span>
+            </div>
           </div>
 
           <!-- Footer -->
-          <div class="flex items-center justify-between pt-4 border-t border-white/10">
-            <span class="text-xs text-white/50">{{
+          <div class="flex items-center justify-between pt-4 border-t border-white/10 mt-auto">
+            <span class="text-xs font-mono text-zinc-500">{{
                 project.created_at ? new Date(project.created_at).toLocaleDateString() : ''
               }}</span>
-            <div class="flex gap-2">
+            <div class="flex gap-1.5">
               <button
                   @click.stop="openProject(project)"
-                  class="p-2 rounded-lg cursor-pointer bg-white/5 hover:bg-primary/20 text-white/50 hover:text-primary transition-all">
-                <Icon name="carbon:pen" size="16"/>
+                  class="p-2 rounded-xl cursor-pointer bg-white/5 hover:bg-white/15 text-zinc-400 hover:text-white transition-all"
+                  title="Edit Project"
+              >
+                <Icon name="carbon:pen" size="15"/>
               </button>
               <button
                   @click.stop="deleteProjectHandler(project.id || 0)"
-                  class="p-2 rounded-lg cursor-pointer bg-white/5 hover:bg-red-500/20 text-white/50 hover:text-red-400 transition-all">
-                <Icon name="carbon:trash-can" size="16"/>
+                  class="p-2 rounded-xl cursor-pointer bg-white/5 hover:bg-rose-500/20 text-zinc-400 hover:text-rose-400 transition-all"
+                  title="Delete Project"
+              >
+                <Icon name="carbon:trash-can" size="15"/>
               </button>
             </div>
           </div>
@@ -301,8 +305,8 @@ const deleteProjectHandler = async (id: number) => {
     <div v-else class="space-y-3">
       <!-- Skeleton Loading -->
       <div v-if="isSearching" v-for="i in 6" :key="`skeleton-${i}`"
-           class="flex items-center gap-4 p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg animate-pulse">
-        <div class="relative w-20 h-20 shrink-0 rounded-lg bg-white/10"></div>
+           class="flex items-center gap-4 p-4 bg-[#141417] border border-white/10 rounded-2xl animate-pulse">
+        <div class="relative w-20 h-20 shrink-0 rounded-xl bg-white/5"></div>
         <div class="flex-1 min-w-0 space-y-2">
           <div class="h-5 bg-white/10 rounded w-1/3"></div>
           <div class="h-4 bg-white/10 rounded w-full"></div>
@@ -326,10 +330,10 @@ const deleteProjectHandler = async (id: number) => {
           :key="project.id"
           v-else
           @click="openProject(project)"
-          class="group flex items-center gap-4 p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg hover:border-primary/50 hover:bg-white/10 transition-all duration-300 cursor-pointer"
+          class="group flex items-center gap-4 p-4 bg-[#141417] border border-white/10 rounded-2xl hover:border-white/20 hover:bg-[#18181c] transition-all duration-300 cursor-pointer"
       >
         <!-- Image Thumbnail -->
-        <div class="relative w-28 sm:w-32 aspect-[16/9] shrink-0 rounded-lg overflow-hidden bg-slate-950 flex items-center justify-center">
+        <div class="relative w-28 sm:w-32 aspect-[16/9] shrink-0 rounded-xl overflow-hidden bg-black/40 flex items-center justify-center">
           <NuxtImg
               :src="project.preview_image || (typeof project.image === 'string' ? project.image : undefined)"
               :alt="project.name"
@@ -340,31 +344,31 @@ const deleteProjectHandler = async (id: number) => {
         <!-- Content -->
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-3 mb-1">
-            <h3 class="text-base font-bold text-white group-hover:text-primary transition-colors">
+            <h3 class="text-sm font-bold text-white group-hover:text-zinc-200 transition-colors tracking-tight">
               {{ project.name }}
             </h3>
             <span
               v-if="project.is_organization"
-              class="px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/40 inline-flex items-center gap-1 shrink-0"
+              class="px-2 py-0.5 rounded-full text-xs font-mono font-medium bg-zinc-800 text-zinc-300 border border-white/10 inline-flex items-center gap-1 shrink-0"
             >
               <Icon name="carbon:enterprise" size="12" />
               <span>Org ({{ project.sub_apps?.length || 0 }} Apps)</span>
             </span>
             <span
-                :class="['px-3 py-1 rounded-full text-xs font-semibold border shrink-0', getStatusColor(project.status)]">
+                :class="['px-2.5 py-0.5 rounded-full text-xs font-mono font-medium border shrink-0', getStatusColor(project.status)]">
               {{ getStatusText(project.status) }}
             </span>
           </div>
-          <p class="text-sm text-white/60 mb-2 line-clamp-1">{{ project.description }}</p>
+          <p class="text-xs text-zinc-400 mb-2 line-clamp-1">{{ project.description }}</p>
           <div class="flex flex-wrap gap-1">
             <span
                 v-for="tech in project.technologies.slice(0, 3)"
                 :key="tech"
-                class="px-2 py-0.5 text-xs font-medium bg-primary/15 text-primary border border-primary/30 rounded"
+                class="px-2 py-0.5 text-[11px] font-mono bg-white/5 text-zinc-300 border border-white/10 rounded-md"
             >
               {{ tech }}
             </span>
-            <span v-if="project.technologies && project.technologies.length > 3" class="text-xs text-white/40">
+            <span v-if="project.technologies && project.technologies.length > 3" class="text-xs font-mono text-zinc-500">
               +{{ project.technologies.length - 3 }} more
             </span>
           </div>
@@ -372,18 +376,22 @@ const deleteProjectHandler = async (id: number) => {
 
         <!-- Meta -->
         <div class="text-right shrink-0">
-          <p class="text-xs text-white/50 mb-3">
+          <p class="text-xs font-mono text-zinc-500 mb-3">
             {{ project.created_at ? new Date(project.created_at).toLocaleDateString() : '' }}</p>
-          <div class="flex gap-2">
+          <div class="flex gap-1.5">
             <button
                 @click.stop="openProject(project)"
-                class="p-2 rounded-lg cursor-pointer bg-white/5 hover:bg-primary/20 text-white/50 hover:text-primary transition-all">
-              <Icon name="carbon:pen" size="16"/>
+                class="p-2 rounded-xl cursor-pointer bg-white/5 hover:bg-white/15 text-zinc-400 hover:text-white transition-all"
+                title="Edit Project"
+            >
+              <Icon name="carbon:pen" size="15"/>
             </button>
             <button
                 @click.stop="deleteProjectHandler(project.id || 0)"
-                class="p-2 rounded-lg cursor-pointer bg-white/5 hover:bg-red-500/20 text-white/50 hover:text-red-400 transition-all">
-              <Icon name="carbon:trash-can" size="16"/>
+                class="p-2 rounded-xl cursor-pointer bg-white/5 hover:bg-rose-500/20 text-zinc-400 hover:text-rose-400 transition-all"
+                title="Delete Project"
+            >
+              <Icon name="carbon:trash-can" size="15"/>
             </button>
           </div>
         </div>
@@ -391,14 +399,16 @@ const deleteProjectHandler = async (id: number) => {
     </div>
 
     <!-- Empty State -->
-    <div v-if="projects.length === 0" class="flex flex-col items-center justify-center py-20">
-      <Icon name="carbon:email" size="64" class="text-white/20 mb-6"/>
-      <h3 class="text-xl font-bold text-white mb-2">No projects found</h3>
-      <p class="text-white/60 text-center mb-6">Try adjusting your search or create a new project</p>
+    <div v-if="projects.length === 0" class="flex flex-col items-center justify-center py-20 rounded-2xl bg-[#141417] border border-white/10">
+      <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-500 mb-4">
+        <Icon name="carbon:folder-open" size="24"/>
+      </div>
+      <h3 class="text-base font-bold text-white mb-1 tracking-tight">No projects found</h3>
+      <p class="text-xs text-zinc-400 text-center mb-6 max-w-sm">Try adjusting your search criteria or create your first portfolio project.</p>
       <button
           @click="navigateTo('/dashboard/projects/new')"
-          class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-white font-semibold hover:brightness-110 transition-all">
-        <Icon name="carbon:add" size="20"/>
+          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-zinc-950 font-semibold hover:bg-zinc-200 transition-all shadow-sm text-sm cursor-pointer">
+        <Icon name="carbon:add" size="18"/>
         Create Your First Project
       </button>
     </div>
@@ -406,8 +416,8 @@ const deleteProjectHandler = async (id: number) => {
     <!-- Loading Indicator (Initial Load) -->
     <div v-if="isLoading && projects.length === 0 && !isSearching"
          class="flex flex-col items-center justify-center py-20">
-      <div class="w-12 h-12 border-4 border-white/20 border-t-primary rounded-full animate-spin mb-4"></div>
-      <p class="text-white/60 text-sm">Loading projects...</p>
+      <div class="w-10 h-10 border-2 border-white/20 border-t-white rounded-full animate-spin mb-4"></div>
+      <p class="text-zinc-400 text-xs font-mono">Loading projects...</p>
     </div>
 
     <!-- Scroll Trigger for Infinite Scroll (Load More) -->

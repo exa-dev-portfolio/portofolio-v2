@@ -97,9 +97,9 @@ if (import.meta.client) {
 
 const getStatusColor = (isCurrent: boolean) => {
   if (isCurrent) {
-    return 'bg-green-500/20 text-green-400 border-green-500/40'
+    return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
   }
-  return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40'
+  return 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
 }
 
 const getStatusText = (isCurrent: boolean) => {
@@ -150,24 +150,24 @@ const deleteJourneyHandler = async (id: number) => {
       <!-- Add New Journey Button -->
       <button
           @click="navigateTo('/dashboard/journeys/new')"
-          class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-white font-semibold hover:brightness-110 transition-all whitespace-nowrap">
-        <Icon name="carbon:add" size="20"/>
+          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-zinc-950 font-semibold hover:bg-zinc-200 transition-all whitespace-nowrap text-sm cursor-pointer shadow-sm">
+        <Icon name="carbon:add" size="18"/>
         Add Experience
       </button>
     </div>
 
     <!-- Filters Section -->
-    <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 mb-8">
+    <div class="bg-[#141417] border border-white/10 rounded-2xl p-4 sm:p-5 mb-8">
       <div class="flex items-center gap-4">
         <!-- Search -->
         <div class="relative flex-1">
-          <Icon name="carbon:search" size="20"
-                class="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50"/>
+          <Icon name="carbon:search" size="18"
+                class="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-zinc-400"/>
           <input
               v-model="searchQuery"
               type="text"
               placeholder="Search by title or company..."
-              class="w-full pl-10 pr-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-primary/50 focus:bg-white/15 transition-all"
+              class="w-full pl-10 pr-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-zinc-500 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all text-sm"
           />
         </div>
 
@@ -176,24 +176,24 @@ const deleteJourneyHandler = async (id: number) => {
           <button
               @click="viewMode = 'grid'"
               :class="[
-                'p-2 rounded-lg transition-all',
+                'p-2 rounded-xl transition-all cursor-pointer',
                 viewMode === 'grid'
-                  ? 'bg-primary/20 text-primary border border-primary/40'
-                  : 'bg-white/5 text-white/50 hover:bg-white/10 border border-white/10'
+                  ? 'bg-white text-zinc-950 font-semibold shadow-sm'
+                  : 'bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10 border border-white/10'
               ]"
           >
-            <Icon name="carbon:grid" size="20"/>
+            <Icon name="carbon:grid" size="18"/>
           </button>
           <button
               @click="viewMode = 'list'"
               :class="[
-                'p-2 rounded-lg transition-all',
+                'p-2 rounded-xl transition-all cursor-pointer',
                 viewMode === 'list'
-                  ? 'bg-primary/20 text-primary border border-primary/40'
-                  : 'bg-white/5 text-white/50 hover:bg-white/10 border border-white/10'
+                  ? 'bg-white text-zinc-950 font-semibold shadow-sm'
+                  : 'bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10 border border-white/10'
               ]"
           >
-            <Icon name="carbon:list" size="20"/>
+            <Icon name="carbon:list" size="18"/>
           </button>
         </div>
       </div>
@@ -203,7 +203,7 @@ const deleteJourneyHandler = async (id: number) => {
     <div v-if="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <!-- Skeleton Loading -->
       <div v-if="isSearching || isLoading" v-for="i in 6" :key="`skeleton-${i}`"
-           class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 animate-pulse">
+           class="bg-[#141417] border border-white/10 rounded-2xl p-6 animate-pulse">
         <div class="space-y-3">
           <div class="h-6 bg-white/10 rounded w-3/4"></div>
           <div class="h-4 bg-white/10 rounded w-full"></div>
@@ -228,55 +228,60 @@ const deleteJourneyHandler = async (id: number) => {
           @click="openJourney(journey)"
           :key="journey.id"
           v-else
-          class="group flex flex-col bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 cursor-pointer p-6"
+          class="group flex flex-col justify-between bg-[#141417] border border-white/10 rounded-2xl overflow-hidden hover:border-white/25 transition-all duration-300 cursor-pointer p-6"
       >
-        <!-- Header -->
-        <div class="flex items-start justify-between mb-4">
-          <div class="flex-1 min-w-0">
-            <h3 class="text-lg font-bold text-white group-hover:text-primary transition-colors">
-              {{ journey.title }}
-            </h3>
-            <p class="text-sm text-white/60">{{ journey.company }}</p>
-            <p v-if="journey.location" class="text-xs text-white/40">{{ journey.location }}</p>
+        <div>
+          <!-- Header -->
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div class="flex-1 min-w-0">
+              <h3 class="text-base font-bold text-white group-hover:text-zinc-200 transition-colors tracking-tight">
+                {{ journey.title }}
+              </h3>
+              <p class="text-xs text-zinc-300 font-medium mt-0.5">{{ journey.company }}</p>
+              <p v-if="journey.location" class="text-[11px] text-zinc-500 font-mono">{{ journey.location }}</p>
+            </div>
+            <span
+                :class="['px-2.5 py-0.5 rounded-full text-xs font-mono font-medium border shrink-0', getStatusColor(journey.is_current)]">
+              {{ getStatusText(journey.is_current) }}
+            </span>
           </div>
-          <span
-              :class="['px-3 py-1 rounded-full text-xs font-semibold border shrink-0', getStatusColor(journey.is_current)]">
-            {{ getStatusText(journey.is_current) }}
-          </span>
-        </div>
 
-        <!-- Date Range -->
-        <p class="text-xs text-white/50 mb-4">{{ formatDateRange(journey.start_date, journey.end_date) }}</p>
+          <!-- Date Range -->
+          <p class="text-xs font-mono text-zinc-400 mb-3">{{ formatDateRange(journey.start_date, journey.end_date) }}</p>
 
-        <!-- Description -->
-        <p class="text-sm text-white/60 mb-4 line-clamp-2">{{ journey.description }}</p>
+          <!-- Description -->
+          <p class="text-xs text-zinc-400 mb-4 line-clamp-2 leading-relaxed">{{ journey.description }}</p>
 
-        <!-- Responsibilities -->
-        <div class="mb-4 grow">
-          <p class="text-xs font-semibold text-white/70 mb-2">Key Responsibilities:</p>
-          <ul class="space-y-1">
-            <li v-for="(resp, idx) in journey.key_responsibilities.slice(0, 2)" :key="idx"
-                class="text-xs text-white/50 line-clamp-1">• {{ resp }}
-            </li>
-            <li v-if="journey.key_responsibilities.length > 2" class="text-xs text-white/40">
-              +{{ journey.key_responsibilities.length - 2 }} more
-            </li>
-          </ul>
+          <!-- Responsibilities -->
+          <div class="mb-4">
+            <p class="text-xs font-mono text-zinc-400 mb-2">Key Responsibilities:</p>
+            <ul class="space-y-1">
+              <li v-for="(resp, idx) in journey.key_responsibilities.slice(0, 2)" :key="idx"
+                  class="text-xs text-zinc-400 line-clamp-1">• {{ resp }}
+              </li>
+              <li v-if="journey.key_responsibilities.length > 2" class="text-xs font-mono text-zinc-500">
+                +{{ journey.key_responsibilities.length - 2 }} more
+              </li>
+            </ul>
+          </div>
         </div>
 
         <!-- Footer -->
-        <div class="flex items-center justify-between pt-4 border-t border-white/10">
-          <div></div>
-          <div class="flex gap-2">
+        <div class="flex items-center justify-end pt-4 border-t border-white/10 mt-auto">
+          <div class="flex gap-1.5">
             <button
                 @click.stop="openJourney(journey)"
-                class="p-2 rounded-lg cursor-pointer bg-white/5 hover:bg-primary/20 text-white/50 hover:text-primary transition-all">
-              <Icon name="carbon:pen" size="16"/>
+                class="p-2 rounded-xl cursor-pointer bg-white/5 hover:bg-white/15 text-zinc-400 hover:text-white transition-all"
+                title="Edit Experience"
+            >
+              <Icon name="carbon:pen" size="15"/>
             </button>
             <button
                 @click.stop="deleteJourneyHandler(journey.id || 0)"
-                class="p-2 rounded-lg cursor-pointer bg-white/5 hover:bg-red-500/20 text-white/50 hover:text-red-400 transition-all">
-              <Icon name="carbon:trash-can" size="16"/>
+                class="p-2 rounded-xl cursor-pointer bg-white/5 hover:bg-rose-500/20 text-zinc-400 hover:text-rose-400 transition-all"
+                title="Delete Experience"
+            >
+              <Icon name="carbon:trash-can" size="15"/>
             </button>
           </div>
         </div>
@@ -287,7 +292,7 @@ const deleteJourneyHandler = async (id: number) => {
     <div v-else class="space-y-3">
       <!-- Skeleton Loading -->
       <div v-if="isSearching" v-for="i in 6" :key="`skeleton-${i}`"
-           class="flex items-center gap-4 p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg animate-pulse">
+           class="flex items-center gap-4 p-4 bg-[#141417] border border-white/10 rounded-2xl animate-pulse">
         <div class="flex-1 min-w-0 space-y-2">
           <div class="h-5 bg-white/10 rounded w-1/3"></div>
           <div class="h-4 bg-white/10 rounded w-1/2"></div>
@@ -308,50 +313,56 @@ const deleteJourneyHandler = async (id: number) => {
           :key="journey.id"
           @click="openJourney(journey)"
           v-else
-          class="group flex items-center justify-between gap-4 p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg hover:border-primary/50 hover:bg-white/10 transition-all duration-300 cursor-pointer"
+          class="group flex items-center justify-between gap-4 p-4 bg-[#141417] border border-white/10 rounded-2xl hover:border-white/20 hover:bg-[#18181c] transition-all duration-300 cursor-pointer"
       >
         <!-- Content -->
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-3 mb-1">
-            <h3 class="text-base font-bold text-white group-hover:text-primary transition-colors">
+            <h3 class="text-sm font-bold text-white group-hover:text-zinc-200 transition-colors tracking-tight">
               {{ journey.title }}
             </h3>
             <span
-                :class="['px-3 py-1 rounded-full text-xs font-semibold border shrink-0', getStatusColor(journey.is_current)]">
+                :class="['px-2.5 py-0.5 rounded-full text-xs font-mono font-medium border shrink-0', getStatusColor(journey.is_current)]">
               {{ getStatusText(journey.is_current) }}
             </span>
           </div>
-          <p class="text-sm text-white/60 mb-1">{{ journey.company }}
-            <span v-if="journey.location" class="text-white/40"> • {{ journey.location }}</span>
+          <p class="text-xs text-zinc-300 mb-1 font-medium">{{ journey.company }}
+            <span v-if="journey.location" class="text-zinc-500 font-mono"> • {{ journey.location }}</span>
           </p>
-          <p class="text-xs text-white/50">{{ formatDateRange(journey.start_date, journey.end_date) }}</p>
+          <p class="text-xs font-mono text-zinc-500">{{ formatDateRange(journey.start_date, journey.end_date) }}</p>
         </div>
 
         <!-- Meta -->
-        <div class="shrink-0 flex gap-2">
+        <div class="shrink-0 flex gap-1.5">
           <button
               @click.stop="openJourney(journey)"
-              class="p-2 rounded-lg cursor-pointer bg-white/5 hover:bg-primary/20 text-white/50 hover:text-primary transition-all">
-            <Icon name="carbon:pen" size="16"/>
+              class="p-2 rounded-xl cursor-pointer bg-white/5 hover:bg-white/15 text-zinc-400 hover:text-white transition-all"
+              title="Edit Experience"
+          >
+            <Icon name="carbon:pen" size="15"/>
           </button>
           <button
               @click.stop="deleteJourneyHandler(journey.id || 0)"
-              class="p-2 rounded-lg cursor-pointer bg-white/5 hover:bg-red-500/20 text-white/50 hover:text-red-400 transition-all">
-            <Icon name="carbon:trash-can" size="16"/>
+              class="p-2 rounded-xl cursor-pointer bg-white/5 hover:bg-rose-500/20 text-zinc-400 hover:text-rose-400 transition-all"
+              title="Delete Experience"
+          >
+            <Icon name="carbon:trash-can" size="15"/>
           </button>
         </div>
       </div>
     </div>
 
     <!-- Empty State -->
-    <div v-if="journeys.length === 0" class="flex flex-col items-center justify-center py-20">
-      <Icon name="mdi:briefcase" size="64" class="text-white/20 mb-6"/>
-      <h3 class="text-xl font-bold text-white mb-2">No work experience found</h3>
-      <p class="text-white/60 text-center mb-6">Start by adding your first work experience</p>
+    <div v-if="journeys.length === 0" class="flex flex-col items-center justify-center py-20 rounded-2xl bg-[#141417] border border-white/10">
+      <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-500 mb-4">
+        <Icon name="mdi:briefcase" size="24"/>
+      </div>
+      <h3 class="text-base font-bold text-white mb-1 tracking-tight">No work experience found</h3>
+      <p class="text-xs text-zinc-400 text-center mb-6 max-w-sm">Start by adding your first professional role or career milestone.</p>
       <button
           @click="navigateTo('/dashboard/journeys/new')"
-          class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-white font-semibold hover:brightness-110 transition-all">
-        <Icon name="carbon:add" size="20"/>
+          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-zinc-950 font-semibold hover:bg-zinc-200 transition-all shadow-sm text-sm cursor-pointer">
+        <Icon name="carbon:add" size="18"/>
         Add Your First Experience
       </button>
     </div>
@@ -359,8 +370,8 @@ const deleteJourneyHandler = async (id: number) => {
     <!-- Loading Indicator (Initial Load) -->
     <div v-if="isLoading && journeys.length === 0 && !isSearching"
          class="flex flex-col items-center justify-center py-20">
-      <div class="w-12 h-12 border-4 border-white/20 border-t-primary rounded-full animate-spin mb-4"></div>
-      <p class="text-white/60 text-sm">Loading journeys...</p>
+      <div class="w-10 h-10 border-2 border-white/20 border-t-white rounded-full animate-spin mb-4"></div>
+      <p class="text-zinc-400 text-xs font-mono">Loading journeys...</p>
     </div>
 
     <!-- Scroll Trigger for Infinite Scroll (Load More) -->

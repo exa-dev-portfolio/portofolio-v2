@@ -402,16 +402,16 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
         <!-- Manage Categories Button -->
         <button
           @click="openManageCategoriesModal"
-          class="inline-flex items-center cursor-pointer gap-2 px-4 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/10 border border-white/15 text-white font-medium text-sm transition-all whitespace-nowrap shadow-sm hover:border-cyan-500/40"
+          class="inline-flex items-center cursor-pointer gap-2 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white font-medium text-sm transition-all whitespace-nowrap shadow-sm"
         >
-          <Icon name="carbon:folders" size="18" class="text-cyan-400" />
+          <Icon name="carbon:folders" size="18" class="text-zinc-300" />
           <span>Manage Categories</span>
         </button>
 
         <!-- Add Skill Button -->
         <button
           @click="openCreateModal"
-          class="inline-flex items-center cursor-pointer gap-2 px-5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white font-semibold text-sm transition-all whitespace-nowrap shadow-lg shadow-blue-500/20"
+          class="inline-flex items-center cursor-pointer gap-2 px-5 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 font-semibold text-sm transition-all whitespace-nowrap shadow-sm"
         >
           <Icon name="carbon:add" size="18" />
           <span>Add Skill</span>
@@ -420,24 +420,24 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
     </div>
 
     <!-- Filters Section: Search Bar & Dynamic Category Pills -->
-    <div class="bg-[#0b1222]/80 backdrop-blur-md border border-white/10 rounded-2xl p-5 mb-8 shadow-xl">
+    <div class="bg-[#141417] border border-white/10 rounded-2xl p-5 mb-8">
       <!-- Search Input -->
       <div class="relative mb-4">
         <Icon
           name="carbon:search"
-          size="20"
-          class="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400"
+          size="18"
+          class="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-zinc-400"
         />
         <input
           v-model="searchQuery"
           type="text"
           placeholder="Search skills by name (e.g. Vue, Docker, Golang)..."
-          class="w-full pl-11 pr-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/15 text-white placeholder:text-slate-400 focus:outline-none focus:border-cyan-500/50 focus:bg-white/[0.08] transition-all text-sm"
+          class="w-full pl-10 pr-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-zinc-500 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all text-sm"
         />
         <button
           v-if="searchQuery"
           @click="searchQuery = ''"
-          class="absolute right-3.5 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white"
+          class="absolute right-3.5 top-1/2 transform -translate-y-1/2 text-zinc-400 hover:text-white"
         >
           <Icon name="carbon:close" size="16" />
         </button>
@@ -446,8 +446,8 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
       <!-- Category Filter Pills (Backend-Driven) -->
       <div>
         <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-mono text-slate-400 uppercase tracking-wider">Filter by Category:</span>
-          <span v-if="selectedCategoryId !== null" class="text-xs text-cyan-400 cursor-pointer hover:underline" @click="selectedCategoryId = null">
+          <span class="text-xs font-mono text-zinc-400 uppercase tracking-wider">Filter by Category:</span>
+          <span v-if="selectedCategoryId !== null" class="text-xs text-zinc-400 hover:text-white cursor-pointer underline font-mono" @click="selectedCategoryId = null">
             Reset to All
           </span>
         </div>
@@ -457,11 +457,11 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
             @click="selectedCategoryId = null"
             class="px-3.5 py-1.5 rounded-xl text-xs font-medium tracking-wide transition-all cursor-pointer flex items-center gap-2"
             :class="selectedCategoryId === null
-              ? 'bg-blue-600/30 text-white border border-blue-500/50 shadow-md shadow-blue-500/20 font-semibold'
-              : 'bg-white/[0.03] text-slate-300 border border-white/10 hover:bg-white/[0.07] hover:text-white'"
+              ? 'bg-white text-zinc-950 font-semibold shadow-sm'
+              : 'bg-white/5 text-zinc-400 border border-white/10 hover:bg-white/10 hover:text-white'"
           >
             <span>All Categories</span>
-            <span class="px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-white/10">
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] font-mono" :class="selectedCategoryId === null ? 'bg-zinc-200 text-zinc-950' : 'bg-white/10 text-zinc-400'">
               {{ totalSkillsCount }}
             </span>
           </button>
@@ -518,32 +518,32 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
         <div
           v-for="skill in filteredSkills"
           :key="skill.id"
-          class="group bg-[#0b1222]/90 border border-white/10 hover:border-white/20 rounded-2xl p-5 transition-all duration-300 flex flex-col hover:shadow-xl hover:shadow-black/40 hover:-translate-y-0.5 relative overflow-hidden"
-          :style="{ '--skill-color': skill.color || '#38bdf8' }"
+          class="group bg-[#141417] border border-white/10 hover:border-white/25 rounded-2xl p-5 transition-all duration-300 flex flex-col hover:shadow-xl hover:shadow-black/40 hover:-translate-y-0.5 relative overflow-hidden"
+          :style="{ '--skill-color': skill.color || '#e4e4e7' }"
         >
           <!-- Subtle Top Accent Line -->
           <div
             class="absolute top-0 left-0 right-0 h-0.5 opacity-40 group-hover:opacity-100 transition-opacity"
-            :style="{ backgroundColor: skill.color || '#38bdf8' }"
+            :style="{ backgroundColor: skill.color || '#e4e4e7' }"
           ></div>
 
           <!-- Icon & Header Info -->
           <div class="flex items-start gap-3.5 mb-4">
             <!-- Icon Wrapper -->
             <div
-              class="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center shrink-0 transition-colors group-hover:bg-[color-mix(in_srgb,var(--skill-color)_15%,transparent)]"
+              class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 transition-colors group-hover:bg-[color-mix(in_srgb,var(--skill-color)_15%,transparent)]"
             >
               <Icon
                 :name="skill.icon || 'mdi:code'"
                 size="24"
                 class="transition-colors group-hover:scale-110 duration-200"
-                :style="{ color: skill.color || '#38bdf8' }"
+                :style="{ color: skill.color || '#e4e4e7' }"
               />
             </div>
 
             <!-- Name & Category Badge -->
             <div class="flex-1 min-w-0">
-              <h3 class="text-base font-bold text-white tracking-tight truncate group-hover:text-cyan-300 transition-colors">
+              <h3 class="text-base font-bold text-white tracking-tight truncate group-hover:text-zinc-200 transition-colors">
                 {{ skill.name }}
               </h3>
 
@@ -552,12 +552,12 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
                 <span
                   class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-mono font-medium border"
                   :style="{
-                    color: skill.category_color || '#38bdf8',
-                    borderColor: `${skill.category_color || '#38bdf8'}35`,
-                    backgroundColor: `${skill.category_color || '#38bdf8'}12`
+                    color: skill.category_color || '#e4e4e7',
+                    borderColor: `${skill.category_color || '#e4e4e7'}35`,
+                    backgroundColor: `${skill.category_color || '#e4e4e7'}12`
                   }"
                 >
-                  <span class="w-1.5 h-1.5 rounded-full" :style="{ backgroundColor: skill.category_color || '#38bdf8' }"></span>
+                  <span class="w-1.5 h-1.5 rounded-full" :style="{ backgroundColor: skill.category_color || '#e4e4e7' }"></span>
                   <span class="truncate max-w-[140px]">{{ skill.category_name || 'Unassigned' }}</span>
                 </span>
               </div>
@@ -568,14 +568,14 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
           <div class="flex gap-2 pt-3 border-t border-white/[0.06] mt-auto">
             <button
               @click="openEditModal(skill)"
-              class="flex-1 py-1.5 cursor-pointer rounded-lg bg-white/[0.04] hover:bg-blue-600/20 text-slate-300 hover:text-blue-400 border border-white/[0.06] hover:border-blue-500/30 transition-all font-medium text-xs flex items-center justify-center gap-1.5"
+              class="flex-1 py-1.5 cursor-pointer rounded-xl bg-white/5 hover:bg-white/15 text-zinc-300 hover:text-white border border-white/10 transition-all font-medium text-xs flex items-center justify-center gap-1.5"
             >
               <Icon name="carbon:pen" size="14" />
               <span>Edit</span>
             </button>
             <button
               @click="deleteSkillHandler(skill.id)"
-              class="flex-1 py-1.5 cursor-pointer rounded-lg bg-white/[0.04] hover:bg-red-500/20 text-slate-300 hover:text-red-400 border border-white/[0.06] hover:border-red-500/30 transition-all font-medium text-xs flex items-center justify-center gap-1.5"
+              class="flex-1 py-1.5 cursor-pointer rounded-xl bg-white/5 hover:bg-rose-500/20 text-zinc-300 hover:text-rose-400 border border-white/10 hover:border-rose-500/30 transition-all font-medium text-xs flex items-center justify-center gap-1.5"
             >
               <Icon name="carbon:trash-can" size="14" />
               <span>Delete</span>
@@ -588,29 +588,29 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
     <!-- Infinite Scroll Trigger & Status -->
     <div ref="scrollTriggerRef" class="flex flex-col items-center justify-center py-6">
       <div v-if="isLoading && filteredSkills.length > 0 && !isSearching" class="flex flex-col items-center gap-3">
-        <div class="w-7 h-7 border-3 border-white/20 border-t-cyan-400 rounded-full animate-spin"></div>
-        <p class="text-white/60 text-xs">Loading more skills from database...</p>
+        <div class="w-7 h-7 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+        <p class="text-zinc-400 text-xs font-mono">Loading more skills from database...</p>
       </div>
 
       <div v-else-if="filteredSkills.length > 0 && !hasMore" class="text-center py-4">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/10 text-slate-400 text-xs font-mono">
-          <Icon name="carbon:checkmark" size="14" class="text-green-400" />
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-400 text-xs font-mono">
+          <Icon name="carbon:checkmark" size="14" class="text-emerald-400" />
           <span>All {{ filteredSkills.length }} skills loaded</span>
         </div>
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="filteredSkills.length === 0 && !isSearching" class="text-center py-16">
-        <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4 text-slate-500">
-          <Icon name="carbon:skill-level" size="32" />
+      <div v-else-if="filteredSkills.length === 0 && !isSearching" class="text-center py-16 rounded-2xl bg-[#141417] border border-white/10 w-full">
+        <div class="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-4 text-zinc-500">
+          <Icon name="carbon:skill-level" size="28" />
         </div>
-        <h3 class="text-lg font-bold text-white mb-1">No skills found</h3>
-        <p class="text-slate-400 text-sm mb-6 max-w-sm mx-auto">
+        <h3 class="text-base font-bold text-white mb-1 tracking-tight">No skills found</h3>
+        <p class="text-zinc-400 text-xs mb-6 max-w-sm mx-auto">
           No skills match your current search query or category filter.
         </p>
         <button
           @click="openCreateModal"
-          class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-primary text-white font-semibold text-xs transition-all shadow-md"
+          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-zinc-950 font-semibold text-xs hover:bg-zinc-200 transition-all shadow-sm cursor-pointer"
         >
           <Icon name="carbon:add" size="16" />
           <span>Add Skill in this Category</span>
@@ -622,10 +622,10 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
     <UModal
       v-model:open="showModal"
       :ui="{
-        content: 'w-full max-w-xl bg-[#090e1a] border border-white/15 shadow-2xl rounded-2xl sm:rounded-3xl overflow-hidden',
-        header: 'p-5 sm:p-6 bg-[#0c1424] border-b border-white/10',
+        content: 'w-full max-w-xl bg-[#141417] border border-white/15 shadow-2xl rounded-2xl sm:rounded-3xl overflow-hidden',
+        header: 'p-5 sm:p-6 bg-[#18181c] border-b border-white/10',
         body: 'p-5 sm:p-6 max-h-[75vh] overflow-y-auto',
-        footer: 'p-4 sm:p-5 bg-[#0c1424] border-t border-white/10'
+        footer: 'p-4 sm:p-5 bg-[#18181c] border-t border-white/10'
       }"
     >
       <template #title>
@@ -650,9 +650,9 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
               v-model="formData.name"
               type="text"
               placeholder="e.g., Vue, Golang, Docker"
-              class="w-full px-3.5 py-2 rounded-xl bg-white/[0.06] border border-white/15 text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/50 text-sm"
+              class="w-full px-3.5 py-2 rounded-xl bg-white/[0.06] border border-white/15 text-white placeholder:text-zinc-500 focus:outline-none focus:border-white/30 text-sm"
             />
-            <p v-if="errorsMessages[0]?.name" class="text-red-400 text-xs mt-1">{{ errorsMessages[0]?.name }}</p>
+            <p v-if="errorsMessages[0]?.name" class="text-rose-400 text-xs mt-1">{{ errorsMessages[0]?.name }}</p>
           </div>
 
           <!-- Category Selection Dropdown -->
@@ -662,7 +662,7 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
               <button
                 @click="openManageCategoriesModal"
                 type="button"
-                class="text-xs text-cyan-400 hover:underline flex items-center gap-1 cursor-pointer"
+                class="text-xs text-zinc-400 hover:text-white hover:underline flex items-center gap-1 cursor-pointer transition-colors"
               >
                 <Icon name="carbon:add" size="12" />
                 <span>New Category</span>
@@ -670,7 +670,7 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
             </div>
             <select
               v-model="formData.category_id"
-              class="w-full px-3.5 py-2 rounded-xl bg-[#0b1222] border border-white/20 text-white focus:outline-none focus:border-cyan-500/50 text-sm cursor-pointer"
+              class="w-full px-3.5 py-2 rounded-xl bg-[#18181c] border border-white/10 text-white focus:outline-none focus:border-white/30 text-sm cursor-pointer"
             >
               <option :value="null">-- No Category (Unassigned) --</option>
               <option v-for="cat in categories" :key="cat.id" :value="cat.id">
@@ -687,13 +687,13 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
                 v-model="formData.icon"
                 type="text"
                 placeholder="e.g., mdi:vuejs, simple-icons:docker"
-                class="flex-1 px-3.5 py-2 rounded-xl bg-white/[0.06] border border-white/15 text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/50 text-sm font-mono"
+                class="flex-1 px-3.5 py-2 rounded-xl bg-white/[0.06] border border-white/15 text-white placeholder:text-zinc-500 focus:outline-none focus:border-white/30 text-sm font-mono"
               />
               <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                <Icon :name="formData.icon || 'carbon:unknown'" size="20" class="text-cyan-400" />
+                <Icon :name="formData.icon || 'carbon:unknown'" size="20" class="text-zinc-300" />
               </div>
             </div>
-            <p v-if="errorsMessages[0]?.icon" class="text-red-400 text-xs mt-1">{{ errorsMessages[0]?.icon }}</p>
+            <p v-if="errorsMessages[0]?.icon" class="text-rose-400 text-xs mt-1">{{ errorsMessages[0]?.icon }}</p>
           </div>
 
           <!-- Color -->
@@ -709,10 +709,10 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
                 v-model="formData.color"
                 type="text"
                 placeholder="#38bdf8"
-                class="flex-1 px-3.5 py-2 rounded-xl bg-white/[0.06] border border-white/15 text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/50 text-sm font-mono"
+                class="flex-1 px-3.5 py-2 rounded-xl bg-white/[0.06] border border-white/15 text-white placeholder:text-zinc-500 focus:outline-none focus:border-white/30 text-sm font-mono"
               />
             </div>
-            <p v-if="errorsMessages[0]?.color" class="text-red-400 text-xs mt-1">{{ errorsMessages[0]?.color }}</p>
+            <p v-if="errorsMessages[0]?.color" class="text-rose-400 text-xs mt-1">{{ errorsMessages[0]?.color }}</p>
           </div>
         </div>
 
@@ -725,12 +725,12 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
           >
             <!-- Header of Skill Item -->
             <div class="flex items-center justify-between mb-3">
-              <span class="text-xs font-mono font-semibold text-cyan-400">#{{ index + 1 }} Skill</span>
+              <span class="text-xs font-mono font-semibold text-zinc-400">#{{ index + 1 }} Skill</span>
               <button
                 v-if="formDataList.length > 1"
                 @click="removeSkillForm(index)"
                 type="button"
-                class="p-1 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-colors"
+                class="p-1 rounded-lg hover:bg-rose-500/20 text-zinc-500 hover:text-rose-400 transition-colors"
                 title="Remove this skill"
               >
                 <Icon name="carbon:trash-can" size="15" />
@@ -740,22 +740,22 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
             <!-- Skill Name & Category in Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
               <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1">Name *</label>
+                <label class="block text-xs font-semibold text-zinc-300 mb-1">Name *</label>
                 <input
                   v-model="skillItem.name"
                   type="text"
                   placeholder="e.g. React"
-                  class="w-full px-3 py-1.5 rounded-lg bg-white/[0.06] border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-500/50"
-                  :class="errorsMessages[index]?.name ? 'border-red-500/50' : ''"
+                  class="w-full px-3 py-1.5 rounded-lg bg-white/[0.06] border border-white/15 text-white text-xs focus:outline-none focus:border-white/30"
+                  :class="errorsMessages[index]?.name ? 'border-rose-500/50' : ''"
                 />
-                <p v-if="errorsMessages[index]?.name" class="text-red-400 text-[11px] mt-0.5">{{ errorsMessages[index]?.name }}</p>
+                <p v-if="errorsMessages[index]?.name" class="text-rose-400 text-[11px] mt-0.5">{{ errorsMessages[index]?.name }}</p>
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1">Category *</label>
+                <label class="block text-xs font-semibold text-zinc-300 mb-1">Category *</label>
                 <select
                   v-model="skillItem.category_id"
-                  class="w-full px-3 py-1.5 rounded-lg bg-[#0b1222] border border-white/20 text-white text-xs focus:outline-none focus:border-cyan-500/50 cursor-pointer"
+                  class="w-full px-3 py-1.5 rounded-lg bg-[#18181c] border border-white/10 text-white text-xs focus:outline-none focus:border-white/30 cursor-pointer"
                 >
                   <option :value="null">-- Unassigned --</option>
                   <option v-for="cat in categories" :key="cat.id" :value="cat.id">
@@ -768,19 +768,19 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
             <!-- Icon & Color in Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1">Icon *</label>
+                <label class="block text-xs font-semibold text-zinc-300 mb-1">Icon *</label>
                 <input
                   v-model="skillItem.icon"
                   type="text"
                   placeholder="mdi:react"
-                  class="w-full px-3 py-1.5 rounded-lg bg-white/[0.06] border border-white/15 text-white text-xs font-mono focus:outline-none focus:border-cyan-500/50"
-                  :class="errorsMessages[index]?.icon ? 'border-red-500/50' : ''"
+                  class="w-full px-3 py-1.5 rounded-lg bg-white/[0.06] border border-white/15 text-white text-xs font-mono focus:outline-none focus:border-white/30"
+                  :class="errorsMessages[index]?.icon ? 'border-rose-500/50' : ''"
                 />
-                <p v-if="errorsMessages[index]?.icon" class="text-red-400 text-[11px] mt-0.5">{{ errorsMessages[index]?.icon }}</p>
+                <p v-if="errorsMessages[index]?.icon" class="text-rose-400 text-[11px] mt-0.5">{{ errorsMessages[index]?.icon }}</p>
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1">Color *</label>
+                <label class="block text-xs font-semibold text-zinc-300 mb-1">Color *</label>
                 <div class="flex items-center gap-2">
                   <input
                     v-model="skillItem.color"
@@ -791,7 +791,7 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
                     v-model="skillItem.color"
                     type="text"
                     placeholder="#38bdf8"
-                    class="flex-1 px-2.5 py-1.5 rounded-lg bg-white/[0.06] border border-white/15 text-white text-xs font-mono focus:outline-none focus:border-cyan-500/50"
+                    class="flex-1 px-2.5 py-1.5 rounded-lg bg-white/[0.06] border border-white/15 text-white text-xs font-mono focus:outline-none focus:border-white/30"
                   />
                 </div>
               </div>
@@ -802,7 +802,7 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
           <button
             @click="addMoreSkillForm"
             type="button"
-            class="w-full py-2.5 cursor-pointer rounded-xl border-2 border-dashed border-white/20 hover:border-cyan-400/50 text-slate-300 hover:text-cyan-300 transition-all text-xs font-medium flex items-center justify-center gap-2"
+            class="w-full py-2.5 cursor-pointer rounded-xl border border-dashed border-white/20 hover:border-white/40 text-zinc-400 hover:text-white transition-all text-xs font-medium flex items-center justify-center gap-2"
           >
             <Icon name="carbon:add" size="16" />
             <span>Add Another Skill Row</span>
@@ -814,16 +814,16 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
         <div class="flex w-full gap-3">
           <button
             @click="closeModal"
-            class="flex-1 py-2 rounded-xl bg-white/[0.05] hover:bg-white/10 text-slate-300 font-semibold text-xs border border-white/10 transition-all"
+            class="flex-1 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 font-semibold text-xs border border-white/10 transition-all cursor-pointer"
           >
             Cancel
           </button>
           <button
             @click="saveSkill"
             :disabled="isSaving"
-            class="flex-1 py-2 rounded-xl bg-primary hover:bg-primary/90 text-white font-semibold text-xs transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
+            class="flex-1 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 font-semibold text-xs transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
           >
-            <Icon v-if="isSaving" name="carbon:circle-dash" size="14" class="animate-spin" />
+            <Icon v-if="isSaving" name="carbon:circle-dash" size="14" class="animate-spin text-zinc-950" />
             <span>{{ isEditMode ? 'Update Skill' : `Save ${formDataList.length} Skill(s)` }}</span>
           </button>
         </div>
@@ -834,21 +834,21 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
     <UModal
       v-model:open="showCategoryModal"
       :ui="{
-        content: 'w-full max-w-lg bg-[#090e1a] border border-white/15 shadow-2xl rounded-2xl sm:rounded-3xl overflow-hidden',
-        header: 'p-5 sm:p-6 bg-[#0c1424] border-b border-white/10',
+        content: 'w-full max-w-lg bg-[#141417] border border-white/15 shadow-2xl rounded-2xl sm:rounded-3xl overflow-hidden',
+        header: 'p-5 sm:p-6 bg-[#18181c] border-b border-white/10',
         body: 'p-5 sm:p-6 max-h-[75vh] overflow-y-auto',
-        footer: 'p-4 sm:p-5 bg-[#0c1424] border-t border-white/10'
+        footer: 'p-4 sm:p-5 bg-[#18181c] border-t border-white/10'
       }"
     >
       <template #title>
         <div class="flex items-center gap-2">
-          <Icon name="carbon:folders" size="22" class="text-cyan-400" />
+          <Icon name="carbon:folders" size="22" class="text-zinc-300" />
           <h2 class="text-xl font-bold text-white">Manage Skill Categories</h2>
         </div>
       </template>
 
       <template #description>
-        <p class="text-xs text-slate-400">
+        <p class="text-xs text-zinc-400">
           Create, edit, or delete categories. Skills in deleted categories will remain intact as unassigned.
         </p>
       </template>
@@ -857,7 +857,7 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
         <div class="space-y-6">
           <!-- Category Create / Edit Form Card -->
           <div class="p-4 rounded-xl bg-white/[0.04] border border-white/15">
-            <h3 class="text-xs font-mono font-semibold text-cyan-300 uppercase tracking-wider mb-3">
+            <h3 class="text-xs font-mono font-semibold text-zinc-300 uppercase tracking-wider mb-3">
               {{ isEditingCategory ? 'Edit Category' : 'Create New Category' }}
             </h3>
 
@@ -865,16 +865,16 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
               <!-- Name & Color -->
               <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
                 <div class="sm:col-span-7">
-                  <label class="block text-xs text-slate-300 mb-1 font-medium">Category Name *</label>
+                  <label class="block text-xs text-zinc-300 mb-1 font-medium">Category Name *</label>
                   <input
                     v-model="categoryForm.name"
                     type="text"
                     placeholder="e.g. AI & Machine Learning"
-                    class="w-full px-3 py-2 rounded-lg bg-white/[0.06] border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-500/50"
+                    class="w-full px-3 py-2 rounded-lg bg-white/[0.06] border border-white/15 text-white text-xs focus:outline-none focus:border-white/30"
                   />
                 </div>
                 <div class="sm:col-span-5">
-                  <label class="block text-xs text-slate-300 mb-1 font-medium">Theme Color</label>
+                  <label class="block text-xs text-zinc-300 mb-1 font-medium">Theme Color</label>
                   <div class="flex items-center gap-2">
                     <input
                       v-model="categoryForm.color"
@@ -885,7 +885,7 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
                       v-model="categoryForm.color"
                       type="text"
                       placeholder="#38bdf8"
-                      class="w-full min-w-0 flex-1 px-2.5 py-1.5 rounded-lg bg-white/[0.06] border border-white/15 text-white text-xs font-mono focus:outline-none focus:border-cyan-500/50"
+                      class="w-full min-w-0 flex-1 px-2.5 py-1.5 rounded-lg bg-white/[0.06] border border-white/15 text-white text-xs font-mono focus:outline-none focus:border-white/30"
                     />
                   </div>
                 </div>
@@ -893,12 +893,12 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
 
               <!-- Description -->
               <div>
-                <label class="block text-xs text-slate-300 mb-1 font-medium">Description (Optional)</label>
+                <label class="block text-xs text-zinc-300 mb-1 font-medium">Description (Optional)</label>
                 <input
                   v-model="categoryForm.description"
                   type="text"
                   placeholder="Short description of this skill category..."
-                  class="w-full px-3 py-2 rounded-lg bg-white/[0.06] border border-white/15 text-white text-xs focus:outline-none focus:border-cyan-500/50"
+                  class="w-full px-3 py-2 rounded-lg bg-white/[0.06] border border-white/15 text-white text-xs focus:outline-none focus:border-white/30"
                 />
               </div>
 
@@ -908,16 +908,16 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
                   v-if="isEditingCategory"
                   @click="resetCategoryForm"
                   type="button"
-                  class="px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white cursor-pointer"
+                  class="px-3 py-1.5 rounded-lg text-xs text-zinc-400 hover:text-white cursor-pointer"
                 >
                   Cancel Edit
                 </button>
                 <button
                   @click="saveCategoryHandler"
                   :disabled="isSavingCategory"
-                  class="px-4 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                  class="px-4 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-zinc-950 font-semibold text-xs transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer shadow-sm"
                 >
-                  <Icon v-if="isSavingCategory" name="carbon:circle-dash" size="14" class="animate-spin" />
+                  <Icon v-if="isSavingCategory" name="carbon:circle-dash" size="14" class="animate-spin text-zinc-950" />
                   <span>{{ isEditingCategory ? 'Update Category' : 'Add Category' }}</span>
                 </button>
               </div>
@@ -926,14 +926,14 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
 
           <!-- Existing Categories List -->
           <div>
-            <h3 class="text-xs font-mono font-semibold text-slate-400 uppercase tracking-wider mb-2.5">
+            <h3 class="text-xs font-mono font-semibold text-zinc-400 uppercase tracking-wider mb-2.5">
               Existing Categories ({{ categories.length }})
             </h3>
 
             <div class="space-y-2 max-h-52 overflow-y-auto pr-1">
               <div
                 v-if="categories.length === 0"
-                class="text-center py-6 text-xs text-slate-500 bg-white/[0.02] border border-dashed border-white/10 rounded-xl"
+                class="text-center py-6 text-xs text-zinc-500 bg-white/[0.02] border border-dashed border-white/10 rounded-xl"
               >
                 No categories created yet. Add one above!
               </div>
@@ -947,19 +947,19 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
                   <span class="w-3 h-3 rounded-full shrink-0" :style="{ backgroundColor: cat.color || '#38bdf8' }"></span>
                   <div class="min-w-0 flex-1">
                     <p class="text-sm font-semibold text-white truncate">{{ cat.name }}</p>
-                    <p class="text-[11px] text-slate-400 truncate">{{ cat.description || `${cat.skills_count || 0} skills linked` }}</p>
+                    <p class="text-[11px] text-zinc-400 truncate">{{ cat.description || `${cat.skills_count || 0} skills linked` }}</p>
                   </div>
                 </div>
 
                 <!-- Right: Count & Actions -->
                 <div class="flex items-center gap-1.5 shrink-0">
-                  <span class="px-2 py-0.5 rounded-full text-[11px] font-mono bg-white/10 text-cyan-300 whitespace-nowrap">
+                  <span class="px-2 py-0.5 rounded-full text-[11px] font-mono bg-white/10 text-zinc-300 whitespace-nowrap">
                     {{ cat.skills_count || 0 }} skills
                   </span>
                   <button
                     @click="editCategoryHandler(cat)"
                     type="button"
-                    class="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer"
+                    class="p-1.5 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer"
                     title="Edit category"
                   >
                     <Icon name="carbon:pen" size="15" />
@@ -967,7 +967,7 @@ const deleteCategoryHandler = async (cat: SkillCategory) => {
                   <button
                     @click="deleteCategoryHandler(cat)"
                     type="button"
-                    class="p-1.5 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-colors cursor-pointer"
+                    class="p-1.5 rounded-lg hover:bg-rose-500/20 text-zinc-400 hover:text-rose-400 transition-colors cursor-pointer"
                     title="Delete category"
                   >
                     <Icon name="carbon:trash-can" size="15" />

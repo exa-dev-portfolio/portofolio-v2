@@ -452,24 +452,24 @@ const goBack = () => {
       <div class="flex gap-3">
         <button
           @click="goBack"
-          class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/10 text-white font-semibold hover:bg-white/20 transition-all border border-white/20"
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 text-zinc-300 hover:text-white font-semibold hover:bg-white/10 transition-all border border-white/10 text-sm cursor-pointer"
         >
-          <Icon name="carbon:arrow-left" size="20" />
+          <Icon name="carbon:arrow-left" size="18" />
           Back
         </button>
 
         <button
           @click="saveProject"
           :disabled="isSaving"
-          class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-white font-semibold hover:brightness-110 transition-all disabled:opacity-50"
+          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-zinc-950 font-semibold hover:bg-zinc-200 transition-all disabled:opacity-50 text-sm shadow-sm cursor-pointer"
         >
           <Icon
             v-if="isSaving"
             name="icon-park-outline:loading-four"
-            size="20"
-            class="animate-spin"
+            size="18"
+            class="animate-spin text-zinc-950"
           />
-          <Icon v-else name="carbon:save" size="20" />
+          <Icon v-else name="carbon:save" size="18" class="text-zinc-950" />
           {{ isSaving ? "Creating..." : "Create Project" }}
         </button>
       </div>
@@ -481,21 +481,21 @@ const goBack = () => {
       <div class="lg:col-span-2 space-y-6">
         <!-- Image Section -->
         <div
-          class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 space-y-4"
-          :class="errors.image ? 'border-red-500/50' : ''"
+          class="bg-[#141417] border border-white/10 rounded-2xl p-6 space-y-4"
+          :class="errors.image ? 'border-rose-500/50' : ''"
         >
           <div>
             <label class="block text-sm font-semibold text-white mb-2">
               Project Image
-              <span class="text-red-400">*</span>
+              <span class="text-rose-400">*</span>
             </label>
             <div class="flex gap-3">
               <button
                 @click="triggerFileInput"
                 type="button"
-                class="inline-flex cursor-pointer items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:brightness-110 transition-all"
+                class="inline-flex cursor-pointer items-center gap-2 px-4 py-2 rounded-xl bg-white text-zinc-950 font-semibold hover:bg-zinc-200 transition-all text-xs shadow-sm"
               >
-                <Icon name="carbon:cloud-upload" size="20" />
+                <Icon name="carbon:cloud-upload" size="16" />
                 Choose Image
               </button>
               <input

@@ -246,9 +246,9 @@ definePageMeta(
           <p class="text-white/60 mb-6">Get in touch with us directly for any privacy concerns or inquiries.</p>
           <NuxtLink
               to="/#contact"
-              class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-white font-semibold hover:brightness-110 transition-all"
+              class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-zinc-950 font-semibold hover:bg-zinc-200 transition-all text-sm shadow-sm"
           >
-            <Icon name="carbon:email" size="20"/>
+            <Icon name="carbon:email" size="18"/>
             Contact Us
           </NuxtLink>
         </div>

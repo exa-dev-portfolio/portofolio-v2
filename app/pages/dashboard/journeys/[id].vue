@@ -242,22 +242,22 @@ if (import.meta.client) {
         </div>
 
         <!-- Action Buttons -->
-        <div class="flex gap-3">
+        <div class="flex gap-2.5">
           <button
               v-if="!isEditMode"
               @click="toggleEditMode"
-              class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-white font-semibold hover:brightness-110 transition-all"
+              class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-zinc-950 font-semibold hover:bg-zinc-200 transition-all text-sm shadow-sm cursor-pointer"
           >
-            <Icon name="carbon:pen" size="20"/>
+            <Icon name="carbon:pen" size="18"/>
             Edit
           </button>
 
           <button
               v-if="isEditMode"
               @click="toggleEditMode"
-              class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/10 text-white font-semibold hover:bg-white/20 transition-all border border-white/20"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 text-zinc-300 font-semibold hover:bg-white/10 transition-all border border-white/10 text-sm cursor-pointer"
           >
-            <Icon name="carbon:close" size="20"/>
+            <Icon name="carbon:close" size="18"/>
             Cancel
           </button>
 
@@ -265,19 +265,19 @@ if (import.meta.client) {
               v-if="isEditMode"
               @click="saveJourney"
               :disabled="isSaving"
-              class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition-all disabled:opacity-50"
+              class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-zinc-950 font-semibold hover:bg-zinc-200 transition-all disabled:opacity-50 text-sm shadow-sm cursor-pointer"
           >
-            <Icon v-if="isSaving" name="icon-park-outline:loading-four" size="16" class="animate-spin"/>
-            <Icon v-else name="carbon:save" size="20"/>
-            {{ isSaving ? 'Saving...' : 'Save' }}
+            <Icon v-if="isSaving" name="icon-park-outline:loading-four" size="16" class="animate-spin text-zinc-950"/>
+            <Icon v-else name="carbon:save" size="18" class="text-zinc-950"/>
+            <span>{{ isSaving ? 'Saving...' : 'Save' }}</span>
           </button>
 
           <button
               v-if="!isEditMode"
               @click="deleteJourneyHandler"
-              class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-red-500/20 text-red-400 font-semibold hover:bg-red-500/30 transition-all border border-red-500/40"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-500/10 text-rose-400 font-semibold hover:bg-rose-500/20 transition-all border border-rose-500/20 text-sm cursor-pointer"
           >
-            <Icon name="carbon:trash-can" size="20"/>
+            <Icon name="carbon:trash-can" size="18"/>
             Delete
           </button>
         </div>

@@ -27,7 +27,7 @@
 
         <button
           @click="openRegisterModal"
-          class="inline-flex items-center cursor-pointer gap-2 px-5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-white font-semibold text-sm transition-all whitespace-nowrap shadow-lg shadow-blue-500/20"
+          class="inline-flex items-center cursor-pointer gap-2 px-5 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 font-semibold text-sm transition-all whitespace-nowrap shadow-sm"
         >
           <Icon name="carbon:add" size="18" />
           <span>Register Repository</span>
@@ -36,7 +36,7 @@
     </div>
 
     <!-- Webhook Instructions Helper Box -->
-    <div class="bg-[#0b1222]/80 backdrop-blur-md border border-white/10 rounded-2xl p-5 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div class="bg-[#141417] border border-white/10 rounded-2xl p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
       <div class="flex items-start gap-3.5">
         <div class="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 flex-shrink-0 mt-0.5">
           <Icon name="carbon:information" size="20" />
@@ -59,7 +59,7 @@
     </div>
 
     <!-- Applications & Release Status Section -->
-    <div class="bg-[#0b1222]/80 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl overflow-hidden">
+    <div class="bg-[#141417] border border-white/10 rounded-2xl overflow-hidden">
       <div class="p-6 border-b border-white/10 flex items-center justify-between">
         <div>
           <h2 class="text-base font-bold text-white flex items-center gap-2.5">
@@ -251,7 +251,7 @@
     </div>
 
     <!-- Registered Repositories Section -->
-    <div class="bg-[#0b1222]/80 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl overflow-hidden">
+    <div class="bg-[#141417] border border-white/10 rounded-2xl overflow-hidden">
       <div class="p-6 border-b border-white/10 flex items-center justify-between">
         <h2 class="text-base font-bold text-white flex items-center gap-2.5">
           <Icon name="carbon:logo-github" size="20" class="text-slate-400" />
@@ -372,7 +372,7 @@
     </div>
 
     <!-- Recent Sync Activity Section -->
-    <div class="bg-[#0b1222]/80 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl overflow-hidden">
+    <div class="bg-[#141417] border border-white/10 rounded-2xl overflow-hidden">
       <div class="p-6 border-b border-white/10 flex items-center justify-between">
         <h2 class="text-base font-bold text-white flex items-center gap-2.5">
           <Icon name="carbon:activity" size="20" class="text-slate-400" />
@@ -423,7 +423,7 @@
       class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
       @click.self="showModal = false"
     >
-      <div class="bg-[#0c1222] border border-white/10 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+      <div class="bg-[#141417] border border-white/10 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
         <button
           @click="showModal = false"
           class="absolute top-4 right-4 text-white/50 hover:text-white transition-colors cursor-pointer"
@@ -500,7 +500,7 @@
             <button
               type="submit"
               :disabled="submitting"
-              class="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-xs text-white font-semibold shadow-lg shadow-blue-500/20 disabled:opacity-50 transition-all cursor-pointer"
+              class="px-5 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-xs text-zinc-950 font-semibold shadow-sm disabled:opacity-50 transition-all cursor-pointer"
             >
               {{ submitting ? 'Saving...' : 'Save & Register' }}
             </button>
@@ -515,7 +515,7 @@
       class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
       @click.self="repoToDelete = null"
     >
-      <div class="bg-[#0c1222] border border-white/10 rounded-2xl max-w-sm w-full p-6 shadow-2xl relative">
+      <div class="bg-[#141417] border border-white/10 rounded-2xl max-w-sm w-full p-6 shadow-2xl relative">
         <div class="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-3 text-red-400">
           <Icon name="carbon:warning-alt" size="24" />
         </div>
@@ -553,7 +553,7 @@
       class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm"
       @click.self="testersModalApp = null"
     >
-      <div class="bg-[#0c1222] border border-white/10 rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative max-h-[85vh] flex flex-col">
+      <div class="bg-[#141417] border border-white/10 rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative max-h-[85vh] flex flex-col">
         <button
           @click="testersModalApp = null"
           class="absolute top-4 right-4 text-white/50 hover:text-white transition-colors cursor-pointer z-10"
@@ -712,7 +712,7 @@
       class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
       @click.self="storeLinksModalApp = null"
     >
-      <div class="bg-[#0c1222] border border-white/10 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative">
+      <div class="bg-[#141417] border border-white/10 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative">
         <button
           @click="storeLinksModalApp = null"
           class="absolute top-4 right-4 text-white/40 hover:text-white transition-colors cursor-pointer"
