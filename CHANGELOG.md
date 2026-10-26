@@ -1,3 +1,10 @@
+# [1.14.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.13.0...v1.14.0) (2026-10-26)
+
+
+### Features
+
+* **dashboard:** add daily tech radar and news aggregator with postgresql persistence ([bf43431](https://github.com/exa-dev-portfolio/portofolio-v2/commit/bf434316a5e30ad4cc1151b80ff7d8f8ff8ebc26))
+
 # [1.13.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.12.0...v1.13.0) (2026-10-21)
 
 
