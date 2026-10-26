@@ -45,6 +45,7 @@ const user = {
 
 const menuItems = [
   { name: 'Dashboard', icon: 'carbon:dashboard', href: '/dashboard' },
+  { name: 'Tech Radar', icon: 'carbon:radar', href: '/dashboard/tech-radar' },
   { name: 'Projects', icon: 'carbon:folder-open', href: '/dashboard/projects' },
   { name: 'Apps (APK)', icon: 'carbon:application-mobile', href: '/dashboard/apps' },
   { name: 'Work', icon: 'mdi:briefcase', href: '/dashboard/journeys' },

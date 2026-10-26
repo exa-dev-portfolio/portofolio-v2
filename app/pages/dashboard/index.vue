@@ -39,9 +39,18 @@ const { data: statsData } = await useAsyncData(
   async () => await fetchStats()
 )
 
+const { data: techRadarData } = await useFetch<any>('/api/dashboard/tech-radar', {
+  query: { limit: 3 },
+  watch: false,
+})
+
 // Extract data from responses
 const projects = computed(() => {
   return projectsData.value?.data ?? []
+})
+
+const topTechNews = computed(() => {
+  return techRadarData.value?.data?.items || []
 })
 
 const dashboardStats = computed(() => {
@@ -103,6 +112,12 @@ const recentProjects = computed(() => {
 
 // Quick shortcuts definition
 const quickShortcuts = [
+  {
+    title: 'Tech Radar',
+    description: 'Daily curated tech news & AI pulse',
+    icon: 'carbon:radar',
+    href: '/dashboard/tech-radar',
+  },
   {
     title: 'Projects',
     description: 'Manage showcases & case studies',
@@ -210,6 +225,70 @@ useHead({
         </div>
         <Icon name="carbon:chevron-right" size="16" class="text-zinc-600 group-hover:text-zinc-300 transition-colors shrink-0" />
       </NuxtLink>
+    </div>
+
+    <!-- Today's Tech Pulse Section -->
+    <div class="rounded-2xl bg-[#141417] border border-white/10 p-5 sm:p-6 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-white/5">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+            <Icon name="carbon:radar" size="18" />
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-base font-bold text-white tracking-tight">Today's Tech Pulse</h2>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-emerald-400/10 text-emerald-400 border border-emerald-400/20 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Live Feed</span>
+              </span>
+            </div>
+            <p class="text-xs text-zinc-400 mt-0.5">Kurasi berita & update teknologi teratas hari ini.</p>
+          </div>
+        </div>
+        <NuxtLink
+          to="/dashboard/tech-radar"
+          class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white text-black font-semibold text-xs tracking-wide shadow-sm hover:opacity-90 transition-opacity"
+        >
+          <span>Open Tech Radar</span>
+          <Icon name="carbon:arrow-up-right" size="13" />
+        </NuxtLink>
+      </div>
+
+      <!-- 3 Highlights Grid -->
+      <div v-if="topTechNews.length > 0" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <a
+          v-for="item in topTechNews"
+          :key="item.id"
+          :href="item.url"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="group p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/15 hover:bg-white/[0.04] transition-all flex flex-col justify-between space-y-3"
+        >
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-xs">
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-white/5 text-zinc-300 border border-white/5">
+                {{ item.source }}
+              </span>
+              <span class="text-[11px] font-mono text-zinc-500">{{ item.time_ago }}</span>
+            </div>
+            <h4 class="text-xs font-semibold text-white group-hover:text-indigo-300 transition-colors line-clamp-2">
+              {{ item.title }}
+            </h4>
+          </div>
+          <div class="flex items-center justify-between pt-1 text-[11px] font-mono text-zinc-500">
+            <span v-if="item.score !== undefined && item.score > 0">▲ {{ item.score }} pts</span>
+            <span v-else class="capitalize">{{ item.category }}</span>
+            <span class="text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+              <span>Read</span>
+              <Icon name="carbon:arrow-up-right" size="11" />
+            </span>
+          </div>
+        </a>
+      </div>
+
+      <div v-else class="text-center py-6 text-xs text-zinc-500">
+        Memuat headline teknologi terbaru...
+      </div>
     </div>
 
     <!-- Recent Projects Section -->

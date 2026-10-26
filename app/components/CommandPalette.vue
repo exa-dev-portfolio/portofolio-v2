@@ -31,9 +31,15 @@ const copyEmail = () => {
   alert('Email address copied to clipboard!')
 }
 
-const navigateTo = (hash: string) => {
+const router = useRouter()
+
+const navigateToSection = (target: string) => {
   isOpen.value = false
-  const el = document.querySelector(hash)
+  if (target.startsWith('/')) {
+    router.push(target)
+    return
+  }
+  const el = document.querySelector(target)
   if (el) {
     el.scrollIntoView({ behavior: 'smooth' })
   }
@@ -41,14 +47,15 @@ const navigateTo = (hash: string) => {
 
 const commands: CommandItem[] = [
   // Navigation
-  { id: 'nav-about', title: 'About Me', subtitle: 'Background & core focus', category: 'Navigation', icon: 'carbon:user', action: () => navigateTo('#about') },
-  { id: 'nav-music', title: 'Apple Music', subtitle: 'Now playing track & daily coding soundtracks', category: 'Navigation', icon: 'carbon:music', action: () => navigateTo('#music') },
-  { id: 'nav-projects', title: 'Featured Projects', subtitle: 'Production software and cloud systems', category: 'Navigation', icon: 'carbon:application-web', action: () => navigateTo('#projects') },
-  { id: 'nav-stack', title: 'Technical Stack', subtitle: 'Technologies, languages, and tools', category: 'Navigation', icon: 'carbon:code', action: () => navigateTo('#stack') },
-  { id: 'nav-experience', title: 'Work Experience', subtitle: 'Career milestones and engineering impact', category: 'Navigation', icon: 'carbon:milestone', action: () => navigateTo('#experience') },
-  { id: 'nav-contact', title: 'Get in Touch', subtitle: 'Inquiries, opportunities, and contact form', category: 'Navigation', icon: 'carbon:email', action: () => navigateTo('#contact') },
+  { id: 'nav-about', title: 'About Me', subtitle: 'Background & core focus', category: 'Navigation', icon: 'carbon:user', action: () => navigateToSection('#about') },
+  { id: 'nav-music', title: 'Apple Music', subtitle: 'Now playing track & daily coding soundtracks', category: 'Navigation', icon: 'carbon:music', action: () => navigateToSection('#music') },
+  { id: 'nav-projects', title: 'Featured Projects', subtitle: 'Production software and cloud systems', category: 'Navigation', icon: 'carbon:application-web', action: () => navigateToSection('#projects') },
+  { id: 'nav-stack', title: 'Technical Stack', subtitle: 'Technologies, languages, and tools', category: 'Navigation', icon: 'carbon:code', action: () => navigateToSection('#stack') },
+  { id: 'nav-experience', title: 'Work Experience', subtitle: 'Career milestones and engineering impact', category: 'Navigation', icon: 'carbon:milestone', action: () => navigateToSection('#experience') },
+  { id: 'nav-contact', title: 'Get in Touch', subtitle: 'Inquiries, opportunities, and contact form', category: 'Navigation', icon: 'carbon:email', action: () => navigateToSection('#contact') },
 
   // Quick Actions
+  { id: 'act-tech-radar', title: 'Daily Tech Radar', subtitle: 'Curated tech updates & AI daily briefing', category: 'Quick Actions', icon: 'carbon:radar', action: () => { isOpen.value = false; router.push('/dashboard/tech-radar') } },
   { id: 'act-resume', title: 'Download Resume / CV', subtitle: 'PDF format', category: 'Quick Actions', icon: 'carbon:document-download', action: () => { if (props.cvUrl) window.open(props.cvUrl, '_blank') } },
   { id: 'act-copy-email', title: 'Copy Email Address', subtitle: props.userEmail || 'contact@eka-dev.cloud', category: 'Quick Actions', icon: 'carbon:copy', action: copyEmail },
   { id: 'act-ai', title: 'Ask Portfolio AI Copilot', subtitle: 'Interactive Gemini assistant', category: 'Quick Actions', icon: 'carbon:bot', action: () => { isOpen.value = false; emit('open-ai') } },
