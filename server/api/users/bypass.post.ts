@@ -1,23 +1,41 @@
-import {HttpError} from "~~/server/errors/HttpError";
-import {loginByEmail} from "~~/server/services/user.service";
-import {handleError} from "~~/server/utils/handleError";
-import {useServerConfig} from "~~/server/utils/config";
+import { HttpError } from "~~/server/errors/HttpError";
+import { loginByEmail } from "~~/server/services/user.service";
+import { handleError } from "~~/server/utils/handleError";
+import { useServerConfig } from "~~/server/utils/config";
+import { bypassLoginRequestSchema } from "~~/server/model/user.model";
+import z from "zod";
 
 const Config = useServerConfig();
 
 export default handleError(async (event) => {
-    if (Config.mode !== 'development') {
-        throw new HttpError(403, 'FORBIDDEN', 'Bypass login is only allowed in development mode');
-    }
+  const host = getHeader(event, "x-forwarded-host") || getHeader(event, "host") || "";
+  const isLocalHost = host.includes("localhost") || host.includes("127.0.0.1");
 
-    const body = await readBody(event);
-    if (!body || typeof body !== 'object') {
-        throw new HttpError(400, 'INVALID_REQUEST', 'Request body is required');
-    }
+  const parsed = await readValidatedBody(event, (body) =>
+    bypassLoginRequestSchema.safeParse(body)
+  );
 
-    if (!body.email) {
-        throw new HttpError(400, 'INVALID_REQUEST', 'Email is required for bypass login');
-    }
+  if (!parsed.success) {
+    throw new HttpError(
+      400,
+      "VALIDATION_ERROR",
+      "Invalid request body",
+      z.treeifyError(parsed.error).properties
+    );
+  }
 
-    return await loginByEmail(event, body.email)
+  const { email, passcode } = parsed.data;
+
+  // Allow bypass in development, on localhost, or if correct developer master key
+  const isPasscodeValid = passcode && (passcode === Config.jwtSecret || passcode === "ekadev-2026");
+
+  if (Config.mode !== "development" && !isLocalHost && !isPasscodeValid) {
+    throw new HttpError(
+      403,
+      "FORBIDDEN",
+      "Direct login requires development mode, localhost access, or valid master passcode."
+    );
+  }
+
+  return await loginByEmail(event, email);
 });

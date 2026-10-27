@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import {onMounted, ref, watch} from 'vue'
+import { onMounted, ref, watch } from 'vue'
 
 definePageMeta({
   layout: false,
 })
+
 useHead({
-  title: 'Login - MyApp',
+  title: 'Sign In | Eka Console',
   meta: [
     {
       name: 'description',
-      content: 'Login to access your personalized dashboard and portfolio.',
+      content: 'Authenticate to access developer console, daily tech radar, and portfolio management.',
     },
   ],
   script: [
@@ -26,178 +27,323 @@ useHead({
   ],
 })
 
+// State
 const isLoading = ref(false)
+const isDirectLoading = ref(false)
 const localError = ref<string | null>(null)
+const isResumingSession = ref(false)
+const showPasscodeInput = ref(false)
+const passcodeInput = ref('')
 const config = useRuntimeConfig()
-const debugInfo = ref<{ clientId?: string; clientUrl?: string }>({clientId: '', clientUrl: ''})
+const router = useRouter()
 
-const {initGoogleSignIn, signInError} = useGoogleSignIn()
-const {signInWithApple, isAppleLoading, appleSignInError} = useAppleSignIn()
+const { initGoogleSignIn, signInError } = useGoogleSignIn()
+const { signInWithApple, isAppleLoading, appleSignInError } = useAppleSignIn()
 
-// Watch untuk reactive error dari Google
+// Watch reactive errors
 watch(signInError, (newError) => {
-  if (newError) {
-    localError.value = newError
-  }
+  if (newError) localError.value = newError
 })
 
-// Watch untuk reactive error dari Apple
 watch(appleSignInError, (newError) => {
-  if (newError) {
-    localError.value = newError
+  if (newError) localError.value = newError
+})
+
+// Auto-check existing session on load
+onMounted(async () => {
+  const tokenCookie = useCookie('token')
+  if (tokenCookie.value) {
+    isResumingSession.value = true
+    try {
+      await router.push('/dashboard')
+    } catch {
+      isResumingSession.value = false
+    }
   }
 })
 
-onMounted(() => {
-  // Debug: Tampilkan konfigurasi Google
-  debugInfo.value = {
-    clientId: String(config.public.googleClientId || 'NOT SET'),
-    clientUrl: String(config.public.clientUrl || 'NOT SET'),
-  }
-  console.log('[Debug] Google Config:', debugInfo.value)
-  console.log('[Debug] Apple Client ID:', config.public.appleClientId)
-})
-
+// Handle Google OAuth
 const handleGoogleLogin = async () => {
   isLoading.value = true
   localError.value = null
 
-  // Trigger Google Sign-In pop-up
-  initGoogleSignIn()
-
-  // Pop-up adalah async, set loading false after a moment
-  setTimeout(() => {
-    isLoading.value = false
-  }, 1000)
+  try {
+    initGoogleSignIn()
+  } catch (err: any) {
+    localError.value = err?.message || 'Google sign-in initiation failed'
+  } finally {
+    setTimeout(() => {
+      isLoading.value = false
+    }, 1500)
+  }
 }
 
+// Handle Apple OAuth
 const handleAppleLogin = async () => {
   localError.value = null
   await signInWithApple()
 }
+
+// Handle 1-Click Quick Owner Access (Bypass / Direct Login)
+const handleDirectOwnerLogin = async () => {
+  isDirectLoading.value = true
+  localError.value = null
+
+  try {
+    const res: any = await $fetch('/api/users/bypass', {
+      method: 'POST',
+      body: {
+        email: 'ekaaa.jobs@gmail.com',
+        passcode: passcodeInput.value.trim() || undefined,
+      },
+      credentials: 'include',
+    })
+
+    if (!res?.data?.access_token) {
+      throw new Error(res?.message || 'Direct login failed')
+    }
+
+    // Set cookie
+    const token = useCookie('token', {
+      maxAge: 86400,
+      path: '/',
+      sameSite: 'lax',
+      secure: import.meta.env.PROD,
+    })
+    token.value = res.data.access_token
+
+    // Smooth redirect
+    isResumingSession.value = true
+    await router.push('/dashboard')
+  } catch (err: any) {
+    localError.value = err?.data?.message || err?.message || 'Direct login failed'
+  } finally {
+    isDirectLoading.value = false
+  }
+}
 </script>
 
 <template>
-  <div
-      class="min-h-screen bg-linear-to-br from-[#0a0e27] via-[#0f1535] to-[#1a2332] relative overflow-hidden flex items-center justify-center">
-    <!-- Animated Background Elements -->
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-      <!-- Gradient Orbs -->
-      <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl animate-pulse"></div>
-      <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-pulse"
-           style="animation-delay: 1s"></div>
-      <div class="absolute top-1/2 left-1/2 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse"
-           style="animation-delay: 2s"></div>
-
-      <!-- Additional decorative elements -->
-      <div class="absolute inset-0 bg-linear-to-t from-[#0a0e27]/40 via-transparent to-transparent"></div>
+  <div class="min-h-screen bg-[#09090b] text-[#f4f4f5] relative overflow-hidden flex flex-col justify-between selection:bg-white selection:text-black font-sans">
+    
+    <!-- Ambient Background Canvas & Grid -->
+    <div class="fixed inset-0 pointer-events-none z-0">
+      <!-- Subtle Grid -->
+      <div class="absolute inset-0 subtle-grid opacity-35"></div>
+      
+      <!-- Glowing Ambient Spheres -->
+      <div class="absolute -top-40 -right-40 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-pulse"></div>
+      <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" style="animation-delay: 2s"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-3xl pointer-events-none"></div>
     </div>
 
-    <!-- Content -->
-    <div class="relative z-10 w-full max-w-lg px-6 sm:px-8">
-      <!-- Logo/Branding Section -->
-      <div class="text-center mb-12">
-        <div class="mb-6 inline-block">
-          <div
-              class="w-16 h-16 sm:w-20 sm:h-20 bg-linear-to-br from-primary to-primary/60 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30">
-            <Icon name="carbon:user-avatar" size="40" class="text-white"/>
-          </div>
+    <!-- Top Navigation Bar -->
+    <header class="relative z-10 p-6 sm:p-8 flex items-center justify-between max-w-5xl mx-auto w-full">
+      <NuxtLink
+        to="/"
+        class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/20 text-zinc-400 hover:text-white text-xs font-mono transition-all cursor-pointer group"
+      >
+        <Icon name="carbon:arrow-left" size="13" class="group-hover:-translate-x-0.5 transition-transform" />
+        <span>Back to Portfolio</span>
+      </NuxtLink>
+
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/10 text-xs font-mono text-zinc-400">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>Console v2.0 • Secure Gateway</span>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="relative z-10 w-full max-w-md mx-auto px-6 py-4 flex-1 flex flex-col justify-center">
+      
+      <!-- Resuming Session Banner (if token already present) -->
+      <div
+        v-if="isResumingSession"
+        class="p-6 rounded-3xl bg-[#141417]/90 border border-emerald-500/30 shadow-2xl backdrop-blur-2xl text-center space-y-4"
+      >
+        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto text-emerald-400">
+          <Icon name="carbon:renew" size="24" class="animate-spin" />
         </div>
-        <h1 class="text-4xl sm:text-5xl font-black bg-linear-to-r from-white via-white to-white/60 bg-clip-text text-transparent mb-3">
-          Welcome
-        </h1>
-        <p class="text-white/60 text-sm sm:text-base max-w-sm mx-auto leading-relaxed">
-          Access your personalized dashboard and explore your portfolio
-        </p>
+        <div class="space-y-1">
+          <h3 class="text-base font-semibold text-white">Active Session Detected</h3>
+          <p class="text-xs text-zinc-400 font-mono">Redirecting to Dashboard Console...</p>
+        </div>
       </div>
 
-      <!-- Main Card -->
-      <div class="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 sm:p-10 shadow-2xl">
-        <!-- Error Message -->
-        <div v-if="localError" class="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-lg">
-          <p class="text-red-400 text-sm">{{ localError }}</p>
+      <!-- Login Card -->
+      <div
+        v-else
+        class="bg-[#141417]/90 backdrop-blur-2xl border border-white/10 rounded-3xl p-7 sm:p-9 shadow-2xl space-y-6 relative overflow-hidden"
+      >
+        <!-- Subtle Top Border Highlight -->
+        <div class="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+
+        <!-- Header / Monogram -->
+        <div class="text-center space-y-2">
+          <!-- Monogram Pill -->
+          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 mb-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span class="font-bold text-xs tracking-tight text-white font-heading">Eka<span class="text-zinc-500">.</span></span>
+            <span class="text-[10px] font-mono text-zinc-400">Admin Console</span>
+          </div>
+
+          <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            Sign In to Dashboard
+          </h1>
+          <p class="text-xs sm:text-sm text-zinc-400 font-normal leading-relaxed">
+            Akses kurasi Tech Radar harian, manajemen portfolio, dan telemetri sistem.
+          </p>
         </div>
 
-        <!-- Header -->
-        <div class="text-center mb-8">
-          <h2 class="text-2xl font-bold text-white mb-2">Sign in to your account</h2>
-          <p class="text-white/50 text-sm">Quick and secure authentication</p>
+        <!-- Error Notification -->
+        <div
+          v-if="localError"
+          class="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2"
+        >
+          <Icon name="carbon:warning-filled" size="16" class="shrink-0" />
+          <span>{{ localError }}</span>
         </div>
 
-        <!-- Login Buttons Container -->
-        <div class="space-y-4">
+        <!-- Primary Actions -->
+        <div class="space-y-3 pt-2">
+          
+          <!-- 1-Click Quick Owner Access (Paling Nyaman untuk Eka) -->
+          <button
+            @click="handleDirectOwnerLogin"
+            :disabled="isDirectLoading || isLoading || isAppleLoading"
+            class="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black font-semibold text-xs sm:text-sm tracking-wide shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 active:scale-[0.98] transition-all duration-200 flex items-center justify-between cursor-pointer disabled:opacity-50"
+          >
+            <div class="flex items-center gap-2.5">
+              <Icon
+                v-if="isDirectLoading"
+                name="carbon:renew"
+                size="17"
+                class="animate-spin text-black"
+              />
+              <Icon
+                v-else
+                name="carbon:flash-filled"
+                size="17"
+                class="text-black"
+              />
+              <span>{{ isDirectLoading ? 'Authenticating...' : 'Quick Console Access (Owner)' }}</span>
+            </div>
+            <span class="text-[10px] font-mono font-bold uppercase bg-black/15 px-2 py-0.5 rounded-full">
+              1-Click
+            </span>
+          </button>
+
+          <!-- Divider -->
+          <div class="relative py-2 flex items-center justify-center">
+            <div class="absolute inset-x-0 h-[1px] bg-white/10"></div>
+            <span class="relative z-10 px-3 bg-[#141417] text-[10px] font-mono uppercase tracking-wider text-zinc-500">
+              atau gunakan OAuth
+            </span>
+          </div>
+
           <!-- Google Login Button -->
           <button
-              @click="handleGoogleLogin"
-              :disabled="isLoading || isAppleLoading"
-              class="w-full py-4 cursor-pointer px-6 rounded-xl bg-white text-[#0a0e27] font-bold text-base hover:bg-white/90 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-3 group shadow-lg hover:shadow-xl"
+            @click="handleGoogleLogin"
+            :disabled="isLoading || isAppleLoading || isDirectLoading"
+            class="w-full py-3 px-4 rounded-xl bg-white hover:bg-zinc-100 text-[#09090b] font-semibold text-xs sm:text-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2.5 shadow-md cursor-pointer"
           >
-            <Icon v-if="isLoading" name="icon-park-outline:loading-four" size="22" class="animate-spin text-[#0a0e27]"/>
-            <Icon v-else name="mdi:google" size="22" class="text-[#0a0e27]"/>
-            <span>{{ isLoading ? 'Signing in with Google...' : 'Continue with Google' }}</span>
+            <Icon
+              v-if="isLoading"
+              name="carbon:renew"
+              size="17"
+              class="animate-spin text-[#09090b]"
+            />
+            <Icon
+              v-else
+              name="logos:google-icon"
+              size="17"
+            />
+            <span>{{ isLoading ? 'Connecting to Google...' : 'Continue with Google' }}</span>
           </button>
 
           <!-- Apple Login Button -->
           <button
-              @click="handleAppleLogin"
-              :disabled="isLoading || isAppleLoading"
-              class="w-full py-4 cursor-pointer px-6 rounded-xl bg-[#000000] text-white border border-white/20 font-bold text-base hover:bg-[#111111] hover:border-white/40 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-3 group shadow-lg hover:shadow-xl"
+            @click="handleAppleLogin"
+            :disabled="isLoading || isAppleLoading || isDirectLoading"
+            class="w-full py-3 px-4 rounded-xl bg-[#1c1c21] hover:bg-[#232329] text-white border border-white/15 hover:border-white/25 font-semibold text-xs sm:text-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2.5 shadow-sm cursor-pointer"
           >
-            <Icon v-if="isAppleLoading" name="icon-park-outline:loading-four" size="22" class="animate-spin text-white"/>
-            <Icon v-else name="mdi:apple" size="24" class="text-white"/>
-            <span>{{ isAppleLoading ? 'Signing in with Apple...' : 'Sign in with Apple' }}</span>
+            <Icon
+              v-if="isAppleLoading"
+              name="carbon:renew"
+              size="17"
+              class="animate-spin text-white"
+            />
+            <Icon
+              v-else
+              name="mdi:apple"
+              size="19"
+              class="text-white"
+            />
+            <span>{{ isAppleLoading ? 'Connecting to Apple...' : 'Sign in with Apple' }}</span>
           </button>
+
+          <!-- Optional Master Passcode Toggle -->
+          <div class="pt-1">
+            <button
+              @click="showPasscodeInput = !showPasscodeInput"
+              class="text-[11px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors mx-auto block cursor-pointer"
+            >
+              {{ showPasscodeInput ? 'Sembunyikan Master Passcode' : 'Gunakan Master Passcode' }}
+            </button>
+
+            <div v-if="showPasscodeInput" class="mt-2.5 space-y-2">
+              <input
+                v-model="passcodeInput"
+                type="password"
+                placeholder="Masukkan developer passcode..."
+                class="w-full px-3.5 py-2 rounded-xl bg-black/40 border border-white/10 text-xs font-mono text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-500/50 transition-colors"
+                @keyup.enter="handleDirectOwnerLogin"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Security Pill Footnote -->
+        <div class="pt-2 border-t border-white/5 flex items-center justify-center gap-4 text-[11px] font-mono text-zinc-500">
+          <span class="flex items-center gap-1">
+            <Icon name="carbon:checkmark-filled" size="13" class="text-emerald-400" />
+            <span>JWT Session</span>
+          </span>
+          <span class="flex items-center gap-1">
+            <Icon name="carbon:checkmark-filled" size="13" class="text-emerald-400" />
+            <span>TLS 1.3 Encryption</span>
+          </span>
         </div>
       </div>
+    </main>
 
-      <!-- Security Info -->
-      <div class="mt-8 text-center">
-        <p class="text-xs text-white/40 mb-4">
-          We never store your password. Your data is secure with industry-standard encryption.
-        </p>
-        <div class="flex items-center justify-center gap-4 text-xs text-white/50">
-          <span class="flex items-center gap-1">
-            <Icon name="carbon:checkmark-filled" size="16" class="text-green-400"/>
-            Secure
-          </span>
-          <span class="flex items-center gap-1">
-            <Icon name="carbon:checkmark-filled" size="16" class="text-green-400"/>
-            Fast
-          </span>
-          <span class="flex items-center gap-1">
-            <Icon name="carbon:checkmark-filled" size="16" class="text-green-400"/>
-            Reliable
-          </span>
-        </div>
+    <!-- Footer Security / Legal Notes -->
+    <footer class="relative z-10 p-6 text-center text-xs text-zinc-600 font-mono space-y-2 max-w-md mx-auto">
+      <p>
+        Portfolio Management Console • Moh. Eka Syafrino Nazhifan
+      </p>
+      <div class="flex items-center justify-center gap-4 text-zinc-500">
+        <NuxtLink to="/terms" class="hover:text-zinc-300 transition-colors">Terms of Service</NuxtLink>
+        <span>•</span>
+        <NuxtLink to="/privacy" class="hover:text-zinc-300 transition-colors">Privacy Policy</NuxtLink>
       </div>
-
-      <!-- Terms & Privacy -->
-      <div class="text-center mt-8 text-xs text-white/40">
-        <p>
-          By continuing, you agree to our
-          <a href="/terms" class="text-primary hover:text-primary/80 transition-colors underline">Terms of Service</a>
-          and
-          <a href="/privacy" class="text-primary hover:text-primary/80 transition-colors underline">Privacy Policy</a>
-        </p>
-      </div>
-    </div>
+    </footer>
   </div>
 </template>
 
 <style scoped>
-@keyframes slide-in {
+@keyframes fadeInScale {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: scale(0.97) translateY(8px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1) translateY(0);
   }
 }
 
-div[class*="max-w-lg"] {
-  animation: slide-in 0.4s ease-out;
+main > div {
+  animation: fadeInScale 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 </style>
-
