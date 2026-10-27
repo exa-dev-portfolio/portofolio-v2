@@ -1,22 +1,32 @@
 import { withAuth } from "~~/server/utils/withAuth";
 import { sendSuccess } from "~~/server/utils/response";
 import { getUserTechRadar } from "~~/server/services/techNews.service";
-import type { TechCategory } from "~~/app/types/tech-news";
+import { techRadarQuerySchema } from "~~/server/model/techRadar.model";
+import { HttpError } from "~~/server/errors/HttpError";
+import z from "zod";
 
 export default withAuth(async (event) => {
-  const query = getQuery(event);
+  const parsed = await getValidatedQuery(event, (query) =>
+    techRadarQuerySchema.safeParse(query)
+  );
+
+  if (!parsed.success) {
+    throw new HttpError(
+      400,
+      "VALIDATION_ERROR",
+      "Invalid query parameters",
+      z.treeifyError(parsed.error).properties
+    );
+  }
+
+  const query = parsed.data;
   const userId = event.context.user?.id;
 
-  const category = (query.category as TechCategory) || "all";
-  const bookmarksOnly = query.bookmarks_only === "true" || query.bookmarks_only === "1";
-  const forceRefresh = query.force_refresh === "true" || query.force_refresh === "1";
-  const limit = query.limit ? Number(query.limit) : undefined;
-
   const data = await getUserTechRadar(userId, {
-    category,
-    bookmarksOnly,
-    forceRefresh,
-    limit,
+    category: query.category,
+    bookmarksOnly: query.bookmarks_only,
+    forceRefresh: query.force_refresh,
+    limit: query.limit,
   });
 
   return sendSuccess(event, data);

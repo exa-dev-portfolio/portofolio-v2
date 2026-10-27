@@ -52,3 +52,83 @@ describe("Tech News Service - Classifier & Utilities", () => {
     expect(formatTimeAgo(threeDaysAgo)).toBe("3d ago");
   });
 });
+
+import {
+  techRadarArticleSchema,
+  techRadarQuerySchema,
+  techRadarBriefingSchema,
+} from "~~/server/model/techRadar.model";
+
+describe("Tech Radar - Zod Validation Schemas", () => {
+  it("validates valid article input successfully", () => {
+    const valid = {
+      article_id: "hn-12345",
+      title: "Anthropic Claude 3.7",
+      url: "https://news.ycombinator.com/item?id=12345",
+      source: "Hacker News",
+      category: "ai",
+      author: "alex",
+      published_at: "2026-10-27T00:00:00Z",
+    };
+    const res = techRadarArticleSchema.safeParse(valid);
+    expect(res.success).toBe(true);
+  });
+
+  it("fails when required article fields are missing or invalid", () => {
+    const invalidUrl = {
+      article_id: "hn-12345",
+      title: "Invalid Article",
+      url: "not-a-valid-url",
+      source: "Hacker News",
+    };
+    const res1 = techRadarArticleSchema.safeParse(invalidUrl);
+    expect(res1.success).toBe(false);
+
+    const missingTitle = {
+      article_id: "hn-12345",
+      url: "https://example.com",
+      source: "Hacker News",
+    };
+    const res2 = techRadarArticleSchema.safeParse(missingTitle);
+    expect(res2.success).toBe(false);
+  });
+
+  it("parses and transforms query parameters correctly", () => {
+    const query = {
+      category: "ai",
+      bookmarks_only: "true",
+      force_refresh: "1",
+      limit: "25",
+    };
+    const res = techRadarQuerySchema.safeParse(query);
+    expect(res.success).toBe(true);
+    if (res.success) {
+      expect(res.data.category).toBe("ai");
+      expect(res.data.bookmarks_only).toBe(true);
+      expect(res.data.force_refresh).toBe(true);
+      expect(res.data.limit).toBe(25);
+    }
+  });
+
+  it("handles default values for query parameters", () => {
+    const res = techRadarQuerySchema.safeParse({});
+    expect(res.success).toBe(true);
+    if (res.success) {
+      expect(res.data.category).toBe("all");
+      expect(res.data.bookmarks_only).toBe(false);
+      expect(res.data.force_refresh).toBe(false);
+      expect(res.data.limit).toBeUndefined();
+    }
+  });
+
+  it("validates briefing schema defaults", () => {
+    const res1 = techRadarBriefingSchema.safeParse({});
+    expect(res1.success).toBe(true);
+    if (res1.success) expect(res1.data.force).toBe(false);
+
+    const res2 = techRadarBriefingSchema.safeParse({ force: true });
+    expect(res2.success).toBe(true);
+    if (res2.success) expect(res2.data.force).toBe(true);
+  });
+});
+

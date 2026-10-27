@@ -28,3 +28,66 @@ Untuk setiap interaksi dan pengerjaan di repository **Portfolio** ini, patuhi at
 
 4. **Eksekusi Mandiri**:
    - Jalankan siklus task management ini secara mandiri (autonomous) di setiap tugas tanpa perlu menunggu instruksi atau diingatkan oleh user.
+
+## API Endpoint Validation Standard (Zod & H3 Validation Rules)
+
+Setiap pembuatan atau modifikasi endpoint API di `server/api/` (GET, POST, PUT, DELETE, PATCH) **WAJIB** mengikuti aturan validasi standar repository ini:
+
+1. **Definisi Model & Schema di `server/model/`**:
+   - Seluruh Zod schema untuk request body, query parameters, atau data transfer objects harus didefinisikan di direktori `server/model/*.model.ts`.
+   - Selalu export inferred TypeScript types (misal: `export type MyInput = z.infer<typeof mySchema>;`).
+
+2. **Validasi Request Body (POST / PUT / PATCH)**:
+   - Gunakan `readValidatedBody` dari H3 dengan `safeParse`:
+     ```ts
+     import z from "zod";
+     import { HttpError } from "~~/server/errors/HttpError";
+     import { mySchema } from "~~/server/model/my.model";
+
+     export default withAuth(async (event) => {
+       const parsed = await readValidatedBody(event, (body) => mySchema.safeParse(body));
+
+       if (!parsed.success) {
+         throw new HttpError(
+           400,
+           "VALIDATION_ERROR",
+           "Invalid request data",
+           z.treeifyError(parsed.error).properties
+         );
+       }
+
+       const data = parsed.data;
+       // ... Lanjutkan proses
+     });
+     ```
+
+3. **Validasi Query Parameters (GET)**:
+   - Gunakan `getValidatedQuery` dari H3 dengan `safeParse`:
+     ```ts
+     const parsed = await getValidatedQuery(event, (query) => myQuerySchema.safeParse(query));
+
+     if (!parsed.success) {
+       throw new HttpError(
+         400,
+         "VALIDATION_ERROR",
+         "Invalid query parameters",
+         z.treeifyError(parsed.error).properties
+       );
+     }
+
+     const query = parsed.data;
+     ```
+
+4. **Validasi Route Parameters ([id], [slug], dsb)**:
+   - Ambil parameter dengan `getRouterParam(event, 'id')` dan validasi menggunakan Zod schema atau `.refine()`:
+     ```ts
+     const ok = z.coerce.number().positive().safeParse(getRouterParam(event, 'id'));
+     if (!ok.success) {
+       throw new HttpError(400, 'INVALID_ID', 'The provided ID is not a valid number.');
+     }
+     ```
+
+5. **Dilarang Manual Ad-Hoc Validation**:
+   - Dilarang keras melakukan pengecekan manual mentah seperti `if (!body?.field1 || !body?.field2)` tanpa schema Zod.
+   - Format error validasi wajib melempar `HttpError` dengan status `400`, code `'VALIDATION_ERROR'`, dan properties dari `z.treeifyError(parsed.error).properties`.
+

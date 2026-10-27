@@ -6,12 +6,28 @@ import { getJson, setJson } from "~~/server/db/redis";
 import { logger } from "~~/server/utils/logger";
 import type { DailyBriefingResponse } from "~~/app/types/tech-news";
 
+import { techRadarBriefingSchema } from "~~/server/model/techRadar.model";
+import { HttpError } from "~~/server/errors/HttpError";
+import z from "zod";
+
 const BRIEFING_CACHE_KEY = "tech_radar:briefing:v1";
 const BRIEFING_TTL = 7200; // 2 hours
 
 export default withAuth(async (event) => {
-  const body = await readBody(event).catch(() => ({}));
-  const forceRefresh = body?.force === true;
+  const parsed = await readValidatedBody(event, (body) =>
+    techRadarBriefingSchema.safeParse(body || {})
+  );
+
+  if (!parsed.success) {
+    throw new HttpError(
+      400,
+      "VALIDATION_ERROR",
+      "Invalid request data",
+      z.treeifyError(parsed.error).properties
+    );
+  }
+
+  const forceRefresh = parsed.data.force;
 
   // 1. Check Redis cache for briefing
   if (!forceRefresh) {
