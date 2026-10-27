@@ -1,3 +1,10 @@
+# [1.16.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.15.0...v1.16.0) (2026-10-27)
+
+
+### Features
+
+* **seo:** redesign open graph images and elevate search engine metadata ([bb5cee2](https://github.com/exa-dev-portfolio/portofolio-v2/commit/bb5cee2653cce772552fc0a74fb7735e57d52852)), closes [hi#res](https://github.com/hi/issues/res)
+
 # [1.15.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.14.0...v1.15.0) (2026-10-27)
 
 
