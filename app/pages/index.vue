@@ -19,12 +19,12 @@ definePageMeta({
 });
 
 // SEO Configuration
-const siteUrl = "https://eka-dev.cloud"; // TODO: Update with your domain
-const siteName = "Eka - Full Stack Developer Portfolio";
+const siteUrl = "https://eka-dev.cloud";
+const siteName = "Eka Syafrino - Full Stack Developer & System Architect";
 const siteDescription =
-  "Full Stack Developer specializing in Vue.js, Nuxt.js, React, Node.js, and Golang. Building scalable web applications, mobile apps with Flutter, and cloud-native solutions with Kubernetes & Docker.";
-const authorName = "Eka";
-const ogImage = `${siteUrl}/images/og-image.webp`; // TODO: Create OG image
+  "Moh. Eka Syafrino - Full Stack Developer & System Architect specializing in Vue/Nuxt, React, Golang, Node.js, and Flutter. Building high-concurrency microservices, fluid reactive applications, and cross-platform mobile solutions.";
+const authorName = "Moh. Eka Syafrino";
+const ogImage = `${siteUrl}/images/og-image.png`;
 
 // ========== FETCH DATA FROM API (SSR dynamic) ==========
 // In Nuxt, internal API routes (/api/*) are automatically resolved in-memory during SSR
@@ -119,8 +119,8 @@ const experiences = computed(() => {
   }));
 });
 
-useHead({
-  title: "Eka - Full Stack Developer | Vue.js, React, Node.js & Mobile Expert",
+useHead(() => ({
+  title: `${siteName} | Software Engineer & Solutions Architect`,
   htmlAttrs: {
     lang: "en",
   },
@@ -128,8 +128,7 @@ useHead({
     // Primary Meta Tags
     {
       name: "title",
-      content:
-        "Eka - Full Stack Developer | Vue.js, React, Node.js & Mobile Expert",
+      content: `${siteName} | Software Engineer & Solutions Architect`,
     },
     {
       name: "description",
@@ -138,7 +137,7 @@ useHead({
     {
       name: "keywords",
       content:
-        "Full Stack Developer, Vue.js Developer, React Developer, Node.js, Golang Developer, Flutter Developer, Mobile App Development, Web Development, Nuxt.js, Next.js, TypeScript, Kubernetes, DevOps, CI/CD, PostgreSQL, MongoDB, REST API",
+        "Moh. Eka Syafrino, Eka Syafrino, Full Stack Developer, Software Engineer, System Architect, Vue.js Developer, Nuxt.js, React Developer, Node.js, Golang Developer, Flutter Developer, Mobile App Development, Web Development, TypeScript, Kubernetes, DevOps, CI/CD, PostgreSQL, Cloud Architecture, REST API",
     },
     {
       name: "author",
@@ -146,17 +145,17 @@ useHead({
     },
     {
       name: "robots",
-      content: "index, follow",
+      content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
     },
     {
       name: "googlebot",
-      content: "index, follow",
+      content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
     },
 
-    // Open Graph / Facebook
+    // Open Graph / Facebook / LinkedIn
     {
       property: "og:type",
-      content: "website",
+      content: "profile",
     },
     {
       property: "og:url",
@@ -168,8 +167,7 @@ useHead({
     },
     {
       property: "og:title",
-      content:
-        "Eka - Full Stack Developer | Vue.js, React, Node.js & Mobile Expert",
+      content: "Eka Syafrino - Full Stack Developer & System Architect",
     },
     {
       property: "og:description",
@@ -180,6 +178,14 @@ useHead({
       content: ogImage,
     },
     {
+      property: "og:image:secure_url",
+      content: ogImage,
+    },
+    {
+      property: "og:image:type",
+      content: "image/png",
+    },
+    {
       property: "og:image:width",
       content: "1200",
     },
@@ -188,8 +194,24 @@ useHead({
       content: "630",
     },
     {
+      property: "og:image:alt",
+      content: "Eka Syafrino - Full Stack Developer & System Architect Portfolio",
+    },
+    {
       property: "og:locale",
       content: "en_US",
+    },
+    {
+      property: "profile:first_name",
+      content: "Moh. Eka",
+    },
+    {
+      property: "profile:last_name",
+      content: "Syafrino",
+    },
+    {
+      property: "profile:username",
+      content: "ESyafrino",
     },
 
     // Twitter Card
@@ -199,16 +221,15 @@ useHead({
     },
     {
       name: "twitter:site",
-      content: "@ESyafrino", // TODO: Update with your Twitter handle
+      content: "@ESyafrino",
     },
     {
       name: "twitter:creator",
-      content: "@ESyafrino", // TODO: Update with your Twitter handle
+      content: "@ESyafrino",
     },
     {
       name: "twitter:title",
-      content:
-        "Eka - Full Stack Developer | Vue.js, React, Node.js & Mobile Expert",
+      content: "Eka Syafrino - Full Stack Developer & System Architect",
     },
     {
       name: "twitter:description",
@@ -218,15 +239,19 @@ useHead({
       name: "twitter:image",
       content: ogImage,
     },
+    {
+      name: "twitter:image:alt",
+      content: "Eka Syafrino - Full Stack Developer & System Architect Portfolio",
+    },
 
-    // Additional SEO
+    // Mobile PWA / UI
     {
       name: "theme-color",
-      content: "#10b981",
+      content: "#09090b",
     },
     {
       name: "msapplication-TileColor",
-      content: "#10b981",
+      content: "#09090b",
     },
     {
       name: "apple-mobile-web-app-capable",
@@ -275,17 +300,27 @@ useHead({
       type: "application/ld+json",
       innerHTML: JSON.stringify({
         "@context": "https://schema.org",
-        "@type": "Person",
-        name: authorName,
-        url: siteUrl,
-        image: ogImage,
-        jobTitle: "Full Stack Developer",
-        description: siteDescription,
-        knowsAbout: skills.value.map((skill) => skill.name),
-        sameAs: [user.value?.github_profile, user.value?.linkedin_profile],
-        worksFor: {
-          "@type": "Organization",
-          name: "Freelance Developer",
+        "@type": "ProfilePage",
+        dateCreated: "2024-01-01T00:00:00+07:00",
+        dateModified: new Date().toISOString(),
+        mainEntity: {
+          "@type": "Person",
+          name: authorName,
+          alternateName: "Eka Syafrino",
+          url: siteUrl,
+          image: ogImage,
+          jobTitle: "Full Stack Developer & System Architect",
+          description: siteDescription,
+          knowsAbout: skills.value.length ? skills.value.map((skill) => skill.name) : ["Vue.js", "Nuxt.js", "React", "Node.js", "Golang", "Flutter", "Kubernetes", "Docker", "PostgreSQL"],
+          sameAs: [
+            user.value?.github_profile || "https://github.com/ESyafrino",
+            user.value?.linkedin_profile || "https://linkedin.com/in/eka-syafrino",
+            "https://twitter.com/ESyafrino",
+          ].filter(Boolean),
+          worksFor: {
+            "@type": "Organization",
+            name: "Independent Software Consultant & Engineer",
+          },
         },
       }),
     },
@@ -297,14 +332,9 @@ useHead({
         name: siteName,
         url: siteUrl,
         description: siteDescription,
-        author: {
+        publisher: {
           "@type": "Person",
           name: authorName,
-        },
-        potentialAction: {
-          "@type": "SearchAction",
-          target: `${siteUrl}/?s={search_term_string}`,
-          "query-input": "required name=search_term_string",
         },
       }),
     },
@@ -313,21 +343,24 @@ useHead({
       innerHTML: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "ItemList",
-        itemListElement: projects.value.slice(0, 6).map((project, index) => ({
+        name: "Featured Software Engineering Projects",
+        itemListElement: projects.value.slice(0, 8).map((project, index) => ({
           "@type": "ListItem",
           position: index + 1,
           item: {
-            "@type": "CreativeWork",
+            "@type": "SoftwareApplication",
             name: project.title,
             description: project.description,
-            url: project.liveUrl || project.link,
-            image: project.image,
+            url: project.liveUrl || project.link || `${siteUrl}/#projects`,
+            image: project.image.startsWith("http") ? project.image : `${siteUrl}${project.image}`,
+            applicationCategory: "DeveloperApplication",
+            operatingSystem: "Web, Cross-Platform",
           },
         })),
       }),
     },
   ],
-});
+}));
 
 function diffInMonths(start: Date, end: Date): number {
   return (

@@ -61,7 +61,7 @@ export default defineNuxtConfig({
     head: {
       charset: "utf-8",
       viewport: "width=device-width, initial-scale=1, maximum-scale=5",
-      title: "Eka - Full Stack Developer Portfolio",
+      title: "Eka Syafrino - Full Stack Developer & System Architect",
       meta: [
         { name: "format-detection", content: "telephone=no" },
         { name: "mobile-web-app-capable", content: "yes" },
@@ -73,40 +73,73 @@ export default defineNuxtConfig({
         {
           name: "description",
           content:
-            "Eka - Full Stack Developer with expertise in Node.js, Go, Java, Python, React, Vue, and Flutter. Building scalable web and mobile solutions.",
+            "Moh. Eka Syafrino - Full Stack Developer & System Architect specializing in Vue/Nuxt, React, Golang, Node.js, and Flutter. Building high-concurrency microservices and fluid reactive applications.",
         },
-        { name: "theme-color", content: "#000000" },
+        {
+          name: "keywords",
+          content:
+            "Moh. Eka Syafrino, Eka Syafrino, Full Stack Developer, Software Engineer, System Architect, Vue.js, Nuxt.js, React, Node.js, Golang, Flutter, TypeScript, Docker, Kubernetes, DevOps, Microservices, PostgreSQL, Cloud Architecture",
+        },
+        { name: "author", content: "Moh. Eka Syafrino" },
+        {
+          name: "robots",
+          content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+        },
+        {
+          name: "googlebot",
+          content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+        },
+        { name: "theme-color", content: "#09090b" },
+        // Open Graph / Facebook / LinkedIn
+        { property: "og:site_name", content: "Eka Syafrino Portfolio" },
         {
           property: "og:title",
-          content: "Eka - Full Stack Developer Portfolio",
+          content: "Eka Syafrino - Full Stack Developer & System Architect",
         },
         {
           property: "og:description",
           content:
-            "Eka - Full Stack Developer with expertise in Node.js, Go, Java, Python, React, Vue, and Flutter. Building scalable web and mobile solutions.",
+            "Architecting high-concurrency backend services, fluid reactive web apps, and cross-platform mobile solutions with modern cloud ecosystems.",
         },
         {
           property: "og:image",
-          content: "https://eka-dev.cloud/og-image.webp",
+          content: "https://eka-dev.cloud/images/og-image.png",
+        },
+        {
+          property: "og:image:secure_url",
+          content: "https://eka-dev.cloud/images/og-image.png",
+        },
+        { property: "og:image:type", content: "image/png" },
+        { property: "og:image:width", content: "1200" },
+        { property: "og:image:height", content: "630" },
+        {
+          property: "og:image:alt",
+          content: "Eka Syafrino - Full Stack Developer & System Architect Portfolio",
         },
         { property: "og:url", content: "https://eka-dev.cloud" },
         { property: "og:type", content: "website" },
+        { property: "og:locale", content: "en_US" },
+        // Twitter Card
         { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:site", content: "@ESyafrino" },
+        { name: "twitter:creator", content: "@ESyafrino" },
         {
           name: "twitter:title",
-          content: "Eka - Full Stack Developer Portfolio",
+          content: "Eka Syafrino - Full Stack Developer & System Architect",
         },
         {
           name: "twitter:description",
           content:
-            "Eka - Full Stack Developer with expertise in Node.js, Go, Java, Python, React, Vue, and Flutter. Building scalable web and mobile solutions.",
+            "Architecting high-concurrency backend services, fluid reactive web apps, and cross-platform mobile solutions with modern cloud ecosystems.",
         },
         {
           name: "twitter:image",
-          content: "https://eka-dev.cloud/og-image.webp",
+          content: "https://eka-dev.cloud/images/og-image.png",
         },
-        // ⬇️ Tambahkan verification code setelah di-verify di Google Search Console
-        // {name: 'google-site-verification', content: 'YOUR_VERIFICATION_CODE'}
+        {
+          name: "twitter:image:alt",
+          content: "Eka Syafrino - Full Stack Developer & System Architect Portfolio",
+        },
       ],
       link: [
         { rel: "icon", href: "/favicon.ico" },

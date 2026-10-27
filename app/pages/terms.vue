@@ -32,13 +32,25 @@ useHead({
       content: pageTitle
     },
     {
-      property: 'og:description',
-      content: pageDescription
+      property: 'og:image',
+      content: `${siteUrl}/images/og-image.png`
+    },
+    {
+      property: 'og:image:width',
+      content: '1200'
+    },
+    {
+      property: 'og:image:height',
+      content: '630'
     },
     // Twitter Card
     {
       name: 'twitter:card',
-      content: 'summary'
+      content: 'summary_large_image'
+    },
+    {
+      name: 'twitter:site',
+      content: '@ESyafrino'
     },
     {
       name: 'twitter:title',
@@ -47,6 +59,10 @@ useHead({
     {
       name: 'twitter:description',
       content: pageDescription
+    },
+    {
+      name: 'twitter:image',
+      content: `${siteUrl}/images/og-image.png`
     },
   ],
   link: [

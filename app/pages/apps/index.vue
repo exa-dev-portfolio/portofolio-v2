@@ -783,14 +783,121 @@ if (!isApkStoreEnabled.value) {
   });
 }
 
-const { renderMarkdown } = useMarkdown();
+const appsPageTitle = "Personal Software & Applications | Eka Syafrino";
+const appsPageDesc =
+  "Curated collection of cross-platform applications and direct binaries built by Eka Syafrino. Download official Android APKs or join iOS TestFlight & Google Play beta programs.";
+const appsPageUrl = "https://eka-dev.cloud/apps";
+const appsOgImage = "https://eka-dev.cloud/images/og-apps.png";
 
-useSeoMeta({
-  title: "Software & Mobile Applications | Eka Portfolio",
-  description: "Curated collection of cross-platform applications and direct binaries with automated GitHub release sync.",
-  ogTitle: "Software & Mobile Applications | Eka Portfolio",
-  ogDescription: "Curated collection of cross-platform applications and direct binaries with automated GitHub release sync.",
-});
+useHead(() => ({
+  title: appsPageTitle,
+  link: [
+    {
+      rel: "canonical",
+      href: appsPageUrl,
+    },
+  ],
+  meta: [
+    {
+      name: "keywords",
+      content:
+        "Eka Syafrino Apps, Android APK Download, Flutter Apps, iOS TestFlight, Cross Platform Binaries, Open Source Mobile Apps, GitHub Release Binaries",
+    },
+    {
+      name: "robots",
+      content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+    },
+    {
+      property: "og:type",
+      content: "website",
+    },
+    {
+      property: "og:site_name",
+      content: "Eka Syafrino Portfolio",
+    },
+    {
+      property: "og:url",
+      content: appsPageUrl,
+    },
+    {
+      property: "og:title",
+      content: appsPageTitle,
+    },
+    {
+      property: "og:description",
+      content: appsPageDesc,
+    },
+    {
+      property: "og:image",
+      content: appsOgImage,
+    },
+    {
+      property: "og:image:secure_url",
+      content: appsOgImage,
+    },
+    {
+      property: "og:image:type",
+      content: "image/png",
+    },
+    {
+      property: "og:image:width",
+      content: "1200",
+    },
+    {
+      property: "og:image:height",
+      content: "630",
+    },
+    {
+      property: "og:image:alt",
+      content: "Personal Software & Applications - Eka Syafrino",
+    },
+    {
+      name: "twitter:card",
+      content: "summary_large_image",
+    },
+    {
+      name: "twitter:site",
+      content: "@ESyafrino",
+    },
+    {
+      name: "twitter:creator",
+      content: "@ESyafrino",
+    },
+    {
+      name: "twitter:title",
+      content: appsPageTitle,
+    },
+    {
+      name: "twitter:description",
+      content: appsPageDesc,
+    },
+    {
+      name: "twitter:image",
+      content: appsOgImage,
+    },
+    {
+      name: "twitter:image:alt",
+      content: "Personal Software & Applications - Eka Syafrino",
+    },
+  ],
+  script: [
+    {
+      type: "application/ld+json",
+      innerHTML: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        name: appsPageTitle,
+        url: appsPageUrl,
+        description: appsPageDesc,
+        creator: {
+          "@type": "Person",
+          name: "Moh. Eka Syafrino",
+          url: "https://eka-dev.cloud",
+        },
+      }),
+    },
+  ],
+}));
 
 const { data: response, pending } = await useFetch<any>("/api/v1/apps");
 
