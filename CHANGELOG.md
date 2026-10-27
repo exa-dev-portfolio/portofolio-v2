@@ -1,3 +1,10 @@
+# [1.15.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.14.0...v1.15.0) (2026-10-27)
+
+
+### Features
+
+* **auth:** redesign login page with Nordic minimalist aesthetic, auto-resume session, and 1-click owner access ([96120d6](https://github.com/exa-dev-portfolio/portofolio-v2/commit/96120d61f29368ff9a76eeb8e19f11cc8e547ec5))
+
 # [1.14.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.13.0...v1.14.0) (2026-10-26)
 
 
