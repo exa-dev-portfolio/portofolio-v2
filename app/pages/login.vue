@@ -29,12 +29,8 @@ useHead({
 
 // State
 const isLoading = ref(false)
-const isDirectLoading = ref(false)
 const localError = ref<string | null>(null)
 const isResumingSession = ref(false)
-const showPasscodeInput = ref(false)
-const passcodeInput = ref('')
-const config = useRuntimeConfig()
 const router = useRouter()
 
 const { initGoogleSignIn, signInError } = useGoogleSignIn()
@@ -82,44 +78,6 @@ const handleGoogleLogin = async () => {
 const handleAppleLogin = async () => {
   localError.value = null
   await signInWithApple()
-}
-
-// Handle 1-Click Quick Owner Access (Bypass / Direct Login)
-const handleDirectOwnerLogin = async () => {
-  isDirectLoading.value = true
-  localError.value = null
-
-  try {
-    const res: any = await $fetch('/api/users/bypass', {
-      method: 'POST',
-      body: {
-        email: 'ekaaa.jobs@gmail.com',
-        passcode: passcodeInput.value.trim() || undefined,
-      },
-      credentials: 'include',
-    })
-
-    if (!res?.data?.access_token) {
-      throw new Error(res?.message || 'Direct login failed')
-    }
-
-    // Set cookie
-    const token = useCookie('token', {
-      maxAge: 86400,
-      path: '/',
-      sameSite: 'lax',
-      secure: import.meta.env.PROD,
-    })
-    token.value = res.data.access_token
-
-    // Smooth redirect
-    isResumingSession.value = true
-    await router.push('/dashboard')
-  } catch (err: any) {
-    localError.value = err?.data?.message || err?.message || 'Direct login failed'
-  } finally {
-    isDirectLoading.value = false
-  }
 }
 </script>
 
@@ -204,59 +162,24 @@ const handleDirectOwnerLogin = async () => {
           <span>{{ localError }}</span>
         </div>
 
-        <!-- Primary Actions -->
-        <div class="space-y-3 pt-2">
-          
-          <!-- 1-Click Quick Owner Access (Paling Nyaman untuk Eka) -->
-          <button
-            @click="handleDirectOwnerLogin"
-            :disabled="isDirectLoading || isLoading || isAppleLoading"
-            class="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black font-semibold text-xs sm:text-sm tracking-wide shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 active:scale-[0.98] transition-all duration-200 flex items-center justify-between cursor-pointer disabled:opacity-50"
-          >
-            <div class="flex items-center gap-2.5">
-              <Icon
-                v-if="isDirectLoading"
-                name="carbon:renew"
-                size="17"
-                class="animate-spin text-black"
-              />
-              <Icon
-                v-else
-                name="carbon:flash-filled"
-                size="17"
-                class="text-black"
-              />
-              <span>{{ isDirectLoading ? 'Authenticating...' : 'Quick Console Access (Owner)' }}</span>
-            </div>
-            <span class="text-[10px] font-mono font-bold uppercase bg-black/15 px-2 py-0.5 rounded-full">
-              1-Click
-            </span>
-          </button>
-
-          <!-- Divider -->
-          <div class="relative py-2 flex items-center justify-center">
-            <div class="absolute inset-x-0 h-[1px] bg-white/10"></div>
-            <span class="relative z-10 px-3 bg-[#141417] text-[10px] font-mono uppercase tracking-wider text-zinc-500">
-              atau gunakan OAuth
-            </span>
-          </div>
-
+        <!-- Primary OAuth Login Buttons -->
+        <div class="space-y-3.5 pt-2">
           <!-- Google Login Button -->
           <button
             @click="handleGoogleLogin"
-            :disabled="isLoading || isAppleLoading || isDirectLoading"
-            class="w-full py-3 px-4 rounded-xl bg-white hover:bg-zinc-100 text-[#09090b] font-semibold text-xs sm:text-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2.5 shadow-md cursor-pointer"
+            :disabled="isLoading || isAppleLoading"
+            class="w-full py-3.5 px-4 rounded-2xl bg-white hover:bg-zinc-100 text-[#09090b] font-semibold text-xs sm:text-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-3 shadow-lg shadow-white/5 hover:shadow-white/10 cursor-pointer"
           >
             <Icon
               v-if="isLoading"
               name="carbon:renew"
-              size="17"
+              size="18"
               class="animate-spin text-[#09090b]"
             />
             <Icon
               v-else
               name="logos:google-icon"
-              size="17"
+              size="18"
             />
             <span>{{ isLoading ? 'Connecting to Google...' : 'Continue with Google' }}</span>
           </button>
@@ -264,54 +187,34 @@ const handleDirectOwnerLogin = async () => {
           <!-- Apple Login Button -->
           <button
             @click="handleAppleLogin"
-            :disabled="isLoading || isAppleLoading || isDirectLoading"
-            class="w-full py-3 px-4 rounded-xl bg-[#1c1c21] hover:bg-[#232329] text-white border border-white/15 hover:border-white/25 font-semibold text-xs sm:text-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2.5 shadow-sm cursor-pointer"
+            :disabled="isLoading || isAppleLoading"
+            class="w-full py-3.5 px-4 rounded-2xl bg-[#1c1c21] hover:bg-[#232329] text-white border border-white/15 hover:border-white/25 font-semibold text-xs sm:text-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-3 shadow-sm cursor-pointer"
           >
             <Icon
               v-if="isAppleLoading"
               name="carbon:renew"
-              size="17"
+              size="18"
               class="animate-spin text-white"
             />
             <Icon
               v-else
               name="mdi:apple"
-              size="19"
+              size="20"
               class="text-white"
             />
             <span>{{ isAppleLoading ? 'Connecting to Apple...' : 'Sign in with Apple' }}</span>
           </button>
-
-          <!-- Optional Master Passcode Toggle -->
-          <div class="pt-1">
-            <button
-              @click="showPasscodeInput = !showPasscodeInput"
-              class="text-[11px] font-mono text-zinc-500 hover:text-zinc-300 transition-colors mx-auto block cursor-pointer"
-            >
-              {{ showPasscodeInput ? 'Sembunyikan Master Passcode' : 'Gunakan Master Passcode' }}
-            </button>
-
-            <div v-if="showPasscodeInput" class="mt-2.5 space-y-2">
-              <input
-                v-model="passcodeInput"
-                type="password"
-                placeholder="Masukkan developer passcode..."
-                class="w-full px-3.5 py-2 rounded-xl bg-black/40 border border-white/10 text-xs font-mono text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-500/50 transition-colors"
-                @keyup.enter="handleDirectOwnerLogin"
-              />
-            </div>
-          </div>
         </div>
 
         <!-- Security Pill Footnote -->
-        <div class="pt-2 border-t border-white/5 flex items-center justify-center gap-4 text-[11px] font-mono text-zinc-500">
+        <div class="pt-4 border-t border-white/5 flex items-center justify-center gap-4 text-[11px] font-mono text-zinc-500">
           <span class="flex items-center gap-1">
             <Icon name="carbon:checkmark-filled" size="13" class="text-emerald-400" />
-            <span>JWT Session</span>
+            <span>OAuth 2.0 PKCE</span>
           </span>
           <span class="flex items-center gap-1">
             <Icon name="carbon:checkmark-filled" size="13" class="text-emerald-400" />
-            <span>TLS 1.3 Encryption</span>
+            <span>TLS 1.3 / JWT</span>
           </span>
         </div>
       </div>
