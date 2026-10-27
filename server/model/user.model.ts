@@ -21,10 +21,3 @@ export const appleLoginRequestModel = z.object({
 })
 
 export type AppleLoginRequestModel = z.infer<typeof appleLoginRequestModel>;
-
-export const bypassLoginRequestSchema = z.object({
-    email: z.string().email(),
-    passcode: z.string().optional(),
-});
-
-export type BypassLoginRequest = z.infer<typeof bypassLoginRequestSchema>;
