@@ -29,7 +29,7 @@ export const findByHash = async (client: PoolClient, tokenHash: string): Promise
 
     const res = await client.query<TokenModel>(query, values);
     if (res.rows.length === 0) {
-        throw new HttpError(401, 'INVALID_TOKEN', 'The provided token is invalid or has expired');
+        return null;
     }
     return res.rows[0] || null;
 }

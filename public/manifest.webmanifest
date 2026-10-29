@@ -1,0 +1,64 @@
+{
+  "id": "/?source=pwa",
+  "name": "Eka Dev Console",
+  "short_name": "Eka Dev",
+  "description": "Moh. Eka Syafrino - Full Stack Developer Console & Portfolio",
+  "start_url": "/dashboard?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "categories": ["development", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-maskable-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/pwa-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard Console",
+      "short_name": "Dashboard",
+      "description": "Developer console & analytics",
+      "url": "/dashboard?source=pwa",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Public Portfolio",
+      "short_name": "Portfolio",
+      "description": "View public portfolio & projects",
+      "url": "/?source=pwa_nav",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Tech Radar",
+      "short_name": "Radar",
+      "description": "AI tech news & trends",
+      "url": "/dashboard/tech-radar?source=pwa",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}
+

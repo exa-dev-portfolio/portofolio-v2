@@ -178,6 +178,16 @@ onUnmounted(() => {
             <span>Apps</span>
           </NuxtLink>
 
+          <!-- Console Link -->
+          <NuxtLink
+            to="/dashboard"
+            class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-mono bg-white/5 border-white/10 hover:bg-white/10 text-zinc-300 hover:text-white transition-all cursor-pointer"
+            title="Open Console"
+          >
+            <Icon name="carbon:terminal" size="13" />
+            <span>Console</span>
+          </NuxtLink>
+
           <!-- Get in Touch CTA -->
           <button
             @click="scrollToSection('#contact')"
@@ -222,6 +232,18 @@ onUnmounted(() => {
         >
           {{ item.name }}
         </button>
+
+        <NuxtLink
+          to="/dashboard"
+          @click="closeMobileMenu"
+          class="w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm font-medium transition-colors cursor-pointer text-zinc-300 hover:text-white bg-white/5 border border-white/5"
+        >
+          <div class="flex items-center gap-2">
+            <Icon name="carbon:terminal" size="16" />
+            <span>Console</span>
+          </div>
+          <Icon name="carbon:arrow-up-right" size="14" class="opacity-60" />
+        </NuxtLink>
 
         <NuxtLink
           v-if="isApkStoreEnabled"

@@ -7,7 +7,7 @@ import {HttpError} from "~~/server/errors/HttpError";
 const Config = useServerConfig();
 const ACCESS_TOKEN_EXPIRES_IN = '15m';
 const REFRESH_TOKEN_EXPIRES_DAYS = Number(process.env.REFRESH_TOKEN_EXPIRES_DAYS ?? 30);
-const REFRESH_ROTATE_THRESHOLD_DAYS = Number(process.env.REFRESH_ROTATE_THRESHOLD_DAYS ?? 7);
+export const DEFAULT_REFRESH_ROTATE_THRESHOLD_DAYS = Number(process.env.REFRESH_ROTATE_THRESHOLD_DAYS ?? 7);
 
 function getJwtSecret() {
     const secret = process.env.JWT_SECRET ?? Config.jwtSecret;
@@ -52,8 +52,13 @@ export function verifyRefreshToken(token: string) {
     return payload;
 }
 
-export function isRefreshTokenRotatingSoon(expiresAt: Date): boolean {
-    const rotateThresholdMs = REFRESH_ROTATE_THRESHOLD_DAYS * 24 * 60 * 60 * 1000;
+export function isRefreshTokenRotatingSoon(
+    expiresAt: Date | string | number,
+    thresholdDays = DEFAULT_REFRESH_ROTATE_THRESHOLD_DAYS
+): boolean {
+    const rotateThresholdMs = thresholdDays * 24 * 60 * 60 * 1000;
     const now = Date.now();
-    return (expiresAt.getTime() - now) <= rotateThresholdMs;
+    const expTime = new Date(expiresAt).getTime();
+    if (isNaN(expTime)) return true;
+    return (expTime - now) <= rotateThresholdMs;
 }

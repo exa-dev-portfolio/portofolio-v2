@@ -256,7 +256,7 @@ export const refreshToken = async (event: H3Event, oldRefreshToken: string) => {
                 expiresAt
             } = signRefreshToken(userId!, name, email);
 
-            await repository.updateToken(client, hashToSha256(oldRefreshToken), expiresAt, hashToSha256(newRefreshToken));
+            await repository.updateToken(client, hashToSha256(newRefreshToken), expiresAt, hashToSha256(oldRefreshToken));
             await del(`user_refresh_token:${oldRefreshToken}`)
             await set(`user_refresh_token:${newRefreshToken}`, JSON.stringify({id: userId}))
 

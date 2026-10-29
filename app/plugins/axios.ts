@@ -1,5 +1,6 @@
 // plugins/axios.ts
 import axios, {AxiosError, type AxiosInstance} from 'axios'
+import {jwtDecode} from 'jwt-decode'
 
 export default defineNuxtPlugin((nuxtApp) => {
 
@@ -38,10 +39,49 @@ export default defineNuxtPlugin((nuxtApp) => {
     let isRefreshing = false
     let refreshPromise: Promise<void> | null = null
 
+    // Proactive refresh threshold helper (e.g. 60 seconds before expiration)
+    const isTokenExpiringSoon = (token: string, thresholdSeconds = 60): boolean => {
+        try {
+            const decoded: any = jwtDecode(token)
+            if (!decoded?.exp) return false
+            const expMs = decoded.exp * 1000
+            return (expMs - Date.now()) <= (thresholdSeconds * 1000)
+        } catch {
+            return false
+        }
+    }
+
+    const executeRefresh = async (): Promise<void> => {
+        if (!isRefreshing) {
+            isRefreshing = true
+            refreshPromise = api
+                .post('/api/users/refresh', {}, {
+                    withCredentials: true,
+                })
+                .then((res) => {
+                    if (res?.data?.data?.access_token) {
+                        tokenCookie.value = res.data.data.access_token
+                    }
+                })
+                .finally(() => {
+                    isRefreshing = false
+                    refreshPromise = null
+                })
+        }
+        if (refreshPromise) {
+            await refreshPromise
+        }
+    }
+
     // =========================
     // REQUEST INTERCEPTOR
     // =========================
-    api.interceptors.request.use((config) => {
+    api.interceptors.request.use(async (config) => {
+        // Skip proactive refresh check for refresh endpoint itself
+        if (config.url?.includes('/api/users/refresh')) {
+            return config
+        }
+
         // SSR: forward cookie
         if (import.meta.server) {
             config.withCredentials = true
@@ -50,8 +90,17 @@ export default defineNuxtPlugin((nuxtApp) => {
                 config.headers.Cookie = headers.cookie
             }
         } else {
-            // Client: Authorization
-            const token = tokenCookie.value
+            // Client: Authorization with proactive threshold refresh
+            let token = tokenCookie.value
+            if (token && isTokenExpiringSoon(token, 60)) {
+                try {
+                    await executeRefresh()
+                    token = tokenCookie.value
+                } catch {
+                    // Fallback to let request execute or fail into response interceptor
+                }
+            }
+
             if (token) {
                 config.headers = config.headers || {}
                 config.headers.Authorization = `Bearer ${token}`
@@ -80,25 +129,11 @@ export default defineNuxtPlugin((nuxtApp) => {
             originalRequest._retry = true
 
             try {
-                if (!isRefreshing) {
-                    isRefreshing = true
-
-                    refreshPromise = api
-                        .post('/api/users/refresh', {}, {
-                            withCredentials: true,
-                        })
-                        .then((res) => {
-                            tokenCookie.value = res.data.data.access_token
-                        })
-                        .finally(() => {
-                            isRefreshing = false
-                        })
-                }
-
-                await refreshPromise
+                await executeRefresh()
 
                 const token = tokenCookie.value
                 if (token) {
+                    originalRequest.headers = originalRequest.headers || {}
                     originalRequest.headers.Authorization = `Bearer ${token}`
                 }
 

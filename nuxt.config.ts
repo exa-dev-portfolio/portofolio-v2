@@ -10,6 +10,7 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     "nuxt-gtag",
     "motion-v/nuxt",
+    "@vite-pwa/nuxt",
   ],
 
   css: ["~/assets/css/main.css"],
@@ -21,6 +22,110 @@ export default defineNuxtConfig({
 
   colorMode: {
     preference: "dark",
+  },
+
+  // ========== PWA ==========
+  pwa: {
+    registerType: "autoUpdate",
+    manifest: {
+      id: "/?source=pwa",
+      name: "Eka Dev Console",
+      short_name: "Eka Dev",
+      description: "Moh. Eka Syafrino - Full Stack Developer Console & Portfolio",
+      theme_color: "#09090b",
+      background_color: "#09090b",
+      display: "standalone",
+      display_override: ["window-controls-overlay", "standalone", "minimal-ui"],
+      orientation: "portrait-primary",
+      start_url: "/dashboard?source=pwa",
+      scope: "/",
+      icons: [
+        {
+          src: "/pwa-192x192.png",
+          sizes: "192x192",
+          type: "image/png",
+          purpose: "any",
+        },
+        {
+          src: "/pwa-512x512.png",
+          sizes: "512x512",
+          type: "image/png",
+          purpose: "any",
+        },
+        {
+          src: "/pwa-maskable-192x192.png",
+          sizes: "192x192",
+          type: "image/png",
+          purpose: "maskable",
+        },
+        {
+          src: "/pwa-maskable-512x512.png",
+          sizes: "512x512",
+          type: "image/png",
+          purpose: "maskable",
+        },
+      ],
+      shortcuts: [
+        {
+          name: "Dashboard Console",
+          short_name: "Dashboard",
+          url: "/dashboard?source=pwa",
+          icons: [{ src: "/pwa-192x192.png", sizes: "192x192" }],
+        },
+        {
+          name: "Public Portfolio",
+          short_name: "Portfolio",
+          url: "/?source=pwa_nav",
+          icons: [{ src: "/pwa-192x192.png", sizes: "192x192" }],
+        },
+        {
+          name: "Tech Radar",
+          short_name: "Radar",
+          url: "/dashboard/tech-radar?source=pwa",
+          icons: [{ src: "/pwa-192x192.png", sizes: "192x192" }],
+        },
+      ],
+    },
+    workbox: {
+      navigateFallback: null,
+      globPatterns: ["**/*.{js,css,html,png,svg,ico,woff,woff2}"],
+      runtimeCaching: [
+        {
+          urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+          handler: "CacheFirst",
+          options: {
+            cacheName: "google-fonts-cache",
+            expiration: {
+              maxEntries: 10,
+              maxAgeSeconds: 60 * 60 * 24 * 365,
+            },
+            cacheableResponse: {
+              statuses: [0, 200],
+            },
+          },
+        },
+        {
+          urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+          handler: "CacheFirst",
+          options: {
+            cacheName: "gstatic-fonts-cache",
+            expiration: {
+              maxEntries: 20,
+              maxAgeSeconds: 60 * 60 * 24 * 365,
+            },
+            cacheableResponse: {
+              statuses: [0, 200],
+            },
+          },
+        },
+      ],
+    },
+    client: {
+      installPrompt: true,
+    },
+    devOptions: {
+      enabled: false,
+    },
   },
 
   // ========== VITE ==========
@@ -145,7 +250,8 @@ export default defineNuxtConfig({
         { rel: "icon", href: "/favicon.ico" },
         { rel: "icon", type: "image/png", href: "/favicon.png" },
         { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
-        { rel: "apple-touch-icon", href: "/favicon.png" },
+        { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+        { rel: "manifest", href: "/manifest.webmanifest" },
         { rel: "canonical", href: "https://eka-dev.cloud" },
         { rel: "preconnect", href: "https://fonts.googleapis.com" },
         { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" },

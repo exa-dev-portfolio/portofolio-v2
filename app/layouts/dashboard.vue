@@ -363,8 +363,7 @@ useHead({
         <!-- Right Header Action: Live Site Link -->
         <div class="flex items-center gap-3">
           <NuxtLink
-            to="/"
-            target="_blank"
+            to="/?source=pwa_nav"
             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-mono text-zinc-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
             title="View Public Portfolio"
           >
