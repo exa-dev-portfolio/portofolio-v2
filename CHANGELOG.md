@@ -1,3 +1,10 @@
+# [1.17.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.16.0...v1.17.0) (2026-10-29)
+
+
+### Features
+
+* **pwa:** implement PWA support with standalone initial routing and refresh token threshold rotation with automated tests ([e64f689](https://github.com/exa-dev-portfolio/portofolio-v2/commit/e64f68960dc86e37cdbad1e23dc836761ef59d7a))
+
 # [1.16.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.15.0...v1.16.0) (2026-10-27)
 
 
