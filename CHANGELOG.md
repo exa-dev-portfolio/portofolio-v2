@@ -1,3 +1,10 @@
+# [1.18.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.17.0...v1.18.0) (2026-10-30)
+
+
+### Features
+
+* **analytics:** add mobile touch interaction and active inspector bar for visitor chart ([55030d9](https://github.com/exa-dev-portfolio/portofolio-v2/commit/55030d9d50de47de1ccfa48759c5fcec892e645b))
+
 # [1.17.0](https://github.com/exa-dev-portfolio/portofolio-v2/compare/v1.16.0...v1.17.0) (2026-10-29)
 
 
