@@ -10,6 +10,7 @@ const timeRange = ref<'7days' | '30days' | '90days' | 'all'>('30days');
 const chartMode = ref<'area' | 'bar'>('area');
 const isHoveringChart = ref(false);
 const activeHoverIndex = ref<number | null>(null);
+const selectedIndex = ref<number | null>(null);
 
 const { data: analyticsRes, pending, refresh } = await useFetch<any>('/api/dashboard/analytics', {
   query: computed(() => ({ range: timeRange.value })),
@@ -151,6 +152,41 @@ const svgVisitorsLinePath = computed(() => {
   return d;
 });
 
+const stepWidth = computed(() => {
+  const total = trafficData.value.length;
+  if (total <= 1) return chartWidth - paddingX * 2;
+  return (chartWidth - paddingX * 2) / (total - 1);
+});
+
+const activeIndex = computed(() => {
+  if (activeHoverIndex.value !== null) return activeHoverIndex.value;
+  if (selectedIndex.value !== null) return selectedIndex.value;
+  if (trafficData.value.length > 0) return trafficData.value.length - 1;
+  return null;
+});
+
+const activeDisplayPoint = computed(() => {
+  const idx = activeIndex.value;
+  if (idx === null || !points.value.views[idx]) return null;
+
+  const viewPt = points.value.views[idx];
+  const visitorPt = points.value.visitors[idx];
+  const item = trafficData.value[idx];
+
+  // Percentage within the SVG coordinate space (0-100%)
+  const xPercent = (viewPt.x / chartWidth) * 100;
+  const yPercent = (Math.min(viewPt.y, visitorPt.y) / chartHeight) * 100;
+
+  return {
+    index: idx,
+    viewPt,
+    visitorPt,
+    item,
+    xPercent,
+    yPercent,
+  };
+});
+
 const hoveredPoint = computed(() => {
   if (activeHoverIndex.value === null || !points.value.views[activeHoverIndex.value]) return null;
   return {
@@ -160,20 +196,51 @@ const hoveredPoint = computed(() => {
   };
 });
 
-const handleChartMouseMove = (e: MouseEvent) => {
-  const svg = (e.currentTarget as HTMLElement).getBoundingClientRect();
-  const relX = e.clientX - svg.left;
-  const ratio = relX / svg.width;
-  const index = Math.round(ratio * (trafficData.value.length - 1));
-  if (index >= 0 && index < trafficData.value.length) {
+const updateActiveIndexFromClientX = (clientX: number, target: HTMLElement) => {
+  const rect = target.getBoundingClientRect();
+  if (!rect.width) return;
+  const relX = clientX - rect.left;
+  const ratio = Math.max(0, Math.min(1, relX / rect.width));
+  const total = trafficData.value.length;
+  if (total <= 0) return;
+  const index = Math.round(ratio * (total - 1));
+  if (index >= 0 && index < total) {
     activeHoverIndex.value = index;
+    selectedIndex.value = index;
     isHoveringChart.value = true;
   }
+};
+
+const handleChartMouseMove = (e: MouseEvent) => {
+  updateActiveIndexFromClientX(e.clientX, e.currentTarget as HTMLElement);
 };
 
 const handleChartMouseLeave = () => {
   isHoveringChart.value = false;
   activeHoverIndex.value = null;
+};
+
+const handleChartTouchStart = (e: TouchEvent) => {
+  if (e.touches && e.touches[0]) {
+    updateActiveIndexFromClientX(e.touches[0].clientX, e.currentTarget as HTMLElement);
+  }
+};
+
+const handleChartTouchMove = (e: TouchEvent) => {
+  if (e.touches && e.touches[0]) {
+    updateActiveIndexFromClientX(e.touches[0].clientX, e.currentTarget as HTMLElement);
+  }
+};
+
+const handleChartTouchEnd = () => {
+  // Retain selectedIndex active so user can inspect metrics on mobile without keeping finger pressed
+  isHoveringChart.value = false;
+  activeHoverIndex.value = null;
+};
+
+const selectPoint = (idx: number) => {
+  selectedIndex.value = idx;
+  activeHoverIndex.value = idx;
 };
 
 // Test beacon trigger for testing
@@ -349,130 +416,211 @@ useHead({
           </div>
 
           <!-- SVG Visualizer -->
-          <div v-else class="relative">
-            <!-- Hover Tooltip Popup -->
+          <div v-else class="space-y-3">
+            <!-- Active Date & Metric Inspector Bar (Always accessible on mobile tap/scrub & desktop hover) -->
             <div
-              v-if="isHoveringChart && hoveredPoint"
-              class="absolute z-20 pointer-events-none p-2.5 rounded-xl bg-zinc-900 border border-white/20 shadow-2xl text-xs font-mono transform -translate-x-1/2 -translate-y-full transition-all duration-75"
-              :style="{ left: `${hoveredPoint.viewPt.x}px`, top: `${Math.min(hoveredPoint.viewPt.y, hoveredPoint.visitorPt.y) - 10}px` }"
+              v-if="activeDisplayPoint"
+              class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 rounded-xl bg-white/[0.04] border border-white/10 transition-colors"
             >
-              <p class="font-bold text-white border-b border-white/10 pb-1 mb-1">{{ hoveredPoint.item.displayDate }} ({{ hoveredPoint.item.day }})</p>
-              <p class="text-white flex items-center justify-between gap-3">
-                <span class="text-zinc-400">Views:</span>
-                <span class="font-semibold">{{ hoveredPoint.item.views }}</span>
-              </p>
-              <p class="text-emerald-400 flex items-center justify-between gap-3">
-                <span class="text-zinc-400">Visitors:</span>
-                <span class="font-semibold">{{ hoveredPoint.item.visitors }}</span>
-              </p>
+              <div class="flex items-center gap-2 text-xs font-mono">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-white font-semibold">
+                  {{ activeDisplayPoint.item.displayDate }} ({{ activeDisplayPoint.item.day }})
+                </span>
+                <span
+                  v-if="activeDisplayPoint.index === trafficData.length - 1"
+                  class="text-[10px] text-zinc-400 font-mono bg-white/5 border border-white/10 px-1.5 py-0.5 rounded"
+                >
+                  Latest
+                </span>
+                <span v-else class="text-[10px] text-zinc-500 font-mono">
+                  Selected
+                </span>
+              </div>
+
+              <div class="flex items-center gap-4 text-xs font-mono">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-white shadow-xs"></span>
+                  <span class="text-zinc-400">Views:</span>
+                  <span class="text-white font-bold text-sm">{{ activeDisplayPoint.item.views.toLocaleString() }}</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-xs"></span>
+                  <span class="text-zinc-400">Visitors:</span>
+                  <span class="text-emerald-400 font-bold text-sm">{{ activeDisplayPoint.item.visitors.toLocaleString() }}</span>
+                </div>
+              </div>
             </div>
 
-            <!-- SVG Container -->
-            <svg
-              :viewBox="`0 0 ${chartWidth} ${chartHeight}`"
-              class="w-full h-60 overflow-visible"
-              preserveAspectRatio="none"
-              @mousemove="handleChartMouseMove"
-              @mouseleave="handleChartMouseLeave"
-            >
-              <defs>
-                <linearGradient id="trafficGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#ffffff" stop-opacity="0.25" />
-                  <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0" />
-                </linearGradient>
-              </defs>
+            <div class="relative">
+              <!-- Floating Tooltip Popup (Desktop / Hover) -->
+              <div
+                v-if="isHoveringChart && activeDisplayPoint"
+                class="absolute z-20 pointer-events-none p-2.5 rounded-xl bg-zinc-950/95 border border-white/20 shadow-2xl text-xs font-mono transition-all duration-75 backdrop-blur-md hidden sm:block"
+                :class="[
+                  activeDisplayPoint.xPercent < 20
+                    ? 'translate-x-0'
+                    : activeDisplayPoint.xPercent > 80
+                      ? '-translate-x-full'
+                      : '-translate-x-1/2',
+                  activeDisplayPoint.yPercent < 25 ? 'translate-y-2' : '-translate-y-full'
+                ]"
+                :style="{
+                  left: `${activeDisplayPoint.xPercent}%`,
+                  top: activeDisplayPoint.yPercent < 25 ? `${activeDisplayPoint.yPercent}%` : `${activeDisplayPoint.yPercent - 3}%`
+                }"
+              >
+                <p class="font-bold text-white border-b border-white/10 pb-1 mb-1.5 flex items-center justify-between gap-3">
+                  <span>{{ activeDisplayPoint.item.displayDate }}</span>
+                  <span class="text-zinc-500 text-[10px] font-normal uppercase">({{ activeDisplayPoint.item.day }})</span>
+                </p>
+                <p class="text-white flex items-center justify-between gap-4">
+                  <span class="text-zinc-400 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-white"></span>
+                    <span>Views:</span>
+                  </span>
+                  <span class="font-bold">{{ activeDisplayPoint.item.views.toLocaleString() }}</span>
+                </p>
+                <p class="text-emerald-400 flex items-center justify-between gap-4 mt-0.5">
+                  <span class="text-zinc-400 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span>Visitors:</span>
+                  </span>
+                  <span class="font-bold">{{ activeDisplayPoint.item.visitors.toLocaleString() }}</span>
+                </p>
+              </div>
 
-              <!-- Horizontal Grid Lines -->
-              <line
-                v-for="yRatio in [0.25, 0.5, 0.75, 1.0]"
-                :key="yRatio"
-                :x1="paddingX"
-                :y1="chartHeight - paddingY - (chartHeight - paddingY * 2) * yRatio"
-                :x2="chartWidth - paddingX"
-                :y2="chartHeight - paddingY - (chartHeight - paddingY * 2) * yRatio"
-                stroke="rgba(255, 255, 255, 0.06)"
-                stroke-dasharray="3 3"
-              />
+              <!-- SVG Container with Touch & Mouse support -->
+              <svg
+                :viewBox="`0 0 ${chartWidth} ${chartHeight}`"
+                class="w-full h-60 overflow-visible touch-pan-y cursor-crosshair"
+                preserveAspectRatio="none"
+                @mousemove="handleChartMouseMove"
+                @mouseleave="handleChartMouseLeave"
+                @touchstart.passive="handleChartTouchStart"
+                @touchmove.passive="handleChartTouchMove"
+                @touchend="handleChartTouchEnd"
+              >
+                <defs>
+                  <linearGradient id="trafficGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.25" />
+                    <stop offset="100%" stop-color="#ffffff" stop-opacity="0.0" />
+                  </linearGradient>
+                </defs>
 
-              <!-- Area Mode -->
-              <template v-if="chartMode === 'area'">
-                <!-- Area Fill -->
-                <path :d="svgAreaPath" fill="url(#trafficGradient)" />
-
-                <!-- Visitors Line (Green) -->
-                <path
-                  :d="svgVisitorsLinePath"
-                  fill="none"
-                  stroke="#34d399"
-                  stroke-width="1.75"
-                  stroke-linecap="round"
-                />
-
-                <!-- Views Line (White) -->
-                <path
-                  :d="svgLinePath"
-                  fill="none"
-                  stroke="#ffffff"
-                  stroke-width="2.5"
-                  stroke-linecap="round"
-                />
-
-                <!-- Data Dots -->
-                <circle
-                  v-for="(pt, idx) in points.views"
-                  :key="'view-' + idx"
-                  :cx="pt.x"
-                  :cy="pt.y"
-                  r="3.5"
-                  fill="#ffffff"
-                  class="transition-all"
-                  :class="{ 'r-5 stroke-2 stroke-black': activeHoverIndex === idx }"
-                />
-
-                <!-- Hover vertical guideline -->
+                <!-- Horizontal Grid Lines -->
                 <line
-                  v-if="isHoveringChart && hoveredPoint"
-                  :x1="hoveredPoint.viewPt.x"
-                  :y1="paddingY"
-                  :x2="hoveredPoint.viewPt.x"
-                  :y2="chartHeight - paddingY"
-                  stroke="rgba(255, 255, 255, 0.4)"
-                  stroke-dasharray="4 4"
+                  v-for="yRatio in [0.25, 0.5, 0.75, 1.0]"
+                  :key="yRatio"
+                  :x1="paddingX"
+                  :y1="chartHeight - paddingY - (chartHeight - paddingY * 2) * yRatio"
+                  :x2="chartWidth - paddingX"
+                  :y2="chartHeight - paddingY - (chartHeight - paddingY * 2) * yRatio"
+                  stroke="rgba(255, 255, 255, 0.06)"
+                  stroke-dasharray="3 3"
                 />
-              </template>
 
-              <!-- Bar Mode -->
-              <template v-else>
-                <g v-for="(pt, idx) in points.views" :key="'bar-' + idx">
-                  <!-- Views Bar -->
-                  <rect
-                    :x="pt.x - 5"
-                    :y="pt.y"
-                    width="10"
-                    :height="chartHeight - paddingY - pt.y"
-                    fill="#ffffff"
-                    rx="2"
-                    :opacity="activeHoverIndex === idx ? 1 : 0.8"
+                <!-- Area Mode -->
+                <template v-if="chartMode === 'area'">
+                  <!-- Area Fill -->
+                  <path :d="svgAreaPath" fill="url(#trafficGradient)" />
+
+                  <!-- Visitors Line (Green) -->
+                  <path
+                    :d="svgVisitorsLinePath"
+                    fill="none"
+                    stroke="#34d399"
+                    stroke-width="1.75"
+                    stroke-linecap="round"
                   />
-                  <!-- Visitors Bar -->
+
+                  <!-- Views Line (White) -->
+                  <path
+                    :d="svgLinePath"
+                    fill="none"
+                    stroke="#ffffff"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                  />
+
+                  <!-- Data Dots -->
+                  <circle
+                    v-for="(pt, idx) in points.views"
+                    :key="'view-' + idx"
+                    :cx="pt.x"
+                    :cy="pt.y"
+                    r="3.5"
+                    fill="#ffffff"
+                    class="transition-all"
+                    :class="{ 'r-5 stroke-2 stroke-black': activeIndex === idx }"
+                  />
+
+                  <!-- Active vertical guideline -->
+                  <line
+                    v-if="activeDisplayPoint"
+                    :x1="activeDisplayPoint.viewPt.x"
+                    :y1="paddingY"
+                    :x2="activeDisplayPoint.viewPt.x"
+                    :y2="chartHeight - paddingY"
+                    stroke="rgba(255, 255, 255, 0.45)"
+                    stroke-dasharray="4 4"
+                  />
+                </template>
+
+                <!-- Bar Mode -->
+                <template v-else>
+                  <g v-for="(pt, idx) in points.views" :key="'bar-' + idx">
+                    <!-- Views Bar -->
+                    <rect
+                      :x="pt.x - 5"
+                      :y="pt.y"
+                      width="10"
+                      :height="chartHeight - paddingY - pt.y"
+                      fill="#ffffff"
+                      rx="2"
+                      :opacity="activeIndex === idx ? 1 : 0.75"
+                    />
+                    <!-- Visitors Bar -->
+                    <rect
+                      :x="pt.x + 6"
+                      :y="points.visitors[idx]?.y || (chartHeight - paddingY)"
+                      width="6"
+                      :height="chartHeight - paddingY - (points.visitors[idx]?.y || (chartHeight - paddingY))"
+                      fill="#34d399"
+                      rx="1.5"
+                      :opacity="activeIndex === idx ? 1 : 0.7"
+                    />
+                  </g>
+                </template>
+
+                <!-- Invisible full-height touch targets per data point for effortless tap on mobile -->
+                <g class="interactive-touch-targets">
                   <rect
-                    :x="pt.x + 6"
-                    :y="points.visitors[idx]?.y || (chartHeight - paddingY)"
-                    width="6"
-                    :height="chartHeight - paddingY - (points.visitors[idx]?.y || (chartHeight - paddingY))"
-                    fill="#34d399"
-                    rx="1.5"
-                    :opacity="activeHoverIndex === idx ? 1 : 0.75"
+                    v-for="(pt, idx) in points.views"
+                    :key="'touch-' + idx"
+                    :x="pt.x - stepWidth / 2"
+                    y="0"
+                    :width="stepWidth"
+                    :height="chartHeight"
+                    fill="transparent"
+                    class="cursor-pointer"
+                    @click="selectPoint(idx)"
                   />
                 </g>
-              </template>
-            </svg>
+              </svg>
 
-            <!-- X-Axis Labels -->
-            <div class="flex items-center justify-between text-[10px] font-mono text-zinc-500 pt-2 px-2 border-t border-white/5">
-              <span>{{ trafficData[0]?.displayDate || '-' }}</span>
-              <span class="hidden sm:inline">{{ trafficData[Math.floor(trafficData.length / 2)]?.displayDate || '' }}</span>
-              <span>{{ trafficData[trafficData.length - 1]?.displayDate || '-' }}</span>
+              <!-- X-Axis Labels -->
+              <div class="flex items-center justify-between text-[10px] font-mono text-zinc-500 pt-2 px-2 border-t border-white/5">
+                <span>{{ trafficData[0]?.displayDate || '-' }}</span>
+                <span class="hidden sm:inline">{{ trafficData[Math.floor(trafficData.length / 2)]?.displayDate || '' }}</span>
+                <span>{{ trafficData[trafficData.length - 1]?.displayDate || '-' }}</span>
+              </div>
+
+              <!-- Mobile Interaction Hint -->
+              <div class="sm:hidden pt-2 flex items-center justify-center gap-1.5 text-[10px] font-mono text-zinc-500">
+                <Icon name="carbon:touch-1" size="12" class="text-zinc-400" />
+                <span>Tap or scrub across chart to inspect daily views</span>
+              </div>
             </div>
           </div>
         </div>
